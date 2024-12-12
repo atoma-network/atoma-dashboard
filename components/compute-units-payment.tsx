@@ -2,7 +2,9 @@ import { useState } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, CreditCard, ShoppingCartIcon as Paypal, SquareStackIcon as Stripe, X } from 'lucide-react'
+import { ArrowRight, X } from 'lucide-react'
+import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
+import {  getSuiAddress, payUSDC, proofRequest, usdcPayment } from "@/lib/atoma"
 
 interface ComputeUnitsPaymentProps {
   modelName: string
@@ -13,8 +15,10 @@ interface ComputeUnitsPaymentProps {
 export function ComputeUnitsPayment({ modelName, pricePerUnit, onClose }: ComputeUnitsPaymentProps) {
   const [step, setStep] = useState<'units' | 'payment' | 'api'>('units')
   const [computeUnits, setComputeUnits] = useState<number>(1000)
-  const [selectedPayment, setSelectedPayment] = useState<string | null>(null)
-
+  const suiClient = useSuiClient();
+  const { currentWallet, connectionStatus } = useCurrentWallet();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
   const handleNextStep = () => {
     if (step === 'units') {
       setStep('payment')
@@ -23,11 +27,58 @@ export function ComputeUnitsPayment({ modelName, pricePerUnit, onClose }: Comput
     }
   }
 
-  const handlePaymentSelection = (method: string) => {
-    setSelectedPayment(method)
-    // Here you would implement the actual payment logic
-    console.log(`Selected payment method: ${method}`)
-    setStep('api')
+  const handleUSDCPayment = async () => {
+    if (currentWallet == null) {
+      return;
+    }
+
+    try {
+      const suiAddress = await getSuiAddress();
+      if (suiAddress == null) {
+        // We haven't proven the SUI address yet
+        throw new Error("SUI address not found");
+      }
+      payUSDC(suiClient, signAndExecuteTransaction, currentWallet).then((res: unknown) => {
+        const txDigest = (res as { digest: string }).digest;
+        setTimeout(() => {
+          usdcPayment(txDigest).then((res) => {
+            console.log('res', res)
+          }).catch((error) => {
+            console.log('error', error)
+          });
+        }, 1000);
+      }).catch((error) => {
+        console.log('error',error)
+      });
+    } catch {
+      const access_token = localStorage.getItem("access_token");
+      let user_id;
+      if (access_token) {
+        const base64Url = access_token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        const token_json = JSON.parse(jsonPayload);
+        user_id = token_json.user_id;
+      }
+
+      signPersonalMessage({
+        message: new TextEncoder().encode(
+          `Sign this message to prove you are the owner of this wallet. User ID: ${user_id}`
+        ),
+      }).then((res) => {
+        proofRequest(res.signature, currentWallet.accounts[0].address)
+          .then((res) => {
+            console.log("res", res);
+          })
+          .catch((error) => {
+            console.log("error", error);
+          });
+      });
+    }
+
+ 
   }
 
   const getApiSample = () => {
@@ -88,7 +139,20 @@ curl https://api.atoma.ai/v1/chat/completions \\
         )}
         {step === 'payment' && (
           <div className="space-y-4">
-            <Button
+            {connectionStatus == "connected" ? (
+              <Button onClick={() => handleUSDCPayment()} className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
+                Pay with USDC
+              </Button>
+            ) : (
+              <ConnectModal
+                trigger={
+                  <Button className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
+                    Connect sui wallet
+                  </Button>
+                }
+              />
+            )}
+            {/* <Button
               onClick={() => handlePaymentSelection('stripe')}
               className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
             >
@@ -108,7 +172,7 @@ curl https://api.atoma.ai/v1/chat/completions \\
             >
               <Paypal className="mr-2 h-5 w-5" />
               Pay with PayPal
-            </Button>
+            </Button> */}
           </div>
         )}
         {step === 'api' && (
@@ -124,7 +188,7 @@ curl https://api.atoma.ai/v1/chat/completions \\
             </pre>
             <div className="mt-4">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Remember to replace 'YOUR_API_KEY' with the actual API key provided in your account settings.
+                Remember to replace &apos;YOUR_API_KEY&apos; with the actual API key provided in your account settings.
               </p>
             </div>
           </div>

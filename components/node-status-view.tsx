@@ -1,66 +1,26 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Users, Server, BarChartIcon as ChartBar, Cpu, Timer, ArrowUpDown, Info } from 'lucide-react'
-import { Bar, BarChart, Line, LineChart, Pie, PieChart, Legend, XAxis, YAxis, Tooltip, Cell } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Users, Server, BarChartIcon as ChartBar, Cpu, Timer, ArrowUpDown} from "lucide-react";
+import { Line, LineChart, Pie, PieChart, Legend, XAxis, YAxis, Tooltip, Cell } from "recharts";
+import { ChartContainer } from "@/components/ui/chart";
+import { useEffect, useState } from "react";
 import {
-  Tooltip as UITooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-
-const stats = [
-  {
-    title: "Total Nodes",
-    value: "2,623",
-    description: "Across all networks",
-    icon: Server
-  },
-  {
-    title: "Nodes Online",
-    value: "1,351",
-    description: "Currently active",
-    icon: Users
-  },
-  {
-    title: "Models Running",
-    value: "12",
-    description: "Different model types",
-    icon: ChartBar
-  },
-  {
-    title: "Compute Units",
-    value: "8.2M",
-    description: "Past 24 hours",
-    icon: Cpu
-  },
-  {
-    title: "Avg Latency",
-    value: "42ms",
-    description: "Last 5 minutes",
-    icon: Timer,
-    tooltip: "Average time taken to receive the first token of a response in the last 5 minutes."
-  },
-{
-    title: "Throughput",
-    value: "850K",
-    description: "Requests/minute",
-    icon: ArrowUpDown
-}
-]
-
-const modelDistribution = [
-  { model: "Llama 3.1 405B", nodesRunning: 523 },
-  { model: "Llama 3.2 3B", nodesRunning: 789 },
-  { model: "GPT-4", nodesRunning: 312 },
-  { model: "BERT-Large", nodesRunning: 156 },
-  { model: "T5-Base", nodesRunning: 245 }
-]
+  getComputeUnitsProcessed,
+  getLatency,
+  // getNodesDistribution,
+  getStatsStacks,
+  getSubscriptions,
+  getTasks,
+  type ComputedUnitsProcessedResponse,
+  type LatencyResponse,
+  type NodeSubscription,
+  type StatsStack,
+  type Task,
+} from "@/lib/atoma";
+import Image from "next/image";
 
 const nodeDistribution = [
   { region: "North America", nodes: 856, percentage: 32.6 },
@@ -70,37 +30,192 @@ const nodeDistribution = [
   { region: "Africa", nodes: 215, percentage: 8.2 }
 ]
 
-const networkActivityData = [
-  { time: "00:00", llama: 1200, gpt4: 800, mixtral: 400 },
-  { time: "02:00", llama: 1050, gpt4: 850, mixtral: 600 },
-  { time: "04:00", llama: 900, gpt4: 950, mixtral: 850 },
-  { time: "06:00", llama: 1100, gpt4: 1100, mixtral: 700 },
-  { time: "08:00", llama: 1400, gpt4: 1400, mixtral: 500 },
-  { time: "10:00", llama: 1500, gpt4: 1300, mixtral: 900 },
-  { time: "12:00", llama: 1600, gpt4: 1100, mixtral: 1600 },
-  { time: "14:00", llama: 1550, gpt4: 1300, mixtral: 1500 },
-  { time: "16:00", llama: 1500, gpt4: 1500, mixtral: 1300 },
-  { time: "18:00", llama: 1300, gpt4: 1350, mixtral: 1200 },
-  { time: "20:00", llama: 1100, gpt4: 1200, mixtral: 1100 },
-  { time: "22:00", llama: 1200, gpt4: 1000, mixtral: 1050 },
-]
-
-const computeUnitsData = [
-  { time: "00:00", units: 280000 },
-  { time: "02:00", units: 300000 },
-  { time: "04:00", units: 320000 },
-  { time: "06:00", units: 380000 },
-  { time: "08:00", units: 450000 },
-  { time: "10:00", units: 500000 },
-  { time: "12:00", units: 520000 },
-  { time: "14:00", units: 510000 },
-  { time: "16:00", units: 480000 },
-  { time: "18:00", units: 420000 },
-  { time: "20:00", units: 380000 },
-  { time: "22:00", units: 360000 },
-]
 
 export function NodeStatusView() {
+  const [stats, setStats] = useState([
+    {
+      title: "Total Nodes",
+      value: "Loading...",
+      description: "Across all networks",
+      icon: Server,
+    },
+    {
+      title: "Nodes Online",
+      value: "Loading...",
+      description: "Currently active",
+      icon: Users,
+    },
+    {
+      title: "Models Running",
+      value: "Loading...",
+      description: "Different model types",
+      icon: ChartBar,
+    },
+    {
+      title: "Compute Units",
+      value: "Loading...",
+      description: "Past 24 hours",
+      icon: Cpu,
+    },
+    {
+      title: "Avg Latency",
+      value: "Loading...",
+      description: "Last hour",
+      icon: Timer,
+    },
+    {
+      title: "Throughput",
+      value: "Loading...",
+      description: "Requests/minute",
+      icon: ArrowUpDown,
+    },
+  ]);
+  const [subscriptions, setSubscriptions] = useState<NodeSubscription[] | undefined>();
+  const [tasks, setTasks] = useState<Task[] | undefined>();
+  // const [subscribers, setSubscribers] = useState<{ model_name: string; nodesRunning: number }[]>();
+  const [computeUnitsData, setComputeUnitsData] = useState<{ time: string; units: number }[]>([]);
+  const [activityModels, setActivityModels] = useState<{ model_name: string; color: string }[]>([]);
+  const [networkActivityData, setNetworkActivityData] = useState<unknown[]>([]);
+  const [modelDistribution, setModelDistruibution] = useState<{ model: string, nodesRunning: number }[]>([]);
+  const [statsStack, setStatsStacks] = useState<unknown[]>([]);
+  // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
+  // const [latency, setLatency] = useState<LatencyResponse[]>([]);
+  useEffect(() => {
+    getStatsStacks().then((stacks) => {
+      setStatsStacks(stacks.map((data: StatsStack) => ({
+        time: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        bought: data.num_compute_units,
+        settled: data.settled_num_compute_units,
+      })));
+    });
+    getComputeUnitsProcessed().then((computeUnits: ComputedUnitsProcessedResponse[]) => {
+      // setComputeUnits(computeUnits);
+      const totalUnits = computeUnits.reduce((sum, data) => sum + data.amount, 0);
+      const totalRequests = computeUnits.reduce((sum, data) => sum + data.requests, 0);
+      const totalTime = computeUnits.reduce((sum, data) => sum + data.time, 0);
+      console.log(computeUnits);
+      setActivityModels(
+        Array.from(new Set(computeUnits.map((data) => data.model_name))).map((model_name, i) => ({
+          model_name: model_name,
+          color: `hsl(var(--chart-${i + 1}))`,
+        }))
+      );
+      const group_by_time = computeUnits.reduce((acc: { [key: string]: { [key: string]: number } }, data) => {
+        if (!(data.timestamp in acc)) {
+          acc[data.timestamp] = {};
+        }
+        acc[data.timestamp][data.model_name] = data.amount;
+        return acc;
+      }, {});
+      console.log("group_by_time", group_by_time);
+      const sortedGroupByTime = Object.keys(group_by_time)
+        .sort()
+        .map((key) => ({
+          time: new Date(key).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          data: group_by_time[key],
+        }));
+      console.log("sortedGroupByTime", sortedGroupByTime);
+
+      setNetworkActivityData(sortedGroupByTime);
+      setComputeUnitsData(
+        sortedGroupByTime.map((data) => ({
+          time: data.time,
+          units: Object.keys(data.data).reduce((sum, key) => sum + data.data[key] , 0),
+        }))
+      );
+      setStats((prevStats) => [
+        ...prevStats.slice(0, 3),
+        {
+          ...prevStats[3],
+          value: totalUnits.toString(),
+        },
+        prevStats[4],
+        {
+          ...prevStats[5],
+          value: (totalRequests * ((1000 * 60) / totalTime)).toFixed(0),
+        },
+        ...prevStats.slice(6),
+      ]);
+    });
+    getLatency().then((latency: LatencyResponse[]) => {
+      // setLatency(latency);
+      const totalLatency = latency.reduce((sum, data) => sum + data.latency, 0);
+      const totalRequests = latency.reduce((sum, data) => sum + data.requests, 0);
+      setStats((prevStats) => [
+        ...prevStats.slice(0, 4),
+        {
+          ...prevStats[4],
+          value: `${(totalLatency / totalRequests).toFixed(2)}ms`,
+        },
+        ...prevStats.slice(5),
+      ]);
+    });
+    getSubscriptions().then((subscriptions) => {
+      setSubscriptions(subscriptions);
+      const nodes: { [key: string]: boolean } = {};
+      for (const subscription of subscriptions) {
+        if (subscription.node_small_id in nodes) {
+          nodes[subscription.node_small_id] ||= subscription.valid;
+        } else {
+          nodes[subscription.node_small_id] = subscription.valid;
+        }
+      }
+      setStats((prevStats) => [
+        {
+          ...prevStats[0],
+          value: Object.keys(nodes).length.toString(),
+        },
+        {
+          ...prevStats[1],
+          value: Object.values(nodes)
+            .filter((v) => v)
+            .length.toString(),
+        },
+        ...prevStats.slice(2),
+      ]);
+    });
+    getTasks().then((tasks) => {
+      const models: { [key: string]: boolean } = {};
+      setTasks(tasks);
+      for (const task of tasks) {
+        if (!task.model_name) {
+          continue;
+        }
+        if (task.model_name in models) {
+          models[task.model_name] ||= !task.is_deprecated;
+        } else {
+          models[task.model_name] = task.is_deprecated;
+        }
+      }
+      setStats((prevStats) => [
+        ...prevStats.slice(0, 2),
+        {
+          ...prevStats[2],
+          value: Object.keys(models).length.toString(),
+        },
+        ...prevStats.slice(3),
+      ]);
+    });
+  }, []);
+  useEffect(() => {
+    if (!tasks || !subscriptions) {
+      return;
+    }
+    const subscribers: { [key: string]: number } = {};
+    for (const task of tasks) {
+      if (!task.model_name) {
+        continue;
+      }
+      if (!(task.model_name in subscribers)) {
+        subscribers[task.model_name] = 0;
+      }
+      subscribers[task.model_name] += subscriptions.filter(
+        (subscription) => subscription.task_small_id === task.task_small_id && subscription.valid
+      ).length;
+    }
+    // setSubscribers(Object.entries(subscribers).map(([model_name, nodesRunning]) => ({ model_name, nodesRunning })));
+    setModelDistruibution(Object.entries(subscribers).map(([model, nodesRunning]) => ({ model, nodesRunning })));
+  }, [tasks, subscriptions]);
   return (
     <div className="space-y-8">
       {/* Stats Cards Section */}
@@ -110,7 +225,7 @@ export function NodeStatusView() {
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 {stat.title}
-                {stat.tooltip && (
+                {/* {stat.tooltip && (
                   <TooltipProvider>
                     <UITooltip>
                       <TooltipTrigger asChild>
@@ -121,7 +236,7 @@ export function NodeStatusView() {
                       </TooltipContent>
                     </UITooltip>
                   </TooltipProvider>
-                )}
+                )} */}
               </CardTitle>
               <stat.icon className="h-4 w-4 text-purple-500 dark:text-purple-400" />
             </CardHeader>
@@ -174,7 +289,7 @@ export function NodeStatusView() {
                       return (
                         <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
                           <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
-                          <p className="text-purple-600 dark:text-purple-400">{`Units: ${payload[0].value.toLocaleString()}`}</p>
+                          <p className="text-purple-600 dark:text-purple-400">{`Units: ${payload?.[0]?.value?.toLocaleString()}`}</p>
                         </div>
                       );
                     }
@@ -192,7 +307,6 @@ export function NodeStatusView() {
             </ChartContainer>
           </CardContent>
         </Card>
-
         {/* Network Activity Section */}
         <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
@@ -203,24 +317,85 @@ export function NodeStatusView() {
           </CardHeader>
           <CardContent>
             <ChartContainer
-              config={{
-                llama: {
-                  label: "Llama Models",
-                  color: "hsl(var(--chart-1))",
-                },
-                gpt4: {
-                  label: "GPT-4",
-                  color: "hsl(var(--chart-2))",
-                },
-                mixtral: {
-                  label: "Mixtral",
-                  color: "hsl(var(--chart-3))",
-                },
-              }}
+              config={activityModels.reduce((acc: { [key: string]: { label: string; color: string } }, model) => {
+                acc[model.model_name] = {
+                  label: model.model_name,
+                  color: model.color,
+                };
+                return acc;
+              }, {})}
               className="h-[300px] w-full"
             >
               <LineChart
                 data={networkActivityData}
+                margin={{ top: 5, right: 0, bottom: 25, left: 20 }}
+              >
+                <XAxis 
+                  dataKey="time" 
+                  tick={{ fill: 'var(--purple-600)' }}
+                  scale="point"
+                  interval={2}
+                  padding={{ left: 10, right: 30 }}
+                />
+                <YAxis
+                  dataKey={"data"}
+                  tick={{ fill: 'var(--purple-600)' }}
+                  tickFormatter={(value) => {
+                    console.log(value)
+                  return  `${value / 1000}k`
+                  }
+                  }
+                />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
+                          <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
+                          {payload.map((entry, index) => (
+                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${entry?.value?.toLocaleString()}`}</p>
+                          ))}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Legend 
+                  verticalAlign="top" 
+                  align="right"
+                  wrapperStyle={{ paddingBottom: "20px" }}
+                />
+                {activityModels.map((model) => {
+                  return (
+                    <Line
+                      key={model.model_name}
+                      type="monotone"
+                      dataKey={model.model_name}
+                      stroke={model.color}
+                      strokeWidth={2}
+                    />
+                  )
+                })}
+              </LineChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+        {/* Stacks Bought/Settled Section */}
+        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Stacks Activity</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
+              Stacks activity  over 24 hours
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer
+              config={{ bought: { label: "Bought", color:"hsl(var(--chart-1))" },settled: { label: "Settled", color:"hsl(var(--chart-2))" } }}
+              className="h-[300px] w-full"
+            >
+              <LineChart
+                data={statsStack}
                 margin={{ top: 5, right: 0, bottom: 25, left: 20 }}
               >
                 <XAxis 
@@ -241,7 +416,7 @@ export function NodeStatusView() {
                         <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
                           <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
                           {payload.map((entry, index) => (
-                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${entry.value.toLocaleString()}`}</p>
+                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${entry?.value?.toLocaleString()}`}</p>
                           ))}
                         </div>
                       );
@@ -254,30 +429,20 @@ export function NodeStatusView() {
                   align="right"
                   wrapperStyle={{ paddingBottom: "20px" }}
                 />
-                <Line
-                  type="monotone"
-                  dataKey="llama"
-                  name="Llama Models"
-                  stroke="var(--color-llama)"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="gpt4"
-                  name="GPT-4"
-                  stroke="var(--color-gpt4)"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="mixtral"
-                  name="Mixtral"
-                  stroke="var(--color-mixtral)"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
+                  <Line
+                    key={"bought"}
+                    type="monotone"
+                    dataKey={"bought"}
+                    stroke={"hsl(var(--chart-1))"}
+                    strokeWidth={2}
+                  />
+                  <Line
+                    key={"settled"}
+                    type="monotone"
+                    dataKey={"settled"}
+                    stroke={"hsl(var(--chart-2))"}
+                    strokeWidth={2}
+                  />
               </LineChart>
             </ChartContainer>
           </CardContent>
@@ -375,10 +540,11 @@ export function NodeStatusView() {
           </CardHeader>
           <CardContent>
             <div className="w-full h-[400px] relative overflow-hidden rounded-lg">
-              <img 
-                src="/placeholder.svg?height=400&width=600" 
+              <Image 
+                src="/world.svg" 
                 alt="Global node distribution map"
-                className="w-full h-full object-cover"
+                layout="fill"
+                objectFit="cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
               <div className="absolute bottom-4 left-4 right-4 text-white">

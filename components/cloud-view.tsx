@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Cloud, Database, Key, CreditCardIcon, BookOpen, Calculator, Zap, Sparkles, Brain, MessageSquare, Info, Copy, CheckCircle2, SquareStackIcon as Stripe, ShoppingCartIcon as Paypal } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
+import { Cloud, Key, CreditCard, BookOpen, Calculator, Info, Copy, CheckCircle2, Delete } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Progress } from "@/components/ui/progress"
@@ -33,6 +34,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ComputeUnitsPayment } from "./compute-units-payment"
+import { generateApiKey, getSubscriptions, getTasks, listApiKeys, revokeApiToken, type NodeSubscription, type Task } from "@/lib/atoma"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
@@ -44,103 +47,6 @@ const tabs = [
   { id: 'calculator', icon: Calculator, label: 'Cost Calculator' },
 ] as const;
 
-const modelOptions = [
-  { 
-    id: 'llama3b',
-    name: 'Llama 3.2 3B',
-    type: 'Chat',
-    icon: Brain,
-    description: 'Efficient and fast language model optimized for low-latency applications',
-    price: 0.01,
-    ram: 'Language Model',
-    cores: 'Context: 8K tokens',
-    storage: 'Basic JSON mode',
-    features: [
-      'Low latency responses',
-      'Efficient resource usage',
-      'Basic reasoning capabilities',
-      'Cost-effective deployment',
-      'Suitable for simple tasks'
-    ],
-    status: 'Available'
-  },
-  { 
-    id: 'llama70b',
-    name: 'Llama 2 70B',
-    type: 'Chat',
-    icon: MessageSquare,
-    description: 'High-performance chat model with strong reasoning capabilities',
-    price: 0.02,
-    ram: 'Language Model',
-    cores: 'Context: 4K tokens',
-    storage: 'JSON mode support',
-    features: [
-      'Advanced reasoning capabilities',
-      'JSON mode support',
-      'Function calling enabled',
-      'High accuracy responses',
-      'Multilingual support'
-    ],
-    status: 'Available'
-  },
-  { 
-    id: 'qwen',
-    name: 'Qwen 72B',
-    type: 'Chat',
-    icon: Brain,
-    description: 'Advanced multilingual model with superior coding abilities',
-    price: 0.025,
-    ram: 'Language Model',
-    cores: 'Context: 8K tokens',
-    storage: 'Code completion',
-    features: [
-      'Superior code completion',
-      'Multi-language support',
-      'Extended context window',
-      'Technical documentation expertise',
-      'API integration capabilities'
-    ],
-    status: 'Available'
-  },
-  { 
-    id: 'mixtral',
-    name: 'Mixtral 8x7B',
-    type: 'Completion',
-    icon: Sparkles,
-    description: 'Efficient mixture-of-experts model with balanced performance',
-    price: 0.015,
-    ram: 'Language Model',
-    cores: 'Context: 32K tokens',
-    storage: 'Sparse MoE',
-    features: [
-      'Mixture-of-Experts architecture',
-      'Efficient token processing',
-      'Low latency responses',
-      'Balanced performance profile',
-      'Cost-effective scaling'
-    ],
-    status: 'Available'
-  },
-  { 
-    id: 'flux1',
-    name: 'FLUX.1',
-    type: 'Image',
-    icon: Sparkles,
-    description: 'Next-generation language model with enhanced reasoning and coding capabilities',
-    price: 0.04,
-    ram: 'Image Model',
-    cores: 'Context: 16K tokens',
-    storage: 'Advanced JSON mode',
-    features: [
-      'Superior reasoning capabilities',
-      'Enhanced code generation',
-      'Multi-modal processing',
-      'Real-time optimization',
-      'Extended context handling'
-    ],
-    status: 'Available'
-  }
-]
 
 const usageHistory = [
   { id: 1, date: '2024-03-01', tokens: 1500000, cost: 30.00, model: 'Llama 2 70B' },
@@ -157,30 +63,74 @@ const apiEndpoints = [
   { name: 'Audio Transcription', endpoint: '/v1/audio/transcriptions', method: 'POST' },
 ]
 
-const generateApiExampleUsage = (model: typeof modelOptions[0], privacyEnabled: boolean) => {
-  const baseUrl = privacyEnabled ? "https://privacy-api.atoma.ai" : "https://api.atoma.ai"
-  const modelId = privacyEnabled ? `${model.id}-privacy` : model.id
-  
-  return `curl ${baseUrl}/v1/chat/completions \\
--H "Content-Type: application/json" \\
--H "Authorization: Bearer YOUR_API_KEY" \\
--d '{
-  "model": "${modelId}",
-  "messages": [
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "What is the capital of France?"}
-  ]
-}'`
-}
-
-export function CloudView() {
+export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, setIsLoggedIn:(isLoggedIn: boolean) => void }) {
   const [activeTab, setActiveTab] = useState<TabType>('compute')
-  const [selectedModel, setSelectedModel] = useState(modelOptions[0])
   const [privacyEnabled, setPrivacyEnabled] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-  const [loginError, setLoginError] = useState<string | null>(null)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [isApiExampleModalOpen, setIsApiExampleModalOpen] = useState(false)
+  const [isComputeUnitsModalOpen, setIsComputeUnitsModalOpen] = useState(false)
+  const [selectedModelForPayment, setSelectedModelForPayment] = useState<typeof modelOptions[0] | null>(null)
+  const [apiKeys, setApiKeys] = useState<string[] | undefined>(); 
+  const [subscribers, setSubscribers] = useState<NodeSubscription[] | undefined>();
+  const [tasks, setTasks] = useState<Task[] | undefined>();
+  const [modelOptions, setModelOptions] = useState<
+    {
+      id: string;
+      name: string;
+      features: string[];
+      price: number;
+      status: string;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    listApiKeys().then((keys) => setApiKeys(keys))
+    getSubscriptions().then((subscriptions) => {
+      setSubscribers(subscriptions);
+    });
+    getTasks().then((tasks) => {
+      setTasks(tasks)
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!subscribers || !tasks) return;
+    console.log('SUBSCRIPTIONS', subscribers);
+    console.log('TASKS', tasks);
+    const availableModels : Record<string, NodeSubscription> = {}
+    for (const task of tasks) {
+      if (!task.model_name) {
+        continue;
+      }
+      const subs_for_this_task = subscribers.filter((subscription) => subscription.task_small_id === task.task_small_id && subscription.valid);  
+      if (subs_for_this_task.length === 0) {
+        // No valid subscriptions for this task
+        continue;
+      }
+      if (task.model_name in availableModels) {
+        availableModels[task.model_name] = subs_for_this_task.reduce((min, item) => item.price_per_compute_unit < min.price_per_compute_unit ? item : min, availableModels[task.model_name])
+      } else {
+        availableModels[task.model_name] = subs_for_this_task.reduce((min, item) => item.price_per_compute_unit < min.price_per_compute_unit ? item : min, subs_for_this_task[0])
+      }
+    }
+    setModelOptions(Object.keys(availableModels).map((model) => (
+      {
+        id: model,
+        name: model,
+        features: [],
+        price: availableModels[model].price_per_compute_unit / availableModels[model].max_num_compute_units,
+        status: 'Available'
+      })
+    ))
+  }, [subscribers, tasks])
+
+  const addApiKey = () => {
+    generateApiKey().then(() => listApiKeys().then((keys) => setApiKeys(keys)));
+  }
+
+  const revokeToken = (token:string) => {
+    revokeApiToken(token).then(() => listApiKeys().then((keys) => setApiKeys(keys)));
+  }
+
 
   const getAdjustedPrice = (basePrice: number) => {
     const pricePerMillion = basePrice * 1000 // Convert from per 1K to per 1M
@@ -191,54 +141,6 @@ export function CloudView() {
     setIsLoginModalOpen(true)
     setLoginError(null)
   }
-
-  const handleLoginRegister = (email: string, password: string, isLogin: boolean) => {
-    // This is a mock implementation. In a real app, you'd call your API here.
-    if (email === "user@example.com" && password === "password") {
-      // Successful login/register
-      setIsLoginModalOpen(false)
-      setLoginError(null)
-      setIsLoggedIn(true) // Set isLoggedIn to true
-    } else {
-      // Failed login/register
-      setLoginError(isLogin ? "Invalid email or password" : "Registration failed. Please try again.")
-    }
-  }
-
-  const generateApiExampleUsage = (model: typeof modelOptions[0], privacyEnabled: boolean) => {
-    const baseUrl = privacyEnabled ? "https://privacy-api.atoma.ai" : "https://api.atoma.ai"
-    const modelId = privacyEnabled ? `${model.id}-privacy` : model.id
-    
-    return `curl ${baseUrl}/v1/chat/completions \\
--H "Content-Type: application/json" \\
--H "Authorization: Bearer YOUR_API_KEY" \\
--d '{
-  "model": "${modelId}",
-  "messages": [
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "What is the capital of France?"}
-  ]
-}'`
-  }
-
-  const ApiExampleModal = ({ isOpen, onClose, model, privacyEnabled }: {isOpen: boolean, onClose: () => void, model: typeof modelOptions[0], privacyEnabled: boolean}) => (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>API Example Usage for {model.name}</DialogTitle>
-            <DialogDescription>
-              Use this curl command to interact with the {model.name} model
-              {privacyEnabled ? " (Privacy Mode Enabled)" : ""}
-            </DialogDescription>
-          </DialogHeader>
-          <pre className="bg-gray-100 dark:bg-[#1A1C23] p-4 rounded-md overflow-x-auto">
-            <code className="text-sm">
-              {generateApiExampleUsage(model, privacyEnabled)}
-            </code>
-          </pre>
-        </DialogContent>
-    </Dialog>
-  )
 
   const ComputeTab = () => (
     <div className="space-y-6">
@@ -286,9 +188,9 @@ export function CloudView() {
                         <div className="pt-2">
                           <p className="text-sm font-medium">Technical Specs:</p>
                           <div className="text-sm space-y-1 mt-1">
-                            <p>• {model.ram}</p>
+                            {/* <p>• {model.ram}</p>
                             <p>• {model.cores}</p>
-                            <p>• {model.storage}</p>
+                            <p>• {model.storage}</p> */}
                           </div>
                         </div>
                       </div>
@@ -296,11 +198,11 @@ export function CloudView() {
                   </Tooltip>
                 </TooltipProvider>
               </CardTitle>
-              <CardDescription className="text-gray-500 dark:text-gray-400">{model.type} Model</CardDescription>
+              {/* <CardDescription className="text-gray-500 dark:text-gray-400">{model.type} Model</CardDescription> */}
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{model.description}</p>
+                {/* <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{model.description}</p> */}
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Price:</span>
                   <span className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -326,8 +228,11 @@ export function CloudView() {
               <Button 
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-800 dark:hover:bg-purple-900"
                 onClick={() => {
-                  setSelectedModel(model)
-                  setIsApiExampleModalOpen(true)
+                  if (isLoggedIn) { 
+                    handleStartUsing(model)
+                  }  else {
+                    setIsLoginModalOpen(true)
+                  }
                 }}
               >
                 Start Using
@@ -356,19 +261,27 @@ export function CloudView() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">API Key</h3>
-            <div className="flex items-center space-x-2">
-              <Input
-                type="password"
-                value="••••••••••••••••"
-                readOnly
-                className="font-mono bg-gray-100 dark:bg-[#1A1C23] border-purple-200 dark:border-purple-800/30 text-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600"
-              />
-              <Button variant="outline">
-                <Copy className="mr-2 h-4 w-4" />
-                Copy
-              </Button>
-            </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2" onClick={addApiKey}>API Key</h3>
+            {Array.isArray(apiKeys) ?
+                apiKeys.map((apiKey) => {
+                  return (<div className="flex items-center space-x-2" key={apiKey}>
+                    <Input
+                      type="password"
+                      value="••••••••••••••••"
+                      readOnly
+                      className="font-mono bg-gray-100 dark:bg-[#1A1C23] border-purple-200 dark:border-purple-800/30 text-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600"
+                    />
+                    <Button variant="outline" onClick={() => navigator.clipboard.writeText(apiKey)}>
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copy
+                    </Button>
+                    <Button variant="outline" onClick={()=>revokeToken(apiKey)}>
+                      <Delete className="mr-2 h-4 w-4" />
+                      Revoke
+                    </Button>
+                  </div>)
+                })
+            : <div>Loading</div>}
           </div>
           
           <div>
@@ -747,7 +660,7 @@ export function CloudView() {
         {/* Login or Register Button Removed */}
       </div>
 
-      {activeTab === 'compute' && <ComputeTab />}
+      {activeTab === 'compute' && <ComputeTab/>}
       {activeTab === 'api' && <ApiTab />}
       {activeTab === 'billing' && <BillingTab />}
       {activeTab === 'docs' && <DocsTab />}
@@ -757,10 +670,8 @@ export function CloudView() {
         isOpen={isLoginModalOpen}
         onClose={() => {
           setIsLoginModalOpen(false)
-          setLoginError(null)
         }}
-        error={loginError}
-        onSubmit={handleLoginRegister}
+        setIsLoggedIn={setIsLoggedIn}
       />
       <ApiExampleModal
         isOpen={isApiExampleModalOpen}

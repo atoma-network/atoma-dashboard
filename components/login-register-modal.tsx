@@ -10,25 +10,51 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
+import { loginUser, registerUser } from "@/lib/atoma"
 
 interface LoginRegisterModalProps {
   isOpen: boolean
   onClose: () => void
-  error: string | null
-  onSubmit: (email: string, password: string, isLogin: boolean) => void
+  setIsLoggedIn: (isLoggedIn: boolean) => void
 }
 
-export function LoginRegisterModal({ isOpen, onClose, error, onSubmit }: LoginRegisterModalProps) {
+export function LoginRegisterModal({ isOpen, onClose, setIsLoggedIn}: LoginRegisterModalProps) {
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-
+  const [error, setError] = useState<string | null>(null)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(email, password, isLogin)
+    if (isLogin) {
+      onLogin()
+    } else {
+      onRegister()
+    }
   }
 
   const toggleMode = () => setIsLogin(!isLogin)
+
+  const onLogin = () => {
+    loginUser(email, password).then(({ access_token, refresh_token }) => {
+      localStorage.setItem("access_token", access_token);
+      document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
+      setIsLoggedIn(true);
+      onClose();
+    }).catch((error) => {
+      setError(`${error}`);
+    });
+  }
+
+  const onRegister = () => {
+    registerUser(email, password).then(({ access_token, refresh_token }) => {
+      localStorage.setItem("access_token", access_token);
+      document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
+      setIsLoggedIn(true);
+      onClose();
+    }).catch((error) => {
+      setError(`${error}`);
+    });
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -94,6 +120,11 @@ export function LoginRegisterModal({ isOpen, onClose, error, onSubmit }: LoginRe
             </Button>
           </div>
         </form>
+        <Button variant="link" onClick={toggleMode} className="text-purple-600 hover:text-purple-700">
+          {isLogin
+            ? "Don't have an account? Register"
+            : "Already have an account? Log In"}
+        </Button>
       </DialogContent>
     </Dialog>
   )

@@ -4,9 +4,8 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { LoginRegisterModal } from "./login-register-modal"
 
-export function LoginRegisterButton() {
+export function LoginRegisterButton({ setIsLoggedIn }: { setIsLoggedIn: (isLoggedIn: boolean) => void }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-
   return (
     <>
       <Button
@@ -18,6 +17,7 @@ export function LoginRegisterButton() {
       <LoginRegisterModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
+        setIsLoggedIn={setIsLoggedIn}
       />
     </>
   )
