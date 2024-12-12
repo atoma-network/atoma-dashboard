@@ -4,9 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Users, Server, BarChartIcon as ChartBar, Cpu, Timer, ArrowUpDown } from 'lucide-react'
-import { Bar, BarChart, Line, LineChart, Pie, PieChart, Legend, XAxis } from "recharts"
+import { Users, Server, BarChartIcon as ChartBar, Cpu, Timer, ArrowUpDown, Info } from 'lucide-react'
+import { Bar, BarChart, Line, LineChart, Pie, PieChart, Legend, XAxis, YAxis, Tooltip, Cell } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import {
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const stats = [
   {
@@ -37,8 +43,9 @@ const stats = [
     title: "Avg Latency",
     value: "42ms",
     description: "Last 5 minutes",
-    icon: Timer
-},
+    icon: Timer,
+    tooltip: "Average time taken to receive the first token of a response in the last 5 minutes."
+  },
 {
     title: "Throughput",
     value: "850K",
@@ -64,23 +71,33 @@ const nodeDistribution = [
 ]
 
 const networkActivityData = [
-  { time: "0000", llama: 1200, gpt4: 800, mixtral: 400 },
-  { time: "0400", llama: 900, gpt4: 950, mixtral: 850 },
-  { time: "0800", llama: 1400, gpt4: 1400, mixtral: 500 },
-  { time: "1200", llama: 1600, gpt4: 1100, mixtral: 1600 },
-  { time: "1600", llama: 1500, gpt4: 1500, mixtral: 1300 },
-  { time: "2000", llama: 1100, gpt4: 1200, mixtral: 1100 },
-  { time: "2359", llama: 1250, gpt4: 825, mixtral: 1000 },
+  { time: "00:00", llama: 1200, gpt4: 800, mixtral: 400 },
+  { time: "02:00", llama: 1050, gpt4: 850, mixtral: 600 },
+  { time: "04:00", llama: 900, gpt4: 950, mixtral: 850 },
+  { time: "06:00", llama: 1100, gpt4: 1100, mixtral: 700 },
+  { time: "08:00", llama: 1400, gpt4: 1400, mixtral: 500 },
+  { time: "10:00", llama: 1500, gpt4: 1300, mixtral: 900 },
+  { time: "12:00", llama: 1600, gpt4: 1100, mixtral: 1600 },
+  { time: "14:00", llama: 1550, gpt4: 1300, mixtral: 1500 },
+  { time: "16:00", llama: 1500, gpt4: 1500, mixtral: 1300 },
+  { time: "18:00", llama: 1300, gpt4: 1350, mixtral: 1200 },
+  { time: "20:00", llama: 1100, gpt4: 1200, mixtral: 1100 },
+  { time: "22:00", llama: 1200, gpt4: 1000, mixtral: 1050 },
 ]
 
 const computeUnitsData = [
-  { time: "0000", units: 280000 },
-  { time: "0400", units: 320000 },
-  { time: "0800", units: 450000 },
-  { time: "1200", units: 520000 },
-  { time: "1600", units: 480000 },
-  { time: "2000", units: 380000 },
-  { time: "2359", units: 350000 },
+  { time: "00:00", units: 280000 },
+  { time: "02:00", units: 300000 },
+  { time: "04:00", units: 320000 },
+  { time: "06:00", units: 380000 },
+  { time: "08:00", units: 450000 },
+  { time: "10:00", units: 500000 },
+  { time: "12:00", units: 520000 },
+  { time: "14:00", units: 510000 },
+  { time: "16:00", units: 480000 },
+  { time: "18:00", units: 420000 },
+  { time: "20:00", units: 380000 },
+  { time: "22:00", units: 360000 },
 ]
 
 export function NodeStatusView() {
@@ -91,7 +108,21 @@ export function NodeStatusView() {
         {stats.map((stat) => (
           <Card key={stat.title} className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-purple-600 dark:text-purple-400">{stat.title}</CardTitle>
+              <CardTitle className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                {stat.title}
+                {stat.tooltip && (
+                  <TooltipProvider>
+                    <UITooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-4 w-4 ml-1 inline-block text-purple-400 dark:text-purple-500 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="w-64 text-sm">{stat.tooltip}</p>
+                      </TooltipContent>
+                    </UITooltip>
+                  </TooltipProvider>
+                )}
+              </CardTitle>
               <stat.icon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
             </CardHeader>
             <CardContent>
@@ -118,14 +149,6 @@ export function NodeStatusView() {
               className="w-full border-purple-200 dark:border-gray-700 text-purple-900 dark:text-purple-100 placeholder-purple-400 dark:placeholder-purple-500 dark:bg-gray-800"
             />
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" className="text-purple-600 dark:text-purple-400 border-purple-200 dark:border-gray-700">
-              Advanced Search
-            </Button>
-            <Button variant="outline" className="text-purple-600 dark:text-purple-400 border-purple-200 dark:border-gray-700">
-              Export Data
-            </Button>
-          </div>
         </CardContent>
       </Card>
 
@@ -147,22 +170,42 @@ export function NodeStatusView() {
                   color: "hsl(var(--chart-1))",
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <LineChart
                 data={computeUnitsData}
-                margin={{ top: 5, right: 30, bottom: 25, left: 40 }}
+                margin={{ top: 5, right: 0, bottom: 25, left: 20 }}
               >
+                <XAxis 
+                  dataKey="time" 
+                  tick={{ fill: 'var(--purple-600)' }}
+                  scale="point"
+                  interval={2}
+                  padding={{ left: 10, right: 30 }}
+                />
+                <YAxis
+                  tick={{ fill: 'var(--purple-600)' }}
+                  tickFormatter={(value) => `${value / 1000}k`}
+                />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
+                          <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
+                          <p className="text-purple-600 dark:text-purple-400">{`Units: ${payload[0].value.toLocaleString()}`}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
                 <Line
                   type="monotone"
                   dataKey="units"
                   stroke="var(--color-units)"
                   strokeWidth={2}
-                />
-                <XAxis 
-                  dataKey="time" 
-                  tickFormatter={(value) => value.replace(/(\d{2})(\d{2})/, '$1:$2')}
-                  tick={{ fill: 'var(--purple-600)' }}
+                  dot={{ r: 4, fill: "var(--color-units)" }}
                 />
               </LineChart>
             </ChartContainer>
@@ -193,21 +236,42 @@ export function NodeStatusView() {
                   color: "hsl(var(--chart-3))",
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <LineChart
                 data={networkActivityData}
-                margin={{ top: 5, right: 30, bottom: 25, left: 40 }}
+                margin={{ top: 5, right: 0, bottom: 25, left: 20 }}
               >
+                <XAxis 
+                  dataKey="time" 
+                  tick={{ fill: 'var(--purple-600)' }}
+                  scale="point"
+                  interval={2}
+                  padding={{ left: 10, right: 30 }}
+                />
+                <YAxis
+                  tick={{ fill: 'var(--purple-600)' }}
+                  tickFormatter={(value) => `${value / 1000}k`}
+                />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
+                          <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
+                          {payload.map((entry, index) => (
+                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${entry.value.toLocaleString()}`}</p>
+                          ))}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
                 <Legend 
                   verticalAlign="top" 
                   align="right"
                   wrapperStyle={{ paddingBottom: "20px" }}
-                />
-                <XAxis 
-                  dataKey="time" 
-                  tickFormatter={(value) => value.replace(/(\d{2})(\d{2})/, '$1:$2')}
-                  tick={{ fill: 'var(--purple-600)' }}
                 />
                 <Line
                   type="monotone"
@@ -241,55 +305,84 @@ export function NodeStatusView() {
 
       {/* Models Running Section */}
       <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-lg font-medium text-purple-700 dark:text-purple-300">Models Running</CardTitle>
-          <CardDescription className="text-purple-600 dark:text-purple-400">
-            Distribution of nodes across different models
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-purple-200 dark:border-gray-700">
-                <TableHead className="text-purple-600 dark:text-purple-400">Model</TableHead>
-                <TableHead className="text-purple-600 dark:text-purple-400">Nodes Running</TableHead>
+  <CardHeader>
+    <CardTitle className="text-lg font-medium text-purple-700 dark:text-purple-300">Models Running</CardTitle>
+    <CardDescription className="text-purple-600 dark:text-purple-400">
+      Distribution of nodes across different models
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div>
+        <Table>
+          <TableHeader>
+            <TableRow className="border-purple-200 dark:border-gray-700">
+              <TableHead className="text-purple-600 dark:text-purple-400">Model</TableHead>
+              <TableHead className="text-purple-600 dark:text-purple-400">Nodes Running</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {modelDistribution.map((item) => (
+              <TableRow key={item.model} className="border-purple-200 dark:border-gray-700">
+                <TableCell className="font-medium text-purple-700 dark:text-purple-300">{item.model}</TableCell>
+                <TableCell className="text-purple-600 dark:text-purple-400">{item.nodesRunning}</TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {modelDistribution.map((item) => (
-                <TableRow key={item.model} className="border-purple-200 dark:border-gray-700">
-                  <TableCell className="font-medium text-purple-700 dark:text-purple-300">{item.model}</TableCell>
-                  <TableCell className="text-purple-600 dark:text-purple-400">{item.nodesRunning}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          <ChartContainer
-            config={{
-              nodesRunning: {
-                label: "Nodes Running",
-                color: "hsl(var(--chart-1))",
-              },
-            }}
-            className="h-[300px]"
-          >
-            <BarChart
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-center">
+        <ChartContainer
+          config={{
+            llama405b: {
+              label: "Llama 3.1 405B",
+              color: "hsl(var(--chart-1))",
+            },
+            llama3b: {
+              label: "Llama 3.2 3B",
+              color: "hsl(var(--chart-2))",
+            },
+            gpt4: {
+              label: "GPT-4",
+              color: "hsl(var(--chart-3))",
+            },
+            bert: {
+              label: "BERT-Large",
+              color: "hsl(var(--chart-4))",
+            },
+            t5: {
+              label: "T5-Base",
+              color: "hsl(var(--chart-5))",
+            },
+          }}
+          className="h-[300px] w-full"
+        >
+          <PieChart>
+            <Pie
               data={modelDistribution}
-              margin={{ top: 5, right: 30, bottom: 25, left: 40 }}
+              dataKey="nodesRunning"
+              nameKey="model"
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              label={(entry) => entry.model}
             >
-              <Bar
-                dataKey="nodesRunning"
-                fill="var(--color-nodesRunning)"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+              {modelDistribution.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={`hsl(var(--chart-${index + 1}))`}
+                />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </ChartContainer>
+      </div>
+    </div>
+  </CardContent>
+</Card>
 
-      {/* Network Activity Section */}
-      
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
@@ -300,35 +393,25 @@ export function NodeStatusView() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="mb-6">
+            <div className="w-full h-[400px] relative overflow-hidden rounded-lg">
               <img 
-                src="/placeholder.svg?height=300&width=600" 
-                alt="Global node distribution heatmap"
-                className="w-full h-[300px] object-cover rounded-lg bg-gray-100 dark:bg-gray-700"
+                src="/placeholder.svg?height=400&width=600" 
+                alt="Global node distribution map"
+                className="w-full h-full object-cover"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+              <div className="absolute bottom-4 left-4 right-4 text-white">
+                <p className="text-sm font-medium">Node distribution across major regions</p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {nodeDistribution.map((item) => (
+                    <div key={item.region} className="flex items-center justify-between">
+                      <span className="text-xs">{item.region}</span>
+                      <span className="text-xs font-bold">{item.percentage.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            <ChartContainer
-              config={{
-                percentage: {
-                  label: "Distribution",
-                  color: "hsl(var(--chart-3))",
-                },
-              }}
-              className="h-[200px]"
-            >
-              <PieChart>
-                <Pie
-                  data={nodeDistribution}
-                  dataKey="percentage"
-                  nameKey="region"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="var(--color-percentage)"
-                  label
-                />
-              </PieChart>
-            </ChartContainer>
           </CardContent>
         </Card>
 
