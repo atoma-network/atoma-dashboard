@@ -1,12 +1,22 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Users, Server, BarChartIcon as ChartBar, Cpu, Timer, ArrowUpDown, Info } from 'lucide-react'
-import { Bar, BarChart, Line, LineChart, Pie, PieChart, Legend, XAxis, YAxis, Tooltip, Cell } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Users, Server, BarChartIcon as ChartBar, Cpu, Timer, ArrowUpDown, Info } from "lucide-react";
+import { Line, LineChart, Pie, PieChart, Legend, XAxis, YAxis, Tooltip, Cell } from "recharts";
+import { ChartContainer } from "@/components/ui/chart";
+import { useEffect, useState } from "react";
+import {
+  getComputeUnitsProcessed,
+  getLatency,
+  getSubscriptions,
+  getTasks,
+  type ComputedUnitsProcessedResponse,
+  type LatencyResponse,
+  type NodeSubscription,
+  type Task,
+} from "@/lib/atoma";
 import {
   Tooltip as UITooltip,
   TooltipContent,
@@ -101,6 +111,191 @@ const computeUnitsData = [
 ]
 
 export function NodeStatusView() {
+  const [stats, setStats] = useState([
+    {
+      title: "Total Nodes",
+      value: "Loading...",
+      description: "Across all networks",
+      icon: Server,
+    },
+    {
+      title: "Nodes Online",
+      value: "Loading...",
+      description: "Currently active",
+      icon: Users,
+    },
+    {
+      title: "Models Running",
+      value: "Loading...",
+      description: "Different model types",
+      icon: ChartBar,
+    },
+    {
+      title: "Compute Units",
+      value: "Loading...",
+      description: "Past 24 hours",
+      icon: Cpu,
+    },
+    {
+      title: "Avg Latency",
+      value: "Loading...",
+      description: "Last hour",
+      icon: Timer,
+    },
+    {
+      title: "Throughput",
+      value: "Loading...",
+      description: "Requests/minute",
+      icon: ArrowUpDown,
+    },
+  ]);
+  const [subscriptions, setSubscriptions] = useState<NodeSubscription[] | undefined>();
+  const [tasks, setTasks] = useState<Task[] | undefined>();
+  const [subscribers, setSubscribers] = useState<{ model_name: string; nodesRunning: number }[]>();
+  const [computeUnitsData, setComputeUnitsData] = useState<{ time: string; units: number }[]>([]);
+  const [activityModels, setActivityModels] = useState<{ model_name: string; color: string }[]>([]);
+  const [networkActivityData, setNetworkActivityData] = useState<any[]>([]);
+  const [modelDistribution, setModelDistruibution] = useState<{model:string,nodesRunning:number}[]>([]);
+  // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
+  // const [latency, setLatency] = useState<LatencyResponse[]>([]);
+  console.log("networkActivityData", networkActivityData);
+  console.log("computeUnitsData", computeUnitsData);
+  console.log("activityModels", activityModels);
+  useEffect(() => {
+    getComputeUnitsProcessed().then((computeUnits: ComputedUnitsProcessedResponse[]) => {
+      // setComputeUnits(computeUnits);
+      const totalUnits = computeUnits.reduce((sum, data) => sum + data.amount, 0);
+      const totalRequests = computeUnits.reduce((sum, data) => sum + data.requests, 0);
+      const totalTime = computeUnits.reduce((sum, data) => sum + data.time, 0);
+      console.log(computeUnits);
+      setNetworkActivityData(
+        computeUnits.map((data) => ({
+          time: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          [data.model_name]: data.amount,
+        }))
+      );
+      setActivityModels(
+        Array.from(new Set(computeUnits.map((data, i) => data.model_name))).map((model_name, i) => ({
+          model_name: model_name,
+          color: `hsl(var(--chart-${i + 1}))`,
+        }))
+      );
+      const group_by_time = computeUnits.reduce((acc: { [key: string]: { [key: string]: number } }, data) => {
+        if (!(data.timestamp in acc)) {
+          acc[data.timestamp] = {};
+        }
+        acc[data.timestamp][data.model_name] = data.amount;
+        return acc;
+      }, {});
+      console.log("group_by_time", group_by_time);
+      const sortedGroupByTime = Object.keys(group_by_time)
+        .sort()
+        .map((key) => ({
+          time: new Date(key).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          ...group_by_time[key],
+        }));
+      console.log("sortedGroupByTime", sortedGroupByTime);
+
+      setNetworkActivityData(sortedGroupByTime);
+      setComputeUnitsData(
+        sortedGroupByTime.map((data) => ({
+          time: data.time,
+          units: Object.keys(data).reduce((sum, key) => (key !== "time" ? sum + data[key] : sum), 0),
+        }))
+      );
+      setStats((prevStats) => [
+        ...prevStats.slice(0, 3),
+        {
+          ...prevStats[3],
+          value: totalUnits.toString(),
+        },
+        prevStats[4],
+        {
+          ...prevStats[5],
+          value: (totalRequests * ((1000 * 60) / totalTime)).toFixed(0),
+        },
+        ...prevStats.slice(6),
+      ]);
+    });
+    getLatency().then((latency: LatencyResponse[]) => {
+      // setLatency(latency);
+      const totalLatency = latency.reduce((sum, data) => sum + data.latency, 0);
+      const totalRequests = latency.reduce((sum, data) => sum + data.requests, 0);
+      setStats((prevStats) => [
+        ...prevStats.slice(0, 4),
+        {
+          ...prevStats[4],
+          value: `${(totalLatency / totalRequests).toFixed(2)}ms`,
+        },
+        ...prevStats.slice(5),
+      ]);
+    });
+    getSubscriptions().then((subscriptions) => {
+      setSubscriptions(subscriptions);
+      const nodes: { [key: string]: boolean } = {};
+      for (const subscription of subscriptions) {
+        if (subscription.node_small_id in nodes) {
+          nodes[subscription.node_small_id] ||= subscription.valid;
+        } else {
+          nodes[subscription.node_small_id] = subscription.valid;
+        }
+      }
+      setStats((prevStats) => [
+        {
+          ...prevStats[0],
+          value: Object.keys(nodes).length.toString(),
+        },
+        {
+          ...prevStats[1],
+          value: Object.values(nodes)
+            .filter((v) => v)
+            .length.toString(),
+        },
+        ...prevStats.slice(2),
+      ]);
+    });
+    getTasks().then((tasks) => {
+      const models: { [key: string]: boolean } = {};
+      setTasks(tasks);
+      for (const task of tasks) {
+        if (!task.model_name) {
+          continue;
+        }
+        if (task.model_name in models) {
+          models[task.model_name] ||= !task.is_deprecated;
+        } else {
+          models[task.model_name] = task.is_deprecated;
+        }
+      }
+      setStats((prevStats) => [
+        ...prevStats.slice(0, 2),
+        {
+          ...prevStats[2],
+          value: Object.keys(models).length.toString(),
+        },
+        ...prevStats.slice(3),
+      ]);
+    });
+  }, []);
+  useEffect(() => {
+    if (!tasks || !subscriptions) {
+      return;
+    }
+    const subscribers: { [key: string]: number } = {};
+    for (const task of tasks) {
+      if (!task.model_name) {
+        continue;
+      }
+      if (!(task.model_name in subscribers)) {
+        subscribers[task.model_name] = 0;
+      }
+      subscribers[task.model_name] += subscriptions.filter(
+        (subscription) => subscription.task_small_id === task.task_small_id && subscription.valid
+      ).length;
+    }
+    setSubscribers(Object.entries(subscribers).map(([model_name, nodesRunning]) => ({ model_name, nodesRunning })));
+    setModelDistruibution(Object.entries(subscribers).map(([model, nodesRunning]) => ({ model, nodesRunning })));
+  }, [tasks, subscriptions]);
   return (
     <div className="space-y-8">
       {/* Stats Cards Section */}
@@ -222,20 +417,13 @@ export function NodeStatusView() {
           </CardHeader>
           <CardContent>
             <ChartContainer
-              config={{
-                llama: {
-                  label: "Llama Models",
-                  color: "hsl(var(--chart-1))",
-                },
-                gpt4: {
-                  label: "GPT-4",
-                  color: "hsl(var(--chart-2))",
-                },
-                mixtral: {
-                  label: "Mixtral",
-                  color: "hsl(var(--chart-3))",
-                },
-              }}
+              config={activityModels.reduce((acc: { [key: string]: { label: string; color: string } }, model) => {
+                acc[model.model_name] = {
+                  label: model.model_name,
+                  color: model.color,
+                };
+                return acc;
+              }, {})}
               className="h-[300px] w-full"
             >
               <LineChart
@@ -273,30 +461,15 @@ export function NodeStatusView() {
                   align="right"
                   wrapperStyle={{ paddingBottom: "20px" }}
                 />
-                <Line
-                  type="monotone"
-                  dataKey="llama"
-                  name="Llama Models"
-                  stroke="var(--color-llama)"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="gpt4"
-                  name="GPT-4"
-                  stroke="var(--color-gpt4)"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="mixtral"
-                  name="Mixtral"
-                  stroke="var(--color-mixtral)"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
+                {activityModels.map((model) => (
+                  <Line
+                    key={model.model_name}
+                    type="monotone"
+                    dataKey={model.model_name}
+                    stroke={model.color}
+                    strokeWidth={2}
+                  />
+                ))}
               </LineChart>
             </ChartContainer>
           </CardContent>

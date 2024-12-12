@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Cloud, Database, Key, CreditCard, BookOpen, Calculator, Zap, Sparkles, Brain, MessageSquare, Info, Copy, CheckCircle2 } from 'lucide-react'
+import { Cloud, Database, Key, CreditCard, BookOpen, Calculator, Zap, Sparkles, Brain, MessageSquare, Info, Copy, CheckCircle2, Delete } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -27,6 +27,7 @@ import { Slider } from "@/components/ui/slider"
 import { LoginRegisterModal } from "./login-register-modal"
 import { cn } from "@/lib/utils"
 import { ComputeUnitsPayment } from "./compute-units-payment"
+import { generateApiKey, listApiKeys, revokeApiToken } from "@/lib/atoma"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
@@ -159,6 +160,20 @@ export function CloudView() {
   const [loginError, setLoginError] = useState<string | null>(null)
   const [isComputeUnitsModalOpen, setIsComputeUnitsModalOpen] = useState(false)
   const [selectedModelForPayment, setSelectedModelForPayment] = useState<typeof modelOptions[0] | null>(null)
+  const [apiKeys, setApiKeys] = useState<string[] | undefined>(); 
+
+  useEffect(() => {
+    listApiKeys().then((keys) => setApiKeys(keys))
+  }, []);
+
+  const addApiKey = () => {
+    generateApiKey().then(() => listApiKeys().then((keys) => setApiKeys(keys)));
+  }
+
+  const revokeToken = (token:string) => {
+    revokeApiToken(token).then(() => listApiKeys().then((keys) => setApiKeys(keys)));
+  }
+
 
   const getAdjustedPrice = (basePrice: number) => {
     const pricePerMillion = basePrice * 1000 // Convert from per 1K to per 1M
@@ -292,19 +307,27 @@ export function CloudView() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">API Key</h3>
-            <div className="flex items-center space-x-2">
-              <Input
-                type="password"
-                value="••••••••••••••••"
-                readOnly
-                className="font-mono bg-gray-100 dark:bg-[#1A1C23] border-purple-200 dark:border-purple-800/30 text-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600"
-              />
-              <Button variant="outline">
-                <Copy className="mr-2 h-4 w-4" />
-                Copy
-              </Button>
-            </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2" onClick={addApiKey}>API Key</h3>
+            {Array.isArray(apiKeys) ?
+                apiKeys.map((apiKey) => {
+                  return (<div className="flex items-center space-x-2" key={apiKey}>
+                    <Input
+                      type="password"
+                      value="••••••••••••••••"
+                      readOnly
+                      className="font-mono bg-gray-100 dark:bg-[#1A1C23] border-purple-200 dark:border-purple-800/30 text-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600"
+                    />
+                    <Button variant="outline">
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copy
+                    </Button>
+                    <Button variant="outline" onClick={()=>revokeToken(apiKey)}>
+                      <Delete className="mr-2 h-4 w-4" />
+                      Revoke
+                    </Button>
+                  </div>)
+                })
+            : <div>Loading</div>}
           </div>
           
           <div>
@@ -538,7 +561,7 @@ export function CloudView() {
         {/* Login or Register Button Removed */}
       </div>
 
-      {activeTab === 'compute' && <ComputeTab />}
+      {activeTab === 'compute' && <ComputeTab apiKeys={apiKeys} />}
       {activeTab === 'api' && <ApiTab />}
       {activeTab === 'billing' && <BillingTab />}
       {activeTab === 'docs' && <DocsTab />}

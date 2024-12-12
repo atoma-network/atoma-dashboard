@@ -1,0 +1,103 @@
+const proxy_url = "http://localhost:8081";
+
+export interface NodeSubscription {
+  node_small_id: number; // Unique small integer identifier for the node subscription
+  task_small_id: number; // Unique small integer identifier for the task
+  price_per_compute_unit: number; // Price per compute unit for the subscription
+  max_num_compute_units: number; // Maximum number of compute units for the subscription
+  valid: boolean; // Indicates whether the subscription is valid
+}
+
+export interface Task {
+  task_small_id: number; // Unique small integer identifier for the task
+  task_id: string; // Unique string identifier for the task
+  role: number; // Role associated with the task (encoded as an integer)
+  model_name?: string; // Optional name of the model used for the task
+  is_deprecated: boolean; // Indicates whether the task is deprecated
+  valid_until_epoch?: number; // Optional epoch timestamp until which the task is valid
+  deprecated_at_epoch?: number; // Optional epoch timestamp when the task was deprecated
+  security_level: number; // Security level of the task (encoded as an integer)
+  minimum_reputation_score?: number; // Optional minimum reputation score required for the task
+}
+
+export interface AuthResponse {
+  refresh_token: string;
+  access_token: string;
+}
+
+export interface ComputedUnitsProcessedResponse {
+  timestamp: string; // ISO 8601 formatted date string
+  model_name: string,
+  amount: number;
+  requests: number;
+  time: number;
+}
+
+export interface LatencyResponse {
+  timestamp: string; // ISO 8601 formatted date string
+  latency: number;
+  requests: number;
+}
+
+export const getSubscriptions = async (): Promise<NodeSubscription[]> => {
+  return await fetch(`${proxy_url}/subscriptions`).then((response) => response.json());
+};
+
+export const getTasks = async (): Promise<Task[]> => {
+  return await fetch(`${proxy_url}/tasks`).then((response) => response.json());
+};
+
+export const registerUser = async (username: string, password: string): Promise<AuthResponse> => {
+  return await fetch(`${proxy_url}/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  }).then((response) => response.json());
+};
+
+export const loginUser = async (username: string, password: string): Promise<AuthResponse> => {
+  return await fetch(`${proxy_url}/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  }).then((response) => response.json());
+};
+
+export const generateApiKey = async (): Promise<string> => {
+  return await fetch(`${proxy_url}/generate_api_token`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+  }).then((response) => response.json());
+}
+
+export const revokeApiToken = async (api_token:string): Promise<void> => {
+  await fetch(`${proxy_url}/revoke_api_token`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ api_token }),
+  });
+}
+
+export const listApiKeys = async (): Promise<string[]> => {
+  return await fetch(`${proxy_url}/api_tokens`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+  }).then((response) => response.json());
+}
+
+export const getComputeUnitsProcessed = async (): Promise<ComputedUnitsProcessedResponse[]> => {
+  return await fetch(`${proxy_url}/compute_units_processed?hours=24`).then((response) => response.json());
+}
+
+export const getLatency = async (): Promise<LatencyResponse[]> => {
+  return await fetch(`${proxy_url}/latency?hours=24`).then((response) => response.json());
+}

@@ -10,6 +10,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
+import { loginUser, registerUser } from "@/lib/atoma"
+import { register } from "module"
 
 interface LoginRegisterModalProps {
   isOpen: boolean
@@ -29,6 +31,22 @@ export function LoginRegisterModal({ isOpen, onClose, error, onSubmit }: LoginRe
   }
 
   const toggleMode = () => setIsLogin(!isLogin)
+
+  const onLogin = () => {
+    loginUser(email, password).then(({ access_token, refresh_token }) => {
+      localStorage.setItem("access_token", access_token);
+      document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
+      onClose();
+    })
+  }
+
+  const onRegister = () => {
+    registerUser(email, password).then(({ access_token, refresh_token }) => {
+      localStorage.setItem("access_token", access_token);
+      document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
+      onClose();
+    });
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
