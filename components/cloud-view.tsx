@@ -155,6 +155,7 @@ export function CloudView() {
   const [selectedModel, setSelectedModel] = useState(modelOptions[0])
   const [privacyEnabled, setPrivacyEnabled] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
 
   const getAdjustedPrice = (basePrice: number) => {
     const pricePerMillion = basePrice * 1000 // Convert from per 1K to per 1M
@@ -163,6 +164,20 @@ export function CloudView() {
 
   const handleStartUsing = () => {
     setIsLoginModalOpen(true)
+    setLoginError(null)
+  }
+
+  const handleLoginRegister = (email: string, password: string, isLogin: boolean) => {
+    // This is a mock implementation. In a real app, you'd call your API here.
+    if (email === "user@example.com" && password === "password") {
+      // Successful login/register
+      setIsLoginModalOpen(false)
+      setLoginError(null)
+      // Here you would typically set the user state or redirect
+    } else {
+      // Failed login/register
+      setLoginError(isLogin ? "Invalid email or password" : "Registration failed. Please try again.")
+    }
   }
 
   const ComputeTab = () => (
@@ -185,10 +200,10 @@ export function CloudView() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {modelOptions.map((model) => (
-          <Card key={model.id} className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+          <Card key={model.id} className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span className="text-lg font-semibold text-purple-700 dark:text-purple-300">{model.name}</span>
+              <CardTitle className="flex items-center justify-between text-lg font-medium text-gray-900 dark:text-white">
+                <span >{model.name}</span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -221,25 +236,25 @@ export function CloudView() {
                   </Tooltip>
                 </TooltipProvider>
               </CardTitle>
-              <CardDescription className="text-purple-600 dark:text-purple-400">{model.type} Model</CardDescription>
+              <CardDescription className="text-gray-500 dark:text-gray-400">{model.type} Model</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <p className="text-sm text-purple-600 dark:text-purple-400 line-clamp-2">{model.description}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{model.description}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-purple-600 dark:text-purple-400">Price:</span>
-                  <span className="text-lg font-semibold text-purple-700 dark:text-purple-300">
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Price:</span>
+                  <span className="text-lg font-semibold text-gray-900 dark:text-white">
                     ${getAdjustedPrice(model.price).toFixed(2)} / 1M {model.id === 'flux1' ? 'MP' : 'tokens'}
                   </span>
                 </div>
               </div>
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="features">
-                  <AccordionTrigger className="text-purple-700 dark:text-purple-300">Features</AccordionTrigger>
+                  <AccordionTrigger className="text-gray-900 dark:text-white">Features</AccordionTrigger>
                   <AccordionContent>
                     <ul className="space-y-1">
                       {model.features.map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400">
+                        <li key={index} className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                           <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400 flex-shrink-0" />
                           {feature}
                         </li>
@@ -249,8 +264,11 @@ export function CloudView() {
                 </AccordionItem>
               </Accordion>
               <Button 
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                onClick={handleStartUsing}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-800 dark:hover:bg-purple-900"
+                onClick={() => {
+                  setIsLoginModalOpen(true)
+                  setLoginError(null)
+                }}
               >
                 Start Using
               </Button>
@@ -263,22 +281,22 @@ export function CloudView() {
 
   const ApiTab = () => (
     <div className="space-y-6">
-      <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+      <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-purple-700 dark:text-purple-300">API Access</CardTitle>
-          <CardDescription className="text-purple-600 dark:text-purple-400">
+          <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">API Access</CardTitle>
+          <CardDescription className="text-gray-500 dark:text-gray-400">
             Integrate our AI models into your applications using our RESTful API
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-2">API Key</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">API Key</h3>
             <div className="flex items-center space-x-2">
               <Input
                 type="password"
                 value="••••••••••••••••"
                 readOnly
-                className="font-mono bg-gray-100 dark:bg-gray-700"
+                className="font-mono bg-gray-100 dark:bg-[#1A1C23] border-purple-200 dark:border-purple-800/30 text-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600"
               />
               <Button variant="outline">
                 <Copy className="mr-2 h-4 w-4" />
@@ -288,21 +306,21 @@ export function CloudView() {
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-2">Available Endpoints</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Available Endpoints</h3>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Endpoint</TableHead>
-                  <TableHead>Method</TableHead>
+                  <TableHead className="text-gray-600 dark:text-gray-300">Name</TableHead>
+                  <TableHead className="text-gray-600 dark:text-gray-300">Endpoint</TableHead>
+                  <TableHead className="text-gray-600 dark:text-gray-300">Method</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {apiEndpoints.map((endpoint) => (
                   <TableRow key={endpoint.name}>
-                    <TableCell>{endpoint.name}</TableCell>
-                    <TableCell>{endpoint.endpoint}</TableCell>
-                    <TableCell>{endpoint.method}</TableCell>
+                    <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.name}</TableCell>
+                    <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.endpoint}</TableCell>
+                    <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.method}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -310,8 +328,8 @@ export function CloudView() {
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-2">Example Usage</h3>
-            <pre className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md overflow-x-auto">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Example Usage</h3>
+            <pre className="bg-gray-100 dark:bg-[#1A1C23] p-4 rounded-md overflow-x-auto">
               <code className="text-sm">
 {`curl https://api.atoma.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
@@ -337,31 +355,31 @@ export function CloudView() {
 
     return (
       <div className="space-y-6">
-        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-purple-700 dark:text-purple-300">Billing Summary</CardTitle>
-            <CardDescription className="text-purple-600 dark:text-purple-400">
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Billing Summary</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
               Overview of your current billing period
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-purple-600 dark:text-purple-400">Total Usage:</span>
-              <span className="text-lg font-bold text-purple-700 dark:text-purple-300">{totalUsage.toLocaleString()} tokens</span>
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Usage:</span>
+              <span className="text-lg font-bold text-gray-900 dark:text-white">{totalUsage.toLocaleString()} tokens</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-purple-600 dark:text-purple-400">Total Cost:</span>
-              <span className="text-lg font-bold text-purple-700 dark:text-purple-300">${totalCost.toFixed(2)}</span>
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Cost:</span>
+              <span className="text-lg font-bold text-gray-900 dark:text-white">${totalCost.toFixed(2)}</span>
             </div>
             <Progress value={(totalCost / 100) * 100} className="h-2" />
-            <p className="text-sm text-purple-600 dark:text-purple-400">Billing period: March 1, 2024 - March 31, 2024</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Billing period: March 1, 2024 - March 31, 2024</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-purple-700 dark:text-purple-300">Usage History</CardTitle>
-            <CardDescription className="text-purple-600 dark:text-purple-400">
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Usage History</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
               Detailed breakdown of your API usage
             </CardDescription>
           </CardHeader>
@@ -369,19 +387,19 @@ export function CloudView() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Model</TableHead>
-                  <TableHead className="text-right">Tokens</TableHead>
-                  <TableHead className="text-right">Cost</TableHead>
+                  <TableHead className="text-gray-600 dark:text-gray-300">Date</TableHead>
+                  <TableHead className="text-gray-600 dark:text-gray-300">Model</TableHead>
+                  <TableHead className="text-right text-gray-600 dark:text-gray-300">Tokens</TableHead>
+                  <TableHead className="text-right text-gray-600 dark:text-gray-300">Cost</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {usageHistory.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell>{item.date}</TableCell>
-                    <TableCell>{item.model}</TableCell>
-                    <TableCell className="text-right">{item.tokens.toLocaleString()}</TableCell>
-                    <TableCell className="text-right">${item.cost.toFixed(2)}</TableCell>
+                    <TableCell className="text-gray-900 dark:text-gray-300">{item.date}</TableCell>
+                    <TableCell className="text-gray-900 dark:text-gray-300">{item.model}</TableCell>
+                    <TableCell className="text-right text-gray-900 dark:text-gray-300">{item.tokens.toLocaleString()}</TableCell>
+                    <TableCell className="text-right text-gray-900 dark:text-gray-300">${item.cost.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -409,10 +427,10 @@ export function CloudView() {
 
     return (
       <div className="space-y-6">
-        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-purple-700 dark:text-purple-300">Cost Calculator</CardTitle>
-            <CardDescription className="text-purple-600 dark:text-purple-400">
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Cost Calculator</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
               Estimate your monthly costs based on usage
             </CardDescription>
           </CardHeader>
@@ -460,35 +478,35 @@ export function CloudView() {
 
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-purple-700 dark:text-purple-300">Estimated Monthly Cost:</span>
-                <span className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                <span className="text-lg font-semibold text-gray-900 dark:text-white">Estimated Monthly Cost:</span>
+                <span className="text-2xl font-bold text-gray-900 dark:text-white">
                   ${monthlyCost.toFixed(2)}
                 </span>
               </div>
-              <p className="mt-2 text-sm text-purple-600 dark:text-purple-400">
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                 Based on {(tokensPerDay * daysPerMonth).toLocaleString()} tokens per month
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-purple-700 dark:text-purple-300">Pricing Details</CardTitle>
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Pricing Details</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Model</TableHead>
-                  <TableHead>Price per 1M tokens</TableHead>
+                  <TableHead className="text-gray-600 dark:text-gray-300">Model</TableHead>
+                  <TableHead className="text-gray-600 dark:text-gray-300">Price per 1M tokens</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {modelOptions.map((model) => (
                   <TableRow key={model.id}>
-                    <TableCell className="font-medium">{model.name}</TableCell>
-                    <TableCell>${(model.price * 1000).toFixed(2)}</TableCell>
+                    <TableCell className="font-medium text-gray-900 dark:text-gray-300">{model.name}</TableCell>
+                    <TableCell className="text-gray-900 dark:text-gray-300">${(model.price * 1000).toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -500,7 +518,7 @@ export function CloudView() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 dark:bg-[#1A1C23]">
       <div className="flex justify-between items-center mb-6">
         <div className="flex space-x-4 overflow-x-auto">
           {tabs.map(({ id, icon: Icon, label }) => (
@@ -526,7 +544,12 @@ export function CloudView() {
 
       <LoginRegisterModal
         isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
+        onClose={() => {
+          setIsLoginModalOpen(false)
+          setLoginError(null)
+        }}
+        error={loginError}
+        onSubmit={handleLoginRegister}
       />
     </div>
   )

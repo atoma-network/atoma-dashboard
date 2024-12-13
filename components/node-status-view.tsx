@@ -106,15 +106,15 @@ export function NodeStatusView() {
       {/* Stats Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
         {stats.map((stat) => (
-          <Card key={stat.title} className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+          <Card key={stat.title} className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-purple-600 dark:text-purple-400">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 {stat.title}
                 {stat.tooltip && (
                   <TooltipProvider>
                     <UITooltip>
                       <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 ml-1 inline-block text-purple-400 dark:text-purple-500 cursor-help" />
+                        <Info className="h-4 w-4 ml-1 inline-block text-purple-400 dark:text-purple-300 cursor-help" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="w-64 text-sm">{stat.tooltip}</p>
@@ -123,21 +123,21 @@ export function NodeStatusView() {
                   </TooltipProvider>
                 )}
               </CardTitle>
-              <stat.icon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <stat.icon className="h-4 w-4 text-purple-500 dark:text-purple-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{stat.value}</div>
-              <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">{stat.description}</p>
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-300">{stat.value}</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{stat.description}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* Node Explorer */}
-      <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+      <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-medium text-purple-700 dark:text-purple-300">Node Explorer</CardTitle>
-          <CardDescription className="text-purple-600 dark:text-purple-400">
+          <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Node Explorer</CardTitle>
+          <CardDescription className="text-gray-500 dark:text-gray-400">
             Search and view detailed node information
           </CardDescription>
         </CardHeader>
@@ -146,7 +146,7 @@ export function NodeStatusView() {
             <Input 
               type="text" 
               placeholder="Enter node address or identifier" 
-              className="w-full border-purple-200 dark:border-gray-700 text-purple-900 dark:text-purple-100 placeholder-purple-400 dark:placeholder-purple-500 dark:bg-gray-800"
+              className="w-full border-purple-200 dark:border-purple-800/30 text-purple-900 dark:text-purple-100 placeholder-purple-400 dark:placeholder-purple-500 dark:bg-[#1A1C23]"
             />
           </div>
         </CardContent>
@@ -155,10 +155,10 @@ export function NodeStatusView() {
       {/* Network Activity and Compute Units Section */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Compute Units Section */}
-        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg font-medium text-purple-700 dark:text-purple-300">Compute Units Processed</CardTitle>
-            <CardDescription className="text-purple-600 dark:text-purple-400">
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Compute Units Processed</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
               Processing activity over the past 24 hours
             </CardDescription>
           </CardHeader>
@@ -167,7 +167,7 @@ export function NodeStatusView() {
               config={{
                 units: {
                   label: "Compute Units",
-                  color: "hsl(var(--chart-1))",
+                  color: "hsl(271, 91%, 65%)", // Bright purple
                 },
               }}
               className="h-[300px] w-full"
@@ -213,10 +213,10 @@ export function NodeStatusView() {
         </Card>
 
         {/* Network Activity Section */}
-        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg font-medium text-purple-700 dark:text-purple-300">Network Activity</CardTitle>
-            <CardDescription className="text-purple-600 dark:text-purple-400">
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Network Activity</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
               Model-wise activity distribution over 24 hours
             </CardDescription>
           </CardHeader>
@@ -304,10 +304,10 @@ export function NodeStatusView() {
       </div>
 
       {/* Models Running Section */}
-      <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+      <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
   <CardHeader>
-    <CardTitle className="text-lg font-medium text-purple-700 dark:text-purple-300">Models Running</CardTitle>
-    <CardDescription className="text-purple-600 dark:text-purple-400">
+    <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Models Running</CardTitle>
+    <CardDescription className="text-gray-500 dark:text-gray-400">
       Distribution of nodes across different models
     </CardDescription>
   </CardHeader>
@@ -316,14 +316,14 @@ export function NodeStatusView() {
       <div>
         <Table>
           <TableHeader>
-            <TableRow className="border-purple-200 dark:border-gray-700">
-              <TableHead className="text-purple-600 dark:text-purple-400">Model</TableHead>
-              <TableHead className="text-purple-600 dark:text-purple-400">Nodes Running</TableHead>
+            <TableRow className="border-purple-200 dark:border-purple-800/30">
+              <TableHead className="text-purple-600 dark:text-purple-300">Model</TableHead>
+              <TableHead className="text-purple-600 dark:text-purple-300">Nodes Running</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {modelDistribution.map((item) => (
-              <TableRow key={item.model} className="border-purple-200 dark:border-gray-700">
+              <TableRow key={item.model} className="border-purple-200 dark:border-purple-800/30">
                 <TableCell className="font-medium text-purple-700 dark:text-purple-300">{item.model}</TableCell>
                 <TableCell className="text-purple-600 dark:text-purple-400">{item.nodesRunning}</TableCell>
               </TableRow>
@@ -385,10 +385,10 @@ export function NodeStatusView() {
 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg font-medium text-purple-700 dark:text-purple-300">Geographic Distribution</CardTitle>
-            <CardDescription className="text-purple-600 dark:text-purple-400">
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Geographic Distribution</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
               Node distribution across regions
             </CardDescription>
           </CardHeader>
@@ -415,25 +415,25 @@ export function NodeStatusView() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg font-medium text-purple-700 dark:text-purple-300">Regional Distribution Details</CardTitle>
-            <CardDescription className="text-purple-600 dark:text-purple-400">
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Regional Distribution Details</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
               Detailed breakdown of node distribution
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
-                <TableRow className="border-purple-200 dark:border-gray-700">
-                  <TableHead className="text-purple-600 dark:text-purple-400">Region</TableHead>
-                  <TableHead className="text-purple-600 dark:text-purple-400">Nodes</TableHead>
-                  <TableHead className="text-purple-600 dark:text-purple-400">Percentage</TableHead>
+                <TableRow className="border-purple-200 dark:border-purple-800/30">
+                  <TableHead className="text-purple-600 dark:text-purple-300">Region</TableHead>
+                  <TableHead className="text-purple-600 dark:text-purple-300">Nodes</TableHead>
+                  <TableHead className="text-purple-600 dark:text-purple-300">Percentage</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {nodeDistribution.map((item) => (
-                  <TableRow key={item.region} className="border-purple-200 dark:border-gray-700">
+                  <TableRow key={item.region} className="border-purple-200 dark:border-purple-800/30">
                     <TableCell className="font-medium text-purple-700 dark:text-purple-300">{item.region}</TableCell>
                     <TableCell className="text-purple-600 dark:text-purple-400">{item.nodes}</TableCell>
                     <TableCell className="text-purple-600 dark:text-purple-400">{item.percentage.toFixed(1)}%</TableCell>

@@ -14,10 +14,19 @@ import {
 interface LoginRegisterModalProps {
   isOpen: boolean
   onClose: () => void
+  error: string | null
+  onSubmit: (email: string, password: string, isLogin: boolean) => void
 }
 
-export function LoginRegisterModal({ isOpen, onClose }: LoginRegisterModalProps) {
+export function LoginRegisterModal({ isOpen, onClose, error, onSubmit }: LoginRegisterModalProps) {
   const [isLogin, setIsLogin] = useState(true)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSubmit(email, password, isLogin)
+  }
 
   const toggleMode = () => setIsLogin(!isLogin)
 
@@ -32,40 +41,53 @@ export function LoginRegisterModal({ isOpen, onClose }: LoginRegisterModalProps)
               : "Create a new account to get started."}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              className="col-span-3 border-purple-200 dark:border-gray-700"
-              placeholder="Enter your email"
-            />
+        {error && (
+          <div className="text-red-500 text-sm mt-2">
+            {error}
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="password" className="text-right">
-              Password
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              className="col-span-3 border-purple-200 dark:border-gray-700"
-              placeholder="Enter your password"
-            />
+        )}
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                className="col-span-3 border-purple-200 dark:border-gray-700"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="password" className="text-right">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                className="col-span-3 border-purple-200 dark:border-gray-700"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col gap-4">
-          <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-            {isLogin ? "Log In" : "Register"}
-          </Button>
-          <Button variant="link" onClick={toggleMode} className="text-purple-600 hover:text-purple-700">
-            {isLogin
-              ? "Don't have an account? Register"
-              : "Already have an account? Log In"}
-          </Button>
-        </div>
+          <div className="flex flex-col gap-4">
+            <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+              {isLogin ? "Log In" : "Register"}
+            </Button>
+            <Button variant="link" onClick={toggleMode} className="text-purple-600 hover:text-purple-700">
+              {isLogin
+                ? "Don't have an account? Register"
+                : "Already have an account? Log In"}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   )

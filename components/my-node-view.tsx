@@ -92,37 +92,37 @@ export function MyNodeView() {
 
   const ChoiceView = () => (
     <div className="grid md:grid-cols-2 gap-6">
-      <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-400 transition-colors cursor-pointer"
+      <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm hover:border-purple-200 transition-colors cursor-pointer"
             onClick={() => window.open('/docs/node-registration', '_blank')}>
         <CardHeader>
-          <CardTitle className="flex items-center text-purple-700 dark:text-purple-300">
+          <CardTitle className="flex items-center text-gray-900 dark:text-white">
             <Book className="mr-2 h-5 w-5" />
             Register a New Node
           </CardTitle>
-          <CardDescription className="text-purple-600 dark:text-purple-400">
+          <CardDescription className="text-gray-500 dark:text-gray-400">
             Learn how to set up and register your node with our documentation
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-between items-center">
-          <p className="text-sm text-purple-600 dark:text-purple-400">Get started with node registration</p>
-          <ChevronRight className="h-5 w-5 text-purple-400 dark:text-purple-500" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Get started with node registration</p>
+          <ChevronRight className="h-5 w-5 text-purple-400" />
         </CardContent>
       </Card>
 
-      <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-400 transition-colors cursor-pointer"
+      <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm hover:border-purple-200 transition-colors cursor-pointer"
             onClick={() => setView('manage')}>
         <CardHeader>
-          <CardTitle className="flex items-center text-purple-700 dark:text-purple-300">
+          <CardTitle className="flex items-center text-gray-900 dark:text-white">
             <Settings className="mr-2 h-5 w-5" />
             Manage Existing Nodes
           </CardTitle>
-          <CardDescription className="text-purple-600 dark:text-purple-400">
+          <CardDescription className="text-gray-500 dark:text-gray-400">
             View and manage your registered nodes
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-between items-center">
-          <p className="text-sm text-purple-600 dark:text-purple-400">Access node management dashboard</p>
-          <ChevronRight className="h-5 w-5 text-purple-400 dark:text-purple-500" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Access node management dashboard</p>
+          <ChevronRight className="h-5 w-5 text-purple-400" />
         </CardContent>
       </Card>
     </div>
@@ -132,7 +132,7 @@ export function MyNodeView() {
     <div className="space-y-6">
       <Button 
         variant="ghost" 
-        className="mb-4 text-purple-600 hover:text-purple-700"
+        className="mb-4 text-purple-600 dark:text-purple-300 hover:text-purple-700"
         onClick={() => setView('choice')}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -158,10 +158,10 @@ export function MyNodeView() {
 
       {activeTab === 'notifications' && (
         <div className="space-y-6">
-          <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+          <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30">
             <CardHeader>
-              <CardTitle className="text-purple-700 dark:text-purple-300">Notifications</CardTitle>
-              <CardDescription className="text-purple-600 dark:text-purple-400">
+              <CardTitle className="text-gray-900 dark:text-white">Notifications</CardTitle>
+              <CardDescription className="text-gray-500 dark:text-gray-400">
                 Recent updates and alerts
               </CardDescription>
             </CardHeader>
@@ -182,10 +182,10 @@ export function MyNodeView() {
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
-                          <h4 className="font-medium text-purple-700 dark:text-purple-300">
+                          <h4 className="font-medium text-gray-900 dark:text-white">
                             {notification.title}
                           </h4>
-                          <p className="text-sm text-purple-600 dark:text-purple-400">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             {notification.message}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -226,27 +226,27 @@ export function MyNodeView() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                 <Input 
-                  className="pl-10 bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700" 
+                  className="pl-10 bg-white dark:bg-[#1A1C23] border-purple-200 dark:border-purple-800/30 dark:text-gray-300 dark:placeholder-gray-600 dark:text-gray-300 dark:placeholder-gray-600" 
                   placeholder="Search transactions..."
                 />
               </div>
 
               {/* Rewards Overview */}
-              <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+              <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-purple-700 dark:text-purple-300">5.23 TOMA</CardTitle>
-                  <CardDescription className="text-purple-600 dark:text-purple-400">
+                  <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">5.23 TOMA</CardTitle>
+                  <CardDescription className="text-gray-500 dark:text-gray-400">
                     Total Earnings
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="text-sm text-purple-600 dark:text-purple-400">Available to claim:</span>
-                      <span className="ml-2 font-medium text-purple-700 dark:text-purple-300">3.75 TOMA</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Available to claim:</span>
+                      <span className="ml-2 font-medium text-gray-900 dark:text-white">3.75 TOMA</span>
                     </div>
                     <Button 
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                      className="bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-800 dark:hover:bg-purple-900"
                       size="sm"
                     >
                       Claim TOMA
@@ -258,10 +258,10 @@ export function MyNodeView() {
               {/* Node Performance */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Node Uptime */}
-                <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+                <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center text-purple-700 dark:text-purple-300">
+                      <CardTitle className="flex items-center text-gray-900 dark:text-white">
                         <Clock className="mr-2 h-5 w-5" />
                         Node Uptime
                       </CardTitle>
@@ -273,84 +273,84 @@ export function MyNodeView() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-purple-600 dark:text-purple-400">Current uptime:</span>
-                      <span className="font-medium text-purple-700 dark:text-purple-300">14 days, 6 hours</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Current uptime:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">14 days, 6 hours</span>
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-purple-600 dark:text-purple-400">Uptime this month:</span>
-                        <span className="text-purple-700 dark:text-purple-300">99.8%</span>
+                        <span className="text-gray-500 dark:text-gray-400">Uptime this month:</span>
+                        <span className="text-gray-900 dark:text-white">99.8%</span>
                       </div>
-                      <Progress value={99.8} className="h-2 bg-purple-200 dark:bg-purple-900" />
+                      <Progress value={99.8} className="h-2 bg-purple-100" />
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Node Utilization Rate */}
-                <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+                <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30">
                   <CardHeader>
-                    <CardTitle className="flex items-center text-purple-700 dark:text-purple-300">
+                    <CardTitle className="flex items-center text-gray-900 dark:text-white">
                       <Activity className="mr-2 h-5 w-5" />
                       Node Utilization
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-purple-600 dark:text-purple-400">Current utilization:</span>
-                      <span className="font-medium text-purple-700 dark:text-purple-300">78%</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Current utilization:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">78%</span>
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-purple-600 dark:text-purple-400">Average this month:</span>
-                        <span className="text-purple-700 dark:text-purple-300">82%</span>
+                        <span className="text-gray-500 dark:text-gray-400">Average this month:</span>
+                        <span className="text-gray-900 dark:text-white">82%</span>
                       </div>
-                      <Progress value={82} className="h-2 bg-purple-200 dark:bg-purple-900" />
+                      <Progress value={82} className="h-2 bg-purple-100" />
                     </div>
-                    <div className="text-sm text-purple-600 dark:text-purple-400">
-                      Total tokens processed: <span className="font-medium text-purple-700 dark:text-purple-300">1,234,567</span>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      Total tokens processed: <span className="font-medium text-gray-900 dark:text-white">1,234,567</span>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
               {/* Recent Activity */}
-              <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+              <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30">
                 <CardHeader>
-                  <CardTitle className="text-purple-700 dark:text-purple-300">Recent Activity</CardTitle>
-                  <CardDescription className="text-purple-600 dark:text-purple-400">
+                  <CardTitle className="text-gray-900 dark:text-white">Recent Activity</CardTitle>
+                  <CardDescription className="text-gray-500 dark:text-gray-400">
                     Your latest completed and ongoing tasks
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-purple-200 dark:border-gray-700">
-                        <TableHead className="text-purple-600 dark:text-purple-400">Task Type</TableHead>
-                        <TableHead className="text-purple-600 dark:text-purple-400">Status</TableHead>
-                        <TableHead className="text-purple-600 dark:text-purple-400">Reward</TableHead>
-                        <TableHead className="text-purple-600 dark:text-purple-400">Epoch</TableHead>
-                        <TableHead className="text-purple-600 dark:text-purple-400">Tokens Processed</TableHead>
-                        <TableHead className="text-purple-600 dark:text-purple-400">Timestamp</TableHead>
+                      <TableRow className="border-purple-200 dark:border-purple-800/30">
+                        <TableHead className="text-gray-600 dark:text-gray-300">Task Type</TableHead>
+                        <TableHead className="text-gray-600 dark:text-gray-300">Status</TableHead>
+                        <TableHead className="text-gray-600 dark:text-gray-300">Reward</TableHead>
+                        <TableHead className="text-gray-600 dark:text-gray-300">Epoch</TableHead>
+                        <TableHead className="text-gray-600 dark:text-gray-300">Tokens Processed</TableHead>
+                        <TableHead className="text-gray-600 dark:text-gray-300">Timestamp</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {recentTasks.map((task) => (
-                        <TableRow key={task.id} className="border-purple-200 dark:border-gray-700">
-                          <TableCell className="text-gray-900 dark:text-gray-100">{task.type}</TableCell>
+                        <TableRow key={task.id} className="border-purple-200 dark:border-purple-800/30">
+                          <TableCell className="font-medium text-gray-900 dark:text-white">{task.type}</TableCell>
                           <TableCell>
                             <span className={cn(
                               "px-2 py-1 rounded-full text-xs font-medium",
                               task.status === "Completed" 
-                                ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300" 
-                                : "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300"
+                                ? "bg-green-100 text-green-800" 
+                                : "bg-yellow-100 text-yellow-800"
                             )}>
                               {task.status}
                             </span>
                           </TableCell>
-                          <TableCell className="text-gray-900 dark:text-gray-100">{task.reward}</TableCell>
-                          <TableCell className="text-gray-900 dark:text-gray-100">{task.epoch}</TableCell>
-                          <TableCell className="text-gray-900 dark:text-gray-100">{task.tokensProcessed.toLocaleString()}</TableCell>
-                          <TableCell className="text-gray-900 dark:text-gray-100">{task.timestamp}</TableCell>
+                          <TableCell className="font-medium text-gray-900 dark:text-white">{task.reward}</TableCell>
+                          <TableCell className="font-medium text-gray-900 dark:text-white">{task.epoch}</TableCell>
+                          <TableCell className="font-medium text-gray-900 dark:text-white">{task.tokensProcessed.toLocaleString()}</TableCell>
+                          <TableCell className="font-medium text-gray-900 dark:text-white">{task.timestamp}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -361,16 +361,16 @@ export function MyNodeView() {
           )}
 
       {activeTab === 'disputes' && (
-        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30">
           <CardHeader>
-            <CardTitle className="text-purple-700 dark:text-purple-300">Dispute Management</CardTitle>
-            <CardDescription className="text-purple-600 dark:text-purple-400">
+            <CardTitle className="text-gray-900 dark:text-white">Dispute Management</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
               Handle and resolve disputes related to your node operations
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-purple-600 dark:text-purple-400">No active disputes at this time.</p>
-            <Button className="mt-4 bg-purple-600 hover:bg-purple-700 text-white">
+            <p className="text-gray-500 dark:text-gray-400">No active disputes at this time.</p>
+            <Button className="mt-4 bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-800 dark:hover:bg-purple-900">
               Open New Dispute
             </Button>
           </CardContent>
@@ -383,44 +383,44 @@ export function MyNodeView() {
                 <Button
                   variant={historyView === 'rewards' ? 'default' : 'outline'}
                   onClick={() => setHistoryView('rewards')}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  className="bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-800 dark:hover:bg-purple-900"
                 >
                   Reward History
                 </Button>
                 <Button
                   variant={historyView === 'tasks' ? 'default' : 'outline'}
                   onClick={() => setHistoryView('tasks')}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  className="bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-800 dark:hover:bg-purple-900"
                 >
                   Task History
                 </Button>
               </div>
 
               {historyView === 'rewards' && (
-                <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+                <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30">
                   <CardHeader>
-                    <CardTitle className="text-purple-700 dark:text-purple-300">Reward History</CardTitle>
-                    <CardDescription className="text-purple-600 dark:text-purple-400">
+                    <CardTitle className="text-gray-900 dark:text-white">Reward History</CardTitle>
+                    <CardDescription className="text-gray-500 dark:text-gray-400">
                       Your recent TOMA rewards
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Table>
                       <TableHeader>
-                        <TableRow className="border-purple-200 dark:border-gray-700">
-                          <TableHead className="text-purple-600 dark:text-purple-400">Amount</TableHead>
-                          <TableHead className="text-purple-600 dark:text-purple-400">Date</TableHead>
-                          <TableHead className="text-purple-600 dark:text-purple-400">Epoch</TableHead>
-                          <TableHead className="text-purple-600 dark:text-purple-400">Reason</TableHead>
+                        <TableRow className="border-purple-200 dark:border-purple-800/30">
+                          <TableHead className="text-gray-600 dark:text-gray-300">Amount</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-300">Date</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-300">Epoch</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-300">Reason</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {rewardHistory.map((reward) => (
-                          <TableRow key={reward.id} className="border-purple-200 dark:border-gray-700">
-                            <TableCell className="font-medium text-gray-900 dark:text-gray-100">{reward.amount}</TableCell>
-                            <TableCell className="text-gray-900 dark:text-gray-100">{reward.timestamp}</TableCell>
-                            <TableCell className="text-gray-900 dark:text-gray-100">{reward.epoch}</TableCell>
-                            <TableCell className="text-gray-900 dark:text-gray-100">{reward.reason}</TableCell>
+                          <TableRow key={reward.id} className="border-purple-200 dark:border-purple-800/30">
+                            <TableCell className="font-medium text-gray-900 dark:text-white">{reward.amount}</TableCell>
+                            <TableCell className="font-medium text-gray-900 dark:text-white">{reward.timestamp}</TableCell>
+                            <TableCell className="font-medium text-gray-900 dark:text-white">{reward.epoch}</TableCell>
+                            <TableCell className="font-medium text-gray-900 dark:text-white">{reward.reason}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -430,32 +430,32 @@ export function MyNodeView() {
               )}
 
               {historyView === 'tasks' && (
-                <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+                <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30">
                   <CardHeader>
-                    <CardTitle className="text-purple-700 dark:text-purple-300">Task History</CardTitle>
-                    <CardDescription className="text-purple-600 dark:text-purple-400">
+                    <CardTitle className="text-gray-900 dark:text-white">Task History</CardTitle>
+                    <CardDescription className="text-gray-500 dark:text-gray-400">
                       Your recent completed tasks
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Table>
                       <TableHeader>
-                        <TableRow className="border-purple-200 dark:border-gray-700">
-                          <TableHead className="text-purple-600 dark:text-purple-400">Task Type</TableHead>
-                          <TableHead className="text-purple-600 dark:text-purple-400">Reward</TableHead>
-                          <TableHead className="text-purple-600 dark:text-purple-400">Epoch</TableHead>
-                          <TableHead className="text-purple-600 dark:text-purple-400">Tokens Processed</TableHead>
-                          <TableHead className="text-purple-600 dark:text-purple-400">Timestamp</TableHead>
+                        <TableRow className="border-purple-200 dark:border-purple-800/30">
+                          <TableHead className="text-gray-600 dark:text-gray-300">Task Type</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-300">Reward</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-300">Epoch</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-300">Tokens Processed</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-300">Timestamp</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {recentTasks.map((task) => (
-                          <TableRow key={task.id} className="border-purple-200 dark:border-gray-700">
-                            <TableCell className="text-gray-900 dark:text-gray-100">{task.type}</TableCell>
-                            <TableCell className="text-gray-900 dark:text-gray-100">{task.reward}</TableCell>
-                            <TableCell className="text-gray-900 dark:text-gray-100">{task.epoch}</TableCell>
-                            <TableCell className="text-gray-900 dark:text-gray-100">{task.tokensProcessed.toLocaleString()}</TableCell>
-                            <TableCell className="text-gray-900 dark:text-gray-100">{task.timestamp}</TableCell>
+                          <TableRow key={task.id} className="border-purple-200 dark:border-purple-800/30">
+                            <TableCell className="font-medium text-gray-900 dark:text-white">{task.type}</TableCell>
+                            <TableCell className="font-medium text-gray-900 dark:text-white">{task.reward}</TableCell>
+                            <TableCell className="font-medium text-gray-900 dark:text-white">{task.epoch}</TableCell>
+                            <TableCell className="font-medium text-gray-900 dark:text-white">{task.tokensProcessed.toLocaleString()}</TableCell>
+                            <TableCell className="font-medium text-gray-900 dark:text-white">{task.timestamp}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -468,10 +468,10 @@ export function MyNodeView() {
 
       {(activeTab === 'tasks') && (
   <div className="space-y-6">
-    <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+    <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30">
       <CardHeader>
-        <CardTitle className="text-purple-700 dark:text-purple-300">Model Demand</CardTitle>
-        <CardDescription className="text-purple-600 dark:text-purple-400">
+        <CardTitle className="text-gray-900 dark:text-white">Model Demand</CardTitle>
+        <CardDescription className="text-gray-500 dark:text-gray-400">
           Current demand for different models across the network
         </CardDescription>
       </CardHeader>
@@ -560,16 +560,16 @@ export function MyNodeView() {
       </CardContent>
     </Card>
 
-    <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+    <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30">
       <CardHeader>
-        <CardTitle className="text-purple-700 dark:text-purple-300">Hardware Matchmaking</CardTitle>
-        <CardDescription className="text-purple-600 dark:text-purple-400">
+        <CardTitle className="text-gray-900 dark:text-white">Hardware Matchmaking</CardTitle>
+        <CardDescription className="text-gray-500 dark:text-gray-400">
           Find compatible models for your hardware
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-purple-700 dark:text-purple-300">Select Your Hardware</Label>
+          <Label className="text-sm font-medium text-gray-900 dark:text-white">Select Your Hardware</Label>
           <Select
             value={selectedHardware}
             onValueChange={setSelectedHardware}
@@ -589,14 +589,14 @@ export function MyNodeView() {
 
         {selectedHardware && (
           <div className="space-y-4">
-            <h4 className="font-medium text-purple-700 dark:text-purple-300">Compatible Models:</h4>
+            <h4 className="font-medium text-gray-900 dark:text-white">Compatible Models:</h4>
             <div className="grid gap-2">
               {hardwareModelMapping[selectedHardware].map((model) => (
                 <div 
                   key={model}
                   className="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/50 border border-purple-200 dark:border-purple-800"
                 >
-                  <span className="text-purple-700 dark:text-purple-300">{model}</span>
+                  <span className="text-gray-900 dark:text-white">{model}</span>
                 </div>
               ))}
             </div>
@@ -608,15 +608,15 @@ export function MyNodeView() {
 )}
 
       {(activeTab !== 'rewards' && activeTab !== 'disputes' && activeTab !== 'history' && activeTab !== 'notifications' && activeTab !== 'tasks') && (
-        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-gray-700">
+        <Card className="bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30">
           <CardHeader>
-            <CardTitle className="text-purple-700 dark:text-purple-300">{tabs.find(tab => tab.id === activeTab)?.label}</CardTitle>
-            <CardDescription className="text-purple-600 dark:text-purple-400">
+            <CardTitle className="text-gray-900 dark:text-white">{tabs.find(tab => tab.id === activeTab)?.label}</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
               This section is under development.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-purple-600 dark:text-purple-400">Content for {tabs.find(tab => tab.id === activeTab)?.label} will be available soon.</p>
+            <p className="text-gray-500 dark:text-gray-400">Content for {tabs.find(tab => tab.id === activeTab)?.label} will be available soon.</p>
           </CardContent>
         </Card>
       )}
@@ -624,7 +624,7 @@ export function MyNodeView() {
   )
 
   return (
-    <div>
+    <div className="dark:bg-[#1A1C23]">
       {view === 'choice' ? <ChoiceView /> : <ManageView />}
     </div>
   )
