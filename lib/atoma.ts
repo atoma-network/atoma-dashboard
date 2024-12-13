@@ -101,3 +101,7 @@ export const getComputeUnitsProcessed = async (): Promise<ComputedUnitsProcessed
 export const getLatency = async (): Promise<LatencyResponse[]> => {
   return await fetch(`${proxy_url}/latency?hours=24`).then((response) => response.json());
 }
+
+export const getNodesDistribution = async (): Promise<{country:string, count:number }[]> => {
+  return await fetch(`${proxy_url}/get_nodes_distribution`).then((response) => response.json());
+}
