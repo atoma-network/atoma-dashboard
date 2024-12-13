@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import {
   getComputeUnitsProcessed,
   getLatency,
+  getNodesDistribution,
   getSubscriptions,
   getTasks,
   type ComputedUnitsProcessedResponse,
@@ -568,7 +569,7 @@ export function NodeStatusView() {
           <CardContent>
             <div className="w-full h-[400px] relative overflow-hidden rounded-lg">
               <img 
-                src="/placeholder.svg?height=400&width=600" 
+                src="/world.svg" 
                 alt="Global node distribution map"
                 className="w-full h-full object-cover"
               />
