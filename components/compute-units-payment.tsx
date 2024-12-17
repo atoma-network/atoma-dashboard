@@ -89,6 +89,10 @@ curl https://api.atoma.ai/v1/chat/completions \\
         {step === 'payment' && (
           <div className="space-y-4">
             <Button
+              onClick={() => handlePaymentSelection('USDC')}
+              className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+            ></Button>
+            {/* <Button
               onClick={() => handlePaymentSelection('stripe')}
               className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
             >
@@ -108,7 +112,7 @@ curl https://api.atoma.ai/v1/chat/completions \\
             >
               <Paypal className="mr-2 h-5 w-5" />
               Pay with PayPal
-            </Button>
+            </Button> */}
           </div>
         )}
         {step === 'api' && (

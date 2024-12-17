@@ -8,16 +8,17 @@ import { Line, LineChart, Pie, PieChart, Legend, XAxis, YAxis, Tooltip, Cell } f
 import { ChartContainer } from "@/components/ui/chart";
 import { useEffect, useState } from "react";
 import {
-  getAllStacks,
   getComputeUnitsProcessed,
   getLatency,
   getNodesDistribution,
+  getStatsStacks,
   getSubscriptions,
   getTasks,
   type ComputedUnitsProcessedResponse,
   type LatencyResponse,
   type NodeSubscription,
   type Stack,
+  type StatsStack,
   type Task,
 } from "@/lib/atoma";
 import {
@@ -26,7 +27,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import StackHistogram from "./StacksHistogram";
 
 const stats = [
   {
@@ -160,16 +160,20 @@ export function NodeStatusView() {
   const [activityModels, setActivityModels] = useState<{ model_name: string; color: string }[]>([]);
   const [networkActivityData, setNetworkActivityData] = useState<any[]>([]);
   const [modelDistribution, setModelDistruibution] = useState<{ model: string, nodesRunning: number }[]>([]);
-  const [allStacks, setAllStacks] = useState<Stack[]>([]);
+  const [statsStack, setStatsStacks] = useState<any[]>([]);
   // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
   // const [latency, setLatency] = useState<LatencyResponse[]>([]);
   console.log("networkActivityData", networkActivityData);
   console.log("computeUnitsData", computeUnitsData);
   console.log("activityModels", activityModels);
-  console.log("allStacks", allStacks);
+  console.log("statsStack", statsStack);
   useEffect(() => {
-    getAllStacks().then((stacks) => {
-      setAllStacks(stacks);
+    getStatsStacks().then((stacks) => {
+      setStatsStacks(stacks.map((data: StatsStack) => ({
+        time: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        bought: data.num_compute_units,
+        settled: data.settled_num_compute_units,
+      })));
     });
     getComputeUnitsProcessed().then((computeUnits: ComputedUnitsProcessedResponse[]) => {
       // setComputeUnits(computeUnits);
@@ -482,15 +486,70 @@ export function NodeStatusView() {
             </ChartContainer>
           </CardContent>
         </Card>
+        {/* Stacks Bought/Settled Section */}
         <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Stacks bought/settled over time</CardTitle>
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Stacks Activity</CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
-              Stack bought/settled over time
+              Stacks activity  over 24 hours
             </CardDescription>
           </CardHeader>
           <CardContent>
-                  <StackHistogram data={allStacks} />
+            <ChartContainer
+              config={{ bought: { label: "Bought", color:"hsl(var(--chart-1))" },settled: { label: "Settled", color:"hsl(var(--chart-2))" } }}
+              className="h-[300px] w-full"
+            >
+              <LineChart
+                data={statsStack}
+                margin={{ top: 5, right: 0, bottom: 25, left: 20 }}
+              >
+                <XAxis 
+                  dataKey="time" 
+                  tick={{ fill: 'var(--purple-600)' }}
+                  scale="point"
+                  interval={2}
+                  padding={{ left: 10, right: 30 }}
+                />
+                <YAxis
+                  tick={{ fill: 'var(--purple-600)' }}
+                  tickFormatter={(value) => `${value / 1000}k`}
+                />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
+                          <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
+                          {payload.map((entry, index) => (
+                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${entry.value.toLocaleString()}`}</p>
+                          ))}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Legend 
+                  verticalAlign="top" 
+                  align="right"
+                  wrapperStyle={{ paddingBottom: "20px" }}
+                />
+                  <Line
+                    key={"bought"}
+                    type="monotone"
+                    dataKey={"bought"}
+                    stroke={"hsl(var(--chart-1))"}
+                    strokeWidth={2}
+                  />
+                  <Line
+                    key={"settled"}
+                    type="monotone"
+                    dataKey={"settled"}
+                    stroke={"hsl(var(--chart-2))"}
+                    strokeWidth={2}
+                  />
+              </LineChart>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>

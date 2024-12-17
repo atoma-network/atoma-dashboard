@@ -27,7 +27,7 @@ import { Slider } from "@/components/ui/slider"
 import { LoginRegisterModal } from "./login-register-modal"
 import { cn } from "@/lib/utils"
 import { ComputeUnitsPayment } from "./compute-units-payment"
-import { generateApiKey, listApiKeys, revokeApiToken } from "@/lib/atoma"
+import { generateApiKey, getNodesDistribution, getSubscriptions, getTasks, listApiKeys, revokeApiToken, type NodeSubscription, type Task } from "@/lib/atoma"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
@@ -160,10 +160,54 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
   const [isComputeUnitsModalOpen, setIsComputeUnitsModalOpen] = useState(false)
   const [selectedModelForPayment, setSelectedModelForPayment] = useState<typeof modelOptions[0] | null>(null)
   const [apiKeys, setApiKeys] = useState<string[] | undefined>(); 
+  const [subscribers, setSubscribers] = useState<NodeSubscription[] | undefined>();
+  const [tasks, setTasks] = useState<Task[] | undefined>();
+  const [models, setModels] = useState<{ model: string, subscription: NodeSubscription }[]>();
+  const [modelOptions, setModelOptions] = useState<any[]>([]);
 
   useEffect(() => {
     listApiKeys().then((keys) => setApiKeys(keys))
+    getSubscriptions().then((subscriptions) => {
+      setSubscribers(subscriptions);
+    });
+    getTasks().then((tasks) => {
+      setTasks(tasks)
+    });
   }, []);
+
+  useEffect(() => {
+    if (!subscribers || !tasks) return;
+    console.log('SUBSCRIPTIONS', subscribers);
+    console.log('TASKS', tasks);
+    const availableModels : Record<string, NodeSubscription> = {}
+    for (const task of tasks) {
+      if (!task.model_name) {
+        continue;
+      }
+      const subs_for_this_task = subscribers.filter((subscription) => subscription.task_small_id === task.task_small_id && subscription.valid);  
+      if (subs_for_this_task.length === 0) {
+        // No valid subscriptions for this task
+        continue;
+      }
+      if (task.model_name in availableModels) {
+        availableModels[task.model_name] = subs_for_this_task.reduce((min, item) => item.price_per_compute_unit < min.price_per_compute_unit ? item : min, availableModels[task.model_name])
+      } else {
+        availableModels[task.model_name] = subs_for_this_task.reduce((min, item) => item.price_per_compute_unit < min.price_per_compute_unit ? item : min, subs_for_this_task[0])
+      }
+    }
+    setModelOptions(Object.keys(availableModels).map((model) => (
+      {
+        id: model,
+        name: model,
+        features: [],
+        price: availableModels[model].price_per_compute_unit / availableModels[model].max_num_compute_units,
+        status: 'Available'
+      })
+    ))
+    setModels(Object.keys(availableModels).map((model) => {
+      return {model, subscription: availableModels[model]}
+    }))
+  }, [subscribers, tasks])
 
   const addApiKey = () => {
     generateApiKey().then(() => listApiKeys().then((keys) => setApiKeys(keys)));

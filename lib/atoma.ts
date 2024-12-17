@@ -20,6 +20,15 @@ export interface Task {
   minimum_reputation_score?: number; // Optional minimum reputation score required for the task
 }
 
+export interface StatsStack {
+  // Timestamp of the stats
+  timestamp: string; // ISO 8601 formatted date string
+  // Number of compute units acquired
+  num_compute_units: number;
+  // Number of compute units processed
+  settled_num_compute_units: number;
+}
+
 export interface Stack {
   // Address of the owner of the stack
   owner: string;
@@ -126,7 +135,12 @@ export const listApiKeys = async (): Promise<string[]> => {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("access_token")}`,
     },
-  }).then((response) => response.json());
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    response.json()
+  });
 }
 
 export const getComputeUnitsProcessed = async (): Promise<ComputedUnitsProcessedResponse[]> => {
@@ -141,6 +155,6 @@ export const getNodesDistribution = async (): Promise<{country:string, count:num
   return await fetch(`${proxy_url}/get_nodes_distribution`).then((response) => response.json());
 }
 
-export const getAllStacks = async (): Promise<Stack[]> => {
-  return await fetch(`${proxy_url}/get_all_stacks`).then((response) => response.json());
+export const getStatsStacks = async (): Promise<StatsStack[]> => {
+  return await fetch(`${proxy_url}/get_stats_stacks?hours=24`).then((response) => response.json());
 }
