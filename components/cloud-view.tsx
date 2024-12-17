@@ -26,6 +26,7 @@ import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { LoginRegisterModal } from "./login-register-modal"
 import { cn } from "@/lib/utils"
+import { ComputeUnitsPayment } from "./compute-units-payment"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
@@ -156,15 +157,17 @@ export function CloudView() {
   const [privacyEnabled, setPrivacyEnabled] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
+  const [isComputeUnitsModalOpen, setIsComputeUnitsModalOpen] = useState(false)
+  const [selectedModelForPayment, setSelectedModelForPayment] = useState<typeof modelOptions[0] | null>(null)
 
   const getAdjustedPrice = (basePrice: number) => {
     const pricePerMillion = basePrice * 1000 // Convert from per 1K to per 1M
     return privacyEnabled ? pricePerMillion * 1.05 : pricePerMillion
   }
 
-  const handleStartUsing = () => {
-    setIsLoginModalOpen(true)
-    setLoginError(null)
+  const handleStartUsing = (model: typeof modelOptions[0]) => {
+    setSelectedModelForPayment(model)
+    setIsComputeUnitsModalOpen(true)
   }
 
   const handleLoginRegister = (email: string, password: string, isLogin: boolean) => {
@@ -266,8 +269,7 @@ export function CloudView() {
               <Button 
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-800 dark:hover:bg-purple-900"
                 onClick={() => {
-                  setIsLoginModalOpen(true)
-                  setLoginError(null)
+                  handleStartUsing(model)
                 }}
               >
                 Start Using
@@ -551,6 +553,15 @@ export function CloudView() {
         error={loginError}
         onSubmit={handleLoginRegister}
       />
+      {isComputeUnitsModalOpen && selectedModelForPayment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <ComputeUnitsPayment
+            modelName={selectedModelForPayment.name}
+            pricePerUnit={selectedModelForPayment.price}
+            onClose={() => setIsComputeUnitsModalOpen(false)}
+          />
+        </div>
+      )}
     </div>
   )
 }
