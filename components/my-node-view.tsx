@@ -9,7 +9,7 @@ import { Bell, ClipboardList, PlusCircle, Settings, BarChart3, Search, Book, Che
 import { cn } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Bar, BarChart, Line, LineChart, Legend, XAxis } from "recharts"
+import { Line, LineChart, Legend, XAxis } from "recharts"
 import { ChartContainer } from "@/components/ui/chart"
 import { Label } from "@/components/ui/label"
 
@@ -76,7 +76,7 @@ const modelDemand = [
   { time: "2359", llama405B: 523, llama3B: 789, gpt4: 312, bert: 156, t5: 245 },
 ]
 
-const hardwareModelMapping = {
+const hardwareModelMapping : Record<string, string[]> = {
   "H100": ["Llama 3.1 405B", "GPT-4", "Mixtral 8x7B"],
   "A100": ["Llama 3.1 405B", "Llama 3.2 3B", "GPT-4", "Mixtral 8x7B"],
   "A6000": ["Llama 3.2 3B", "BERT-Large", "T5-Base"],

@@ -33,7 +33,7 @@ export function AskUtopia() {
                 <div className="flex gap-2 items-start">
                   <Bot className="w-6 h-6 text-purple-600 dark:text-purple-400 mt-1" />
                   <p className="bg-purple-100 dark:bg-purple-900 p-2 rounded-lg text-sm">
-                    Hello! I'm Utopia, your AI assistant. How can I help you today?
+                    Hello! I&apos;m Utopia, your AI assistant. How can I help you today?
                   </p>
                 </div>
               </div>

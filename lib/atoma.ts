@@ -139,7 +139,7 @@ export const listApiKeys = async (): Promise<string[]> => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    response.json()
+    return response.json()
   });
 }
 

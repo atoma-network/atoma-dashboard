@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, CreditCard, ShoppingCartIcon as Paypal, SquareStackIcon as Stripe, X } from 'lucide-react'
+import { ArrowRight, X } from 'lucide-react'
 
 interface ComputeUnitsPaymentProps {
   modelName: string
@@ -13,7 +13,6 @@ interface ComputeUnitsPaymentProps {
 export function ComputeUnitsPayment({ modelName, pricePerUnit, onClose }: ComputeUnitsPaymentProps) {
   const [step, setStep] = useState<'units' | 'payment' | 'api'>('units')
   const [computeUnits, setComputeUnits] = useState<number>(1000)
-  const [selectedPayment, setSelectedPayment] = useState<string | null>(null)
 
   const handleNextStep = () => {
     if (step === 'units') {
@@ -24,7 +23,6 @@ export function ComputeUnitsPayment({ modelName, pricePerUnit, onClose }: Comput
   }
 
   const handlePaymentSelection = (method: string) => {
-    setSelectedPayment(method)
     // Here you would implement the actual payment logic
     console.log(`Selected payment method: ${method}`)
     setStep('api')
@@ -128,7 +126,7 @@ curl https://api.atoma.ai/v1/chat/completions \\
             </pre>
             <div className="mt-4">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Remember to replace 'YOUR_API_KEY' with the actual API key provided in your account settings.
+                Remember to replace &apos;YOUR_API_KEY&apos; with the actual API key provided in your account settings.
               </p>
             </div>
           </div>

@@ -3,78 +3,24 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Users, Server, BarChartIcon as ChartBar, Cpu, Timer, ArrowUpDown, Info } from "lucide-react";
+import { Users, Server, BarChartIcon as ChartBar, Cpu, Timer, ArrowUpDown} from "lucide-react";
 import { Line, LineChart, Pie, PieChart, Legend, XAxis, YAxis, Tooltip, Cell } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
 import { useEffect, useState } from "react";
 import {
   getComputeUnitsProcessed,
   getLatency,
-  getNodesDistribution,
+  // getNodesDistribution,
   getStatsStacks,
   getSubscriptions,
   getTasks,
   type ComputedUnitsProcessedResponse,
   type LatencyResponse,
   type NodeSubscription,
-  type Stack,
   type StatsStack,
   type Task,
 } from "@/lib/atoma";
-import {
-  Tooltip as UITooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-
-const stats = [
-  {
-    title: "Total Nodes",
-    value: "2,623",
-    description: "Across all networks",
-    icon: Server
-  },
-  {
-    title: "Nodes Online",
-    value: "1,351",
-    description: "Currently active",
-    icon: Users
-  },
-  {
-    title: "Models Running",
-    value: "12",
-    description: "Different model types",
-    icon: ChartBar
-  },
-  {
-    title: "Compute Units",
-    value: "8.2M",
-    description: "Past 24 hours",
-    icon: Cpu
-  },
-  {
-    title: "Avg Latency",
-    value: "42ms",
-    description: "Last 5 minutes",
-    icon: Timer,
-    tooltip: "Average time taken to receive the first token of a response in the last 5 minutes."
-  },
-{
-    title: "Throughput",
-    value: "850K",
-    description: "Requests/minute",
-    icon: ArrowUpDown
-}
-]
-
-const modelDistribution = [
-  { model: "Llama 3.1 405B", nodesRunning: 523 },
-  { model: "Llama 3.2 3B", nodesRunning: 789 },
-  { model: "GPT-4", nodesRunning: 312 },
-  { model: "BERT-Large", nodesRunning: 156 },
-  { model: "T5-Base", nodesRunning: 245 }
-]
+import Image from "next/image";
 
 const nodeDistribution = [
   { region: "North America", nodes: 856, percentage: 32.6 },
@@ -84,35 +30,6 @@ const nodeDistribution = [
   { region: "Africa", nodes: 215, percentage: 8.2 }
 ]
 
-const networkActivityData = [
-  { time: "00:00", llama: 1200, gpt4: 800, mixtral: 400 },
-  { time: "02:00", llama: 1050, gpt4: 850, mixtral: 600 },
-  { time: "04:00", llama: 900, gpt4: 950, mixtral: 850 },
-  { time: "06:00", llama: 1100, gpt4: 1100, mixtral: 700 },
-  { time: "08:00", llama: 1400, gpt4: 1400, mixtral: 500 },
-  { time: "10:00", llama: 1500, gpt4: 1300, mixtral: 900 },
-  { time: "12:00", llama: 1600, gpt4: 1100, mixtral: 1600 },
-  { time: "14:00", llama: 1550, gpt4: 1300, mixtral: 1500 },
-  { time: "16:00", llama: 1500, gpt4: 1500, mixtral: 1300 },
-  { time: "18:00", llama: 1300, gpt4: 1350, mixtral: 1200 },
-  { time: "20:00", llama: 1100, gpt4: 1200, mixtral: 1100 },
-  { time: "22:00", llama: 1200, gpt4: 1000, mixtral: 1050 },
-]
-
-const computeUnitsData = [
-  { time: "00:00", units: 280000 },
-  { time: "02:00", units: 300000 },
-  { time: "04:00", units: 320000 },
-  { time: "06:00", units: 380000 },
-  { time: "08:00", units: 450000 },
-  { time: "10:00", units: 500000 },
-  { time: "12:00", units: 520000 },
-  { time: "14:00", units: 510000 },
-  { time: "16:00", units: 480000 },
-  { time: "18:00", units: 420000 },
-  { time: "20:00", units: 380000 },
-  { time: "22:00", units: 360000 },
-]
 
 export function NodeStatusView() {
   const [stats, setStats] = useState([
@@ -155,12 +72,12 @@ export function NodeStatusView() {
   ]);
   const [subscriptions, setSubscriptions] = useState<NodeSubscription[] | undefined>();
   const [tasks, setTasks] = useState<Task[] | undefined>();
-  const [subscribers, setSubscribers] = useState<{ model_name: string; nodesRunning: number }[]>();
+  // const [subscribers, setSubscribers] = useState<{ model_name: string; nodesRunning: number }[]>();
   const [computeUnitsData, setComputeUnitsData] = useState<{ time: string; units: number }[]>([]);
   const [activityModels, setActivityModels] = useState<{ model_name: string; color: string }[]>([]);
-  const [networkActivityData, setNetworkActivityData] = useState<any[]>([]);
+  const [networkActivityData, setNetworkActivityData] = useState<unknown[]>([]);
   const [modelDistribution, setModelDistruibution] = useState<{ model: string, nodesRunning: number }[]>([]);
-  const [statsStack, setStatsStacks] = useState<any[]>([]);
+  const [statsStack, setStatsStacks] = useState<unknown[]>([]);
   // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
   // const [latency, setLatency] = useState<LatencyResponse[]>([]);
   console.log("networkActivityData", networkActivityData);
@@ -188,7 +105,7 @@ export function NodeStatusView() {
         }))
       );
       setActivityModels(
-        Array.from(new Set(computeUnits.map((data, i) => data.model_name))).map((model_name, i) => ({
+        Array.from(new Set(computeUnits.map((data) => data.model_name))).map((model_name, i) => ({
           model_name: model_name,
           color: `hsl(var(--chart-${i + 1}))`,
         }))
@@ -205,7 +122,7 @@ export function NodeStatusView() {
         .sort()
         .map((key) => ({
           time: new Date(key).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          ...group_by_time[key],
+          data : group_by_time[key],
         }));
       console.log("sortedGroupByTime", sortedGroupByTime);
 
@@ -213,7 +130,7 @@ export function NodeStatusView() {
       setComputeUnitsData(
         sortedGroupByTime.map((data) => ({
           time: data.time,
-          units: Object.keys(data).reduce((sum, key) => (key !== "time" ? sum + data[key] : sum), 0),
+          units: Object.keys(data.data).reduce((sum, key) => sum + data.data[key] , 0),
         }))
       );
       setStats((prevStats) => [
@@ -306,7 +223,7 @@ export function NodeStatusView() {
         (subscription) => subscription.task_small_id === task.task_small_id && subscription.valid
       ).length;
     }
-    setSubscribers(Object.entries(subscribers).map(([model_name, nodesRunning]) => ({ model_name, nodesRunning })));
+    // setSubscribers(Object.entries(subscribers).map(([model_name, nodesRunning]) => ({ model_name, nodesRunning })));
     setModelDistruibution(Object.entries(subscribers).map(([model, nodesRunning]) => ({ model, nodesRunning })));
   }, [tasks, subscriptions]);
   return (
@@ -318,7 +235,7 @@ export function NodeStatusView() {
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 {stat.title}
-                {stat.tooltip && (
+                {/* {stat.tooltip && (
                   <TooltipProvider>
                     <UITooltip>
                       <TooltipTrigger asChild>
@@ -329,7 +246,7 @@ export function NodeStatusView() {
                       </TooltipContent>
                     </UITooltip>
                   </TooltipProvider>
-                )}
+                )} */}
               </CardTitle>
               <stat.icon className="h-4 w-4 text-purple-500 dark:text-purple-400" />
             </CardHeader>
@@ -401,7 +318,7 @@ export function NodeStatusView() {
                       return (
                         <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
                           <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
-                          <p className="text-purple-600 dark:text-purple-400">{`Units: ${payload[0].value.toLocaleString()}`}</p>
+                          <p className="text-purple-600 dark:text-purple-400">{`Units: ${payload?.[0]?.value?.toLocaleString()}`}</p>
                         </div>
                       );
                     }
@@ -460,7 +377,7 @@ export function NodeStatusView() {
                         <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
                           <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
                           {payload.map((entry, index) => (
-                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${entry.value.toLocaleString()}`}</p>
+                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${entry?.value?.toLocaleString()}`}</p>
                           ))}
                         </div>
                       );
@@ -521,7 +438,7 @@ export function NodeStatusView() {
                         <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
                           <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
                           {payload.map((entry, index) => (
-                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${entry.value.toLocaleString()}`}</p>
+                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${entry?.value?.toLocaleString()}`}</p>
                           ))}
                         </div>
                       );
@@ -645,10 +562,11 @@ export function NodeStatusView() {
           </CardHeader>
           <CardContent>
             <div className="w-full h-[400px] relative overflow-hidden rounded-lg">
-              <img 
+              <Image 
                 src="/world.svg" 
                 alt="Global node distribution map"
-                className="w-full h-full object-cover"
+                layout="fill"
+                objectFit="cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
               <div className="absolute bottom-4 left-4 right-4 text-white">
