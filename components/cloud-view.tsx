@@ -152,9 +152,8 @@ const apiEndpoints = [
   { name: 'Audio Transcription', endpoint: '/v1/audio/transcriptions', method: 'POST' },
 ]
 
-export function CloudView() {
+export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, setIsLoggedIn:(isLoggedIn: boolean) => void }) {
   const [activeTab, setActiveTab] = useState<TabType>('compute')
-  const [selectedModel, setSelectedModel] = useState(modelOptions[0])
   const [privacyEnabled, setPrivacyEnabled] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
@@ -183,19 +182,6 @@ export function CloudView() {
   const handleStartUsing = (model: typeof modelOptions[0]) => {
     setSelectedModelForPayment(model)
     setIsComputeUnitsModalOpen(true)
-  }
-
-  const handleLoginRegister = (email: string, password: string, isLogin: boolean) => {
-    // This is a mock implementation. In a real app, you'd call your API here.
-    if (email === "user@example.com" && password === "password") {
-      // Successful login/register
-      setIsLoginModalOpen(false)
-      setLoginError(null)
-      // Here you would typically set the user state or redirect
-    } else {
-      // Failed login/register
-      setLoginError(isLogin ? "Invalid email or password" : "Registration failed. Please try again.")
-    }
   }
 
   const ComputeTab = () => (
@@ -284,7 +270,12 @@ export function CloudView() {
               <Button 
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-800 dark:hover:bg-purple-900"
                 onClick={() => {
-                  handleStartUsing(model)
+                  if (isLoggedIn) { 
+                    handleStartUsing(model)
+                  }  else {
+                    setIsLoginModalOpen(true)
+                    setLoginError(null)
+                  }
                 }}
               >
                 Start Using
@@ -573,8 +564,7 @@ export function CloudView() {
           setIsLoginModalOpen(false)
           setLoginError(null)
         }}
-        error={loginError}
-        onSubmit={handleLoginRegister}
+        setIsLoggedIn={setIsLoggedIn}
       />
       {isComputeUnitsModalOpen && selectedModelForPayment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

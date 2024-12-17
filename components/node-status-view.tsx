@@ -8,6 +8,7 @@ import { Line, LineChart, Pie, PieChart, Legend, XAxis, YAxis, Tooltip, Cell } f
 import { ChartContainer } from "@/components/ui/chart";
 import { useEffect, useState } from "react";
 import {
+  getAllStacks,
   getComputeUnitsProcessed,
   getLatency,
   getNodesDistribution,
@@ -16,6 +17,7 @@ import {
   type ComputedUnitsProcessedResponse,
   type LatencyResponse,
   type NodeSubscription,
+  type Stack,
   type Task,
 } from "@/lib/atoma";
 import {
@@ -24,6 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import StackHistogram from "./StacksHistogram";
 
 const stats = [
   {
@@ -156,13 +159,18 @@ export function NodeStatusView() {
   const [computeUnitsData, setComputeUnitsData] = useState<{ time: string; units: number }[]>([]);
   const [activityModels, setActivityModels] = useState<{ model_name: string; color: string }[]>([]);
   const [networkActivityData, setNetworkActivityData] = useState<any[]>([]);
-  const [modelDistribution, setModelDistruibution] = useState<{model:string,nodesRunning:number}[]>([]);
+  const [modelDistribution, setModelDistruibution] = useState<{ model: string, nodesRunning: number }[]>([]);
+  const [allStacks, setAllStacks] = useState<Stack[]>([]);
   // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
   // const [latency, setLatency] = useState<LatencyResponse[]>([]);
   console.log("networkActivityData", networkActivityData);
   console.log("computeUnitsData", computeUnitsData);
   console.log("activityModels", activityModels);
+  console.log("allStacks", allStacks);
   useEffect(() => {
+    getAllStacks().then((stacks) => {
+      setAllStacks(stacks);
+    });
     getComputeUnitsProcessed().then((computeUnits: ComputedUnitsProcessedResponse[]) => {
       // setComputeUnits(computeUnits);
       const totalUnits = computeUnits.reduce((sum, data) => sum + data.amount, 0);
@@ -407,7 +415,6 @@ export function NodeStatusView() {
             </ChartContainer>
           </CardContent>
         </Card>
-
         {/* Network Activity Section */}
         <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
@@ -473,6 +480,17 @@ export function NodeStatusView() {
                 ))}
               </LineChart>
             </ChartContainer>
+          </CardContent>
+        </Card>
+        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Stacks bought/settled over time</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
+              Stack bought/settled over time
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+                  <StackHistogram data={allStacks} />
           </CardContent>
         </Card>
       </div>

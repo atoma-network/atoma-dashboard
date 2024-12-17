@@ -20,6 +20,36 @@ export interface Task {
   minimum_reputation_score?: number; // Optional minimum reputation score required for the task
 }
 
+export interface Stack {
+  // Address of the owner of the stack
+  owner: string;
+  // Unique small integer identifier for the stack
+  stack_small_id: number;
+  // Unique string identifier for the stack
+  stack_id: string;
+  // Small integer identifier of the associated task
+  task_small_id: number;
+  // Identifier of the selected node for computation
+  selected_node_id: number;
+  // Total number of compute units in this stack
+  num_compute_units: number;
+  // Price of the stack (likely in smallest currency unit)
+  price: number;
+  // Number of compute units already processed
+  already_computed_units: number;
+  // Indicates whether the stack is currently in the settle period
+  in_settle_period: boolean;
+  // Joint concatenation of Blake2b hashes of each payload and response pairs that was already processed
+  // by the node for this stack.
+  total_hash: Uint8Array;
+  // Number of payload requests that were received by the node for this stack.
+  num_total_messages: number;
+  // Created_at timestamp in ISO 8601 format
+  created_at: string;
+  // Created_at timestamp in ISO 8601 format
+  settled_at: string;
+}
+
 export interface AuthResponse {
   refresh_token: string;
   access_token: string;
@@ -64,7 +94,12 @@ export const loginUser = async (username: string, password: string): Promise<Aut
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ username, password }),
-  }).then((response) => response.json());
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json()
+  });
 };
 
 export const generateApiKey = async (): Promise<string> => {
@@ -104,4 +139,8 @@ export const getLatency = async (): Promise<LatencyResponse[]> => {
 
 export const getNodesDistribution = async (): Promise<{country:string, count:number }[]> => {
   return await fetch(`${proxy_url}/get_nodes_distribution`).then((response) => response.json());
+}
+
+export const getAllStacks = async (): Promise<Stack[]> => {
+  return await fetch(`${proxy_url}/get_all_stacks`).then((response) => response.json());
 }
