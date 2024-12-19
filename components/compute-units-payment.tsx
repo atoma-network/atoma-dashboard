@@ -3,6 +3,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, X } from 'lucide-react'
+import { ConnectModal, useCurrentWallet, useSignPersonalMessage } from "@mysten/dapp-kit"
+import {  proofRequest } from "@/lib/atoma"
 
 interface ComputeUnitsPaymentProps {
   modelName: string
@@ -13,7 +15,10 @@ interface ComputeUnitsPaymentProps {
 export function ComputeUnitsPayment({ modelName, pricePerUnit, onClose }: ComputeUnitsPaymentProps) {
   const [step, setStep] = useState<'units' | 'payment' | 'api'>('units')
   const [computeUnits, setComputeUnits] = useState<number>(1000)
-
+  // const suiClient = useSuiClient();
+  const { currentWallet, connectionStatus } = useCurrentWallet();
+  // const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
   const handleNextStep = () => {
     if (step === 'units') {
       setStep('payment')
@@ -22,10 +27,25 @@ export function ComputeUnitsPayment({ modelName, pricePerUnit, onClose }: Comput
     }
   }
 
-  const handlePaymentSelection = (method: string) => {
-    // Here you would implement the actual payment logic
-    console.log(`Selected payment method: ${method}`)
-    setStep('api')
+  const handleUSDCPayment = async () => {
+    if (currentWallet == null) {
+      return;
+    }
+
+    signPersonalMessage({ message: new TextEncoder().encode("Sign this message to prove you are the owner of this wallet") }).then((res) => {
+      console.log('res', res)
+      proofRequest(res.signature, currentWallet.accounts[0].address).then((res) => {
+        console.log('res',res)
+      }).catch((error) => {
+        console.log('error',error)
+      }
+      );
+    });
+    // payUSDC(suiClient, signAndExecuteTransaction, currentWallet).then((res) => {
+    //   let txDigest = res.digest;
+    // }).catch((error) => {
+    //   console.log('error',error)
+    // });
   }
 
   const getApiSample = () => {
@@ -86,10 +106,19 @@ curl https://api.atoma.ai/v1/chat/completions \\
         )}
         {step === 'payment' && (
           <div className="space-y-4">
-            <Button
-              onClick={() => handlePaymentSelection('USDC')}
-              className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
-            ></Button>
+            {connectionStatus == "connected" ? (
+              <Button onClick={() => handleUSDCPayment()} className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
+                Pay with USDC
+              </Button>
+            ) : (
+              <ConnectModal
+                trigger={
+                  <Button className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
+                    Connect sui wallet
+                  </Button>
+                }
+              />
+            )}
             {/* <Button
               onClick={() => handlePaymentSelection('stripe')}
               className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"

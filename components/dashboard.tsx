@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Activity, Cloud, Home } from "lucide-react";
 import { NodeStatusView } from "@/components/node-status-view";
 import { MyNodeView } from "@/components/my-node-view";
@@ -22,6 +22,11 @@ const mainTabs = [
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabType>("node-status");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    if (localStorage.getItem("access_token")) {
+      setIsLoggedIn(true);
+    }
+  }, []);
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <div className="flex flex-col h-screen bg-white dark:bg-[#1A1C23]">

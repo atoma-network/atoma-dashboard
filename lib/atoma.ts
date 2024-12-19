@@ -1,3 +1,7 @@
+import type { SuiClient } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
+import type { UseMutateAsyncFunction } from "@tanstack/react-query";
+
 const proxy_url = "http://localhost:8081";
 
 export interface NodeSubscription {
@@ -158,3 +162,68 @@ export const getNodesDistribution = async (): Promise<{country:string, count:num
 export const getStatsStacks = async (): Promise<StatsStack[]> => {
   return await fetch(`${proxy_url}/get_stats_stacks?hours=24`).then((response) => response.json());
 }
+
+export const proofRequest = async (signature: string, walletAddress: string): Promise<void> => {
+  await fetch(`${proxy_url}/update_sui_address`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ signature, address:walletAddress }),
+  });
+}
+
+const USDC_TYPE = '0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const payUSDC = async (client: SuiClient, signAndExecuteTransaction: UseMutateAsyncFunction<any, any, any, unknown>, currentWallet: import("@mysten/wallet-standard").WalletWithRequiredFeatures): Promise<unknown> => {
+  const amount = 100;
+  const { data: coins } = await client.getCoins({
+    owner: currentWallet.accounts[0].address,
+    coinType: USDC_TYPE,
+  });
+  const tx = new Transaction();
+  const [coin] = tx.splitCoins(coins[0].coinObjectId, [tx.pure.u64(amount)]);
+  tx.transferObjects([coin], "0xd5f66ef59f66b4d90e2620077b23ad7cd7425e8425a626630f4a1c742933e4e1");
+  tx.setSender(currentWallet.accounts[0].address);
+  console.log('signAndExecuteTransaction',signAndExecuteTransaction)
+  return await signAndExecuteTransaction(
+    {
+      transaction: tx,
+    });
+}
+
+// export const payUSDC = async (amount: number, currentAccount: string, recipientAddress: string): Promise<void> => {
+//   try {
+//     // Fetch USDC coins owned by the current account
+//     // This uses the SuiClient to get coins of the specified type owned by the current address
+//     const { data: coins } = await suiClient.getCoins({
+//       owner: currentAccount.address,
+//       coinType: USDC_TYPE,
+//     });
+//     if (coins.length === 0) {
+//       setTxStatus('No USDC coins found in your wallet');
+//       return;
+//     }
+//     // Create a new transaction block
+//     // TransactionBlock is used to construct and execute transactions on Sui
+//     const tx = new TransactionBlock();
+//     // Split the coin and get a new coin with the specified amount
+//     // This creates a new coin object with the desired amount to be transferred
+//     const [coin] = tx.splitCoins(coins[0].coinObjectId, [tx.pure(BigInt(amount))]);
+//     // Transfer the split coin to the recipient
+//     // This adds a transfer operation to the transaction block
+//     tx.transferObjects([coin], tx.pure(recipientAddress));
+//     // Sign and execute the transaction block
+//     // This sends the transaction to the network and waits for it to be executed
+//     const result = await signAndExecuteTransactionBlock({
+//       transactionBlock: tx,
+//     });
+//     console.log('Transaction result:', result);
+//     setTxStatus(`Transaction successful. Digest: ${result.digest}`);
+//   } catch (error) {
+//     console.error('Error sending tokens:', error);
+//     setTxStatus(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+//   }
+// }

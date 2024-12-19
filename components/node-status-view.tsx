@@ -80,10 +80,6 @@ export function NodeStatusView() {
   const [statsStack, setStatsStacks] = useState<unknown[]>([]);
   // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
   // const [latency, setLatency] = useState<LatencyResponse[]>([]);
-  console.log("networkActivityData", networkActivityData);
-  console.log("computeUnitsData", computeUnitsData);
-  console.log("activityModels", activityModels);
-  console.log("statsStack", statsStack);
   useEffect(() => {
     getStatsStacks().then((stacks) => {
       setStatsStacks(stacks.map((data: StatsStack) => ({
@@ -98,12 +94,6 @@ export function NodeStatusView() {
       const totalRequests = computeUnits.reduce((sum, data) => sum + data.requests, 0);
       const totalTime = computeUnits.reduce((sum, data) => sum + data.time, 0);
       console.log(computeUnits);
-      setNetworkActivityData(
-        computeUnits.map((data) => ({
-          time: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          [data.model_name]: data.amount,
-        }))
-      );
       setActivityModels(
         Array.from(new Set(computeUnits.map((data) => data.model_name))).map((model_name, i) => ({
           model_name: model_name,
@@ -122,7 +112,7 @@ export function NodeStatusView() {
         .sort()
         .map((key) => ({
           time: new Date(key).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          data : group_by_time[key],
+          data: group_by_time[key],
         }));
       console.log("sortedGroupByTime", sortedGroupByTime);
 
@@ -367,8 +357,13 @@ export function NodeStatusView() {
                   padding={{ left: 10, right: 30 }}
                 />
                 <YAxis
+                  dataKey={"data"}
                   tick={{ fill: 'var(--purple-600)' }}
-                  tickFormatter={(value) => `${value / 1000}k`}
+                  tickFormatter={(value) => {
+                    console.log(value)
+                  return  `${value / 1000}k`
+                  }
+                  }
                 />
                 <Tooltip
                   content={({ active, payload, label }) => {
@@ -390,15 +385,17 @@ export function NodeStatusView() {
                   align="right"
                   wrapperStyle={{ paddingBottom: "20px" }}
                 />
-                {activityModels.map((model) => (
-                  <Line
-                    key={model.model_name}
-                    type="monotone"
-                    dataKey={model.model_name}
-                    stroke={model.color}
-                    strokeWidth={2}
-                  />
-                ))}
+                {activityModels.map((model) => {
+                  return (
+                    <Line
+                      key={model.model_name}
+                      type="monotone"
+                      dataKey={model.model_name}
+                      stroke={model.color}
+                      strokeWidth={2}
+                    />
+                  )
+                })}
               </LineChart>
             </ChartContainer>
           </CardContent>
