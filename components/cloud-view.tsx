@@ -255,7 +255,7 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
                       readOnly
                       className="font-mono bg-gray-100 dark:bg-[#1A1C23] border-purple-200 dark:border-purple-800/30 text-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600"
                     />
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => navigator.clipboard.writeText(apiKey)}>
                       <Copy className="mr-2 h-4 w-4" />
                       Copy
                     </Button>
