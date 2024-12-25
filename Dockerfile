@@ -1,37 +1,43 @@
 # Build stage
 FROM node:18-slim AS builder
 
+# Set the working directory inside the container
 WORKDIR /app
 
+# Copy only package.json and package-lock.json for dependency installation
 COPY package*.json ./
 
-# Install dependencies with legacy-peer-deps
-RUN npm ci --only=production --legacy-peer-deps && \
-    npm cache clean --force
+# Install dependencies
+RUN npm install
 
+# Copy the rest of the application files
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the Next.js application
+RUN npx next build
 
 # Production stage
 FROM node:18-slim
 
-# Add node user for security
-RUN groupadd -r nodejs && \
-    useradd -r -g nodejs nodejs
+# Add a non-root user for security
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 
+# Set the working directory for the production container
 WORKDIR /app
 
-ARG NODE_ENV=production
-
-# Copy necessary files from builder
+# Copy only necessary files from the builder stage
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
 
-USER nodejs
+ARG NODE_ENV
 
+# Use the non-root user
+USER appuser
+
+# Expose the port your app runs on
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+# Start the Next.js server
+CMD ["npx", "next", "start"]
