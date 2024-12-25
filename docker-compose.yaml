@@ -10,6 +10,7 @@ services:
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro  # Allow the container to listen to Docker events
       - ./nginx/certs:/etc/nginx/certs            # Store certificates here
+      - ./nginx/html:/usr/share/nginx/html
     ports:
       - "80:80"   # HTTP port
       - "443:443" # HTTPS port
@@ -17,15 +18,14 @@ services:
       - atoma-dashboard-network
 
   certbot:
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - ./nginx/certs:/etc/letsencrypt       # Store certs in the shared volume
-      - ./nginx/certbot/conf:/etc/letsencrypt/live  # Shared Certbot configurations
-    entrypoint: >
-      sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"
-    networks:
-      - atoma-dashboard-network
+  image: certbot/certbot
+  container_name: certbot
+  volumes:
+    - ./nginx/certs:/etc/letsencrypt
+    - ./nginx/certbot/conf:/etc/letsencrypt/live
+  networks:
+    - atoma-dashboard-network
+
 
   app:
     build:
