@@ -1,21 +1,13 @@
 services:
   nginx-proxy:
-    image: jwilder/nginx-proxy
-    container_name: nginx-proxy
-    environment:
-      - DEFAULT_HOST=default.local  # Set a default host in case something goes wrong
-      - VIRTUAL_HOST=atomacloud.com
-      - VIRTUAL_PORT=3000            # Port of the Next.js app inside the container
-      - ENABLE_IPV6=true
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro  # Allow the container to listen to Docker events
-      - ./nginx/certs:/etc/nginx/certs            # Store certificates here
-      - ./nginx/html:/usr/share/nginx/html
+    image: nginx:latest
     ports:
-      - "80:80"   # HTTP port
-      - "443:443" # HTTPS port
-    networks:
-      - atoma-dashboard-network
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./certbot/www:/var/www/certbot/:ro
 
   certbot:
     image: certbot/certbot
@@ -23,8 +15,6 @@ services:
     volumes:
       - ./nginx/certs:/etc/letsencrypt
       - ./nginx/certbot/conf:/etc/letsencrypt/live
-    networks:
-      - atoma-dashboard-network
 
   app:
     build:
@@ -35,9 +25,3 @@ services:
     environment:
       - VIRTUAL_HOST=atomacloud.com
       - VIRTUAL_PORT=3000
-    networks:
-      - atoma-dashboard-network
-
-networks:
-  atoma-dashboard-network:
-    driver: bridge
