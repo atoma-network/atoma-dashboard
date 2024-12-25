@@ -33,6 +33,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    environment:
+      - VIRTUAL_HOST=atomacloud.com
+      - VIRTUAL_PORT=3000
     networks:
       - atoma-dashboard-network
 
