@@ -13,6 +13,8 @@ services:
     ports:
       - "80:80"   # HTTP port
       - "443:443" # HTTPS port
+    networks:
+      - atoma-dashboard-network
 
   certbot:
     image: certbot/certbot
@@ -22,16 +24,17 @@ services:
       - ./nginx/certbot/conf:/etc/letsencrypt/live  # Shared Certbot configurations
     entrypoint: >
       sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"
+    networks:
+      - atoma-dashboard-network
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      VIRTUAL_HOST: yourdomain.com
-      VIRTUAL_PORT: 3000
-    expose:
-      - "3000"  # Expose port 3000, but don't publish it externally
+    ports:
+      - "3000:3000"
+    networks:
+      - atoma-dashboard-network
 
 networks:
   atoma-dashboard-network:
