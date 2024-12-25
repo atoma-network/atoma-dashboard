@@ -18,14 +18,13 @@ services:
       - atoma-dashboard-network
 
   certbot:
-  image: certbot/certbot
-  container_name: certbot
-  volumes:
-    - ./nginx/certs:/etc/letsencrypt
-    - ./nginx/certbot/conf:/etc/letsencrypt/live
-  networks:
-    - atoma-dashboard-network
-
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./nginx/certs:/etc/letsencrypt
+      - ./nginx/certbot/conf:/etc/letsencrypt/live
+    networks:
+      - atoma-dashboard-network
 
   app:
     build:
