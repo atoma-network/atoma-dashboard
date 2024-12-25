@@ -26,15 +26,15 @@ services:
     volumes:
       - letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
-  app:
+  atoma-dashboard:
     build:
       context: .
       dockerfile: Dockerfile
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.guestbook.rule=Host(`atomacloud.com`)"
-      - "traefik.http.routers.guestbook.entrypoints=websecure"
-      - "traefik.http.routers.guestbook.tls.certresolver=myresolver"
+      - "traefik.http.routers.atoma-dashboard.rule=Host(`atomacloud.com`)"
+      - "traefik.http.routers.atoma-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.atoma-dashboard.tls.certresolver=myresolver"
       - "com.centurylinklabs.watchtower.enable=true"
     deploy:
       mode: replicated
