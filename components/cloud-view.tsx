@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Cloud, Database, Key, CreditCard, BookOpen, Calculator, Zap, Sparkles, Brain, MessageSquare, Info, Copy, CheckCircle2 } from 'lucide-react'
+import { Cloud, Database, Key, CreditCardIcon, BookOpen, Calculator, Zap, Sparkles, Brain, MessageSquare, Info, Copy, CheckCircle2, SquareStackIcon as Stripe, ShoppingCartIcon as Paypal } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -26,14 +26,20 @@ import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { LoginRegisterModal } from "./login-register-modal"
 import { cn } from "@/lib/utils"
-import { ComputeUnitsPayment } from "./compute-units-payment"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
 const tabs = [
   { id: 'compute', icon: Cloud, label: 'Models' },
   { id: 'api', icon: Key, label: 'API Access' },
-  { id: 'billing', icon: CreditCard, label: 'Billing' },
+  { id: 'billing', icon: CreditCardIcon, label: 'Billing' },
   { id: 'docs', icon: BookOpen, label: 'Documentation' },
   { id: 'calculator', icon: Calculator, label: 'Cost Calculator' },
 ] as const;
@@ -151,23 +157,39 @@ const apiEndpoints = [
   { name: 'Audio Transcription', endpoint: '/v1/audio/transcriptions', method: 'POST' },
 ]
 
+const generateApiExampleUsage = (model: typeof modelOptions[0], privacyEnabled: boolean) => {
+  const baseUrl = privacyEnabled ? "https://privacy-api.atoma.ai" : "https://api.atoma.ai"
+  const modelId = privacyEnabled ? `${model.id}-privacy` : model.id
+  
+  return `curl ${baseUrl}/v1/chat/completions \\
+-H "Content-Type: application/json" \\
+-H "Authorization: Bearer YOUR_API_KEY" \\
+-d '{
+  "model": "${modelId}",
+  "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "What is the capital of France?"}
+  ]
+}'`
+}
+
 export function CloudView() {
   const [activeTab, setActiveTab] = useState<TabType>('compute')
   const [selectedModel, setSelectedModel] = useState(modelOptions[0])
   const [privacyEnabled, setPrivacyEnabled] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
-  const [isComputeUnitsModalOpen, setIsComputeUnitsModalOpen] = useState(false)
-  const [selectedModelForPayment, setSelectedModelForPayment] = useState<typeof modelOptions[0] | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isApiExampleModalOpen, setIsApiExampleModalOpen] = useState(false)
 
   const getAdjustedPrice = (basePrice: number) => {
     const pricePerMillion = basePrice * 1000 // Convert from per 1K to per 1M
     return privacyEnabled ? pricePerMillion * 1.05 : pricePerMillion
   }
 
-  const handleStartUsing = (model: typeof modelOptions[0]) => {
-    setSelectedModelForPayment(model)
-    setIsComputeUnitsModalOpen(true)
+  const handleStartUsing = () => {
+    setIsLoginModalOpen(true)
+    setLoginError(null)
   }
 
   const handleLoginRegister = (email: string, password: string, isLogin: boolean) => {
@@ -176,12 +198,47 @@ export function CloudView() {
       // Successful login/register
       setIsLoginModalOpen(false)
       setLoginError(null)
-      // Here you would typically set the user state or redirect
+      setIsLoggedIn(true) // Set isLoggedIn to true
     } else {
       // Failed login/register
       setLoginError(isLogin ? "Invalid email or password" : "Registration failed. Please try again.")
     }
   }
+
+  const generateApiExampleUsage = (model: typeof modelOptions[0], privacyEnabled: boolean) => {
+    const baseUrl = privacyEnabled ? "https://privacy-api.atoma.ai" : "https://api.atoma.ai"
+    const modelId = privacyEnabled ? `${model.id}-privacy` : model.id
+    
+    return `curl ${baseUrl}/v1/chat/completions \\
+-H "Content-Type: application/json" \\
+-H "Authorization: Bearer YOUR_API_KEY" \\
+-d '{
+  "model": "${modelId}",
+  "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "What is the capital of France?"}
+  ]
+}'`
+  }
+
+  const ApiExampleModal = ({ isOpen, onClose, model, privacyEnabled }: {isOpen: boolean, onClose: () => void, model: typeof modelOptions[0], privacyEnabled: boolean}) => (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>API Example Usage for {model.name}</DialogTitle>
+            <DialogDescription>
+              Use this curl command to interact with the {model.name} model
+              {privacyEnabled ? " (Privacy Mode Enabled)" : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <pre className="bg-gray-100 dark:bg-[#1A1C23] p-4 rounded-md overflow-x-auto">
+            <code className="text-sm">
+              {generateApiExampleUsage(model, privacyEnabled)}
+            </code>
+          </pre>
+        </DialogContent>
+    </Dialog>
+  )
 
   const ComputeTab = () => (
     <div className="space-y-6">
@@ -269,7 +326,8 @@ export function CloudView() {
               <Button 
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-800 dark:hover:bg-purple-900"
                 onClick={() => {
-                  handleStartUsing(model)
+                  setSelectedModel(model)
+                  setIsApiExampleModalOpen(true)
                 }}
               >
                 Start Using
@@ -278,6 +336,12 @@ export function CloudView() {
           </Card>
         ))}
       </div>
+      <ApiExampleModal
+        isOpen={isApiExampleModalOpen}
+        onClose={() => setIsApiExampleModalOpen(false)}
+        model={selectedModel}
+        privacyEnabled={privacyEnabled}
+      />
     </div>
   )
 
@@ -354,29 +418,139 @@ export function CloudView() {
   const BillingTab = () => {
     const totalUsage = usageHistory.reduce((sum, item) => sum + item.tokens, 0)
     const totalCost = usageHistory.reduce((sum, item) => sum + item.cost, 0)
+    const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false)
+    const [isAutoReloadEnabled, setIsAutoReloadEnabled] = useState(false)
+    const [isAddFundsModalOpen, setIsAddFundsModalOpen] = useState(false)
+    const [cardNumber, setCardNumber] = useState<string | null>(null);
+
+    const AddFundsModal = () => (
+      <Dialog open={isAddFundsModalOpen} onOpenChange={setIsAddFundsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Funds</DialogTitle>
+            <DialogDescription>
+              Choose a payment method to add funds to your account.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-4 py-4">
+            <Button 
+              variant="outline" 
+              className="flex justify-start items-center"
+              onClick={() => {
+                // Handle Stripe payment
+                setIsAddFundsModalOpen(false)
+              }}
+            >
+              <Stripe className="mr-2 h-4 w-4" />
+              Pay with Stripe
+            </Button>
+            <Button 
+              variant="outline" 
+              className="flex justify-start items-center"
+              onClick={() => {
+                // Handle Credit Card payment
+                setIsAddFundsModalOpen(false)
+              }}
+            >
+              <CreditCardIcon className="mr-2 h-4 w-4" />
+              Pay with Credit Card
+            </Button>
+            <Button 
+              variant="outline" 
+              className="flex justify-start items-center"
+              onClick={() => {
+                // Handle PayPal payment
+                setIsAddFundsModalOpen(false)
+              }}
+            >
+              <Paypal className="mr-2 h-4 w-4" />
+              Pay with PayPal
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
 
     return (
       <div className="space-y-6">
-        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Billing Summary</CardTitle>
-            <CardDescription className="text-gray-500 dark:text-gray-400">
-              Overview of your current billing period
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Usage:</span>
-              <span className="text-lg font-bold text-gray-900 dark:text-white">{totalUsage.toLocaleString()} tokens</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Cost:</span>
-              <span className="text-lg font-bold text-gray-900 dark:text-white">${totalCost.toFixed(2)}</span>
-            </div>
-            <Progress value={(totalCost / 100) * 100} className="h-2" />
-            <p className="text-sm text-gray-500 dark:text-gray-400">Billing period: March 1, 2024 - March 31, 2024</p>
-          </CardContent>
-        </Card>
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Credit Balance</CardTitle>
+              <CardDescription className="text-gray-500 dark:text-gray-400">
+                Your credit balance will be consumed with API usage.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-4xl font-bold text-gray-900 dark:text-white">$1.73</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Remaining Balance</p>
+                </div>
+                <Button 
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  onClick={() => setIsAddFundsModalOpen(true)}
+                >
+                  Add Funds
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <CreditCardIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                    <span className="text-gray-900 dark:text-white">
+                      {cardNumber ? `Mastercard •••• ${cardNumber.slice(-4)}` : 'No card on file'}
+                    </span>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setIsNewCardModalOpen(true)}>
+                    {cardNumber ? 'Change' : 'Add Card'}
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Zap className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {isAutoReloadEnabled ? "Auto reload is enabled" : "Auto reload is disabled"}
+                    </span>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setIsAutoReloadEnabled(!isAutoReloadEnabled)}
+                  >
+                    {isAutoReloadEnabled ? "Disable" : "Enable"}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Billing Summary</CardTitle>
+              <CardDescription className="text-gray-500 dark:text-gray-400">
+                Overview of your current billing period
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Usage:</span>
+                <span className="text-lg font-bold text-gray-900 dark:text-white">{totalUsage.toLocaleString()} tokens</span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500 dark:text-gray-400">Monthly budget:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">$100.00</span>
+                </div>
+                <Progress value={(totalCost / 100) * 100} className="h-2" />
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {totalCost.toFixed(2)} / $100.00 used
+                </p>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Billing period: March 1, 2024 - March 31, 2024</p>
+            </CardContent>
+          </Card>
+        </div>
 
         <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
@@ -408,6 +582,42 @@ export function CloudView() {
             </Table>
           </CardContent>
         </Card>
+        {isNewCardModalOpen && (
+          <Dialog open={isNewCardModalOpen} onOpenChange={setIsNewCardModalOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Card</DialogTitle>
+                <DialogDescription>
+                  Enter your new card details below.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                const newCardNumber = formData.get('cardNumber') as string;
+                setCardNumber(newCardNumber);
+                setIsNewCardModalOpen(false);
+              }} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cardNumber">Card Number</Label>
+                  <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="expiryDate">Expiry Date</Label>
+                    <Input id="expiryDate" placeholder="MM/YY" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cvc">CVC</Label>
+                    <Input id="cvc" placeholder="123" />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full">Add Card</Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
+        <AddFundsModal />
       </div>
     )
   }
@@ -501,9 +711,8 @@ export function CloudView() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-gray-600 dark:text-gray-300">Model</TableHead>
-                  <TableHead className="text-gray-600 dark:text-gray-300">Price per 1M tokens</TableHead>
-                </TableRow>
-              </TableHeader>
+                  <TableHead className="text-gray-600 dark:text-gray-300">Price per 1Mtokens</TableHead>
+                </TableRow>              </TableHeader>
               <TableBody>
                 {modelOptions.map((model) => (
                   <TableRow key={model.id}>
@@ -553,16 +762,15 @@ export function CloudView() {
         error={loginError}
         onSubmit={handleLoginRegister}
       />
-      {isComputeUnitsModalOpen && selectedModelForPayment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <ComputeUnitsPayment
-            modelName={selectedModelForPayment.name}
-            pricePerUnit={selectedModelForPayment.price}
-            onClose={() => setIsComputeUnitsModalOpen(false)}
-          />
-        </div>
-      )}
+      <ApiExampleModal
+        isOpen={isApiExampleModalOpen}
+        onClose={() => setIsApiExampleModalOpen(false)}
+        model={selectedModel}
+        privacyEnabled={privacyEnabled}
+      />
     </div>
+  )
+}
   )
 }
 

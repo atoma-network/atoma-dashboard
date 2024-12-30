@@ -133,25 +133,6 @@ export function NodeStatusView() {
         ))}
       </div>
 
-      {/* Node Explorer */}
-      <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Node Explorer</CardTitle>
-          <CardDescription className="text-gray-500 dark:text-gray-400">
-            Search and view detailed node information
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <Input 
-              type="text" 
-              placeholder="Enter node address or identifier" 
-              className="w-full border-purple-200 dark:border-purple-800/30 text-purple-900 dark:text-purple-100 placeholder-purple-400 dark:placeholder-purple-500 dark:bg-[#1A1C23]"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Network Activity and Compute Units Section */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Compute Units Section */}

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { X } from 'lucide-react'
+import { X, Wallet } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -32,10 +32,12 @@ export function LoginRegisterModal({ isOpen, onClose, error, onSubmit }: LoginRe
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="text-purple-700 dark:text-purple-300">{isLogin ? "Log In" : "Register"}</DialogTitle>
-          <DialogDescription className="text-purple-600 dark:text-purple-400">
+      <DialogContent className="sm:max-w-[425px] text-center">
+        <DialogHeader className="space-y-2 text-center">
+          <DialogTitle className="text-2xl font-bold text-purple-700 dark:text-purple-300 text-center">
+            {isLogin ? "Log In" : "Register"}
+          </DialogTitle>
+          <DialogDescription className="text-purple-600 dark:text-purple-400 mx-auto">
             {isLogin
               ? "Enter your credentials to access your account."
               : "Create a new account to get started."}
@@ -47,9 +49,9 @@ export function LoginRegisterModal({ isOpen, onClose, error, onSubmit }: LoginRe
           </div>
         )}
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-4 text-left">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
+              <Label htmlFor="email" className="text-left">
                 Email
               </Label>
               <Input
@@ -63,7 +65,7 @@ export function LoginRegisterModal({ isOpen, onClose, error, onSubmit }: LoginRe
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="password" className="text-right">
+              <Label htmlFor="password" className="text-left">
                 Password
               </Label>
               <Input
@@ -77,9 +79,13 @@ export function LoginRegisterModal({ isOpen, onClose, error, onSubmit }: LoginRe
               />
             </div>
           </div>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
             <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
               {isLogin ? "Log In" : "Register"}
+            </Button>
+            <Button type="button" variant="outline" className="w-full mt-1 flex items-center justify-center" onClick={() => {/* Handle wallet connection */}}>
+              <Wallet className="mr-2 h-4 w-4" />
+              Connect Wallet
             </Button>
             <Button variant="link" onClick={toggleMode} className="text-purple-600 hover:text-purple-700">
               {isLogin
