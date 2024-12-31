@@ -382,7 +382,7 @@ export function NodeStatusView() {
           </CardContent>
         </Card>
         {/* Stacks Bought/Settled Section */}
-        <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
+        {/* <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
             <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Stacks Activity</CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
@@ -446,7 +446,7 @@ export function NodeStatusView() {
               </LineChart>
             </ChartContainer>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Models Running Section */}

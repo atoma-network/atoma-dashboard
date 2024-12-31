@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Cloud, Database, Key, CreditCardIcon, BookOpen, Calculator, Zap, Sparkles, Brain, MessageSquare, Info, Copy, CheckCircle2, SquareStackIcon as Stripe, ShoppingCartIcon as Paypal } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
-import { Cloud, Key, CreditCard, BookOpen, Calculator, Info, Copy, CheckCircle2, Delete } from 'lucide-react'
+import {  Delete } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Progress } from "@/components/ui/progress"
@@ -63,23 +63,25 @@ const apiEndpoints = [
   { name: 'Audio Transcription', endpoint: '/v1/audio/transcriptions', method: 'POST' },
 ]
 
+interface IModelOptions {
+    id: string;
+    name: string;
+    features: string[];
+    price: number;
+    status: string;
+}
+
 export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, setIsLoggedIn:(isLoggedIn: boolean) => void }) {
   const [activeTab, setActiveTab] = useState<TabType>('compute')
   const [privacyEnabled, setPrivacyEnabled] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [isComputeUnitsModalOpen, setIsComputeUnitsModalOpen] = useState(false)
-  const [selectedModelForPayment, setSelectedModelForPayment] = useState<typeof modelOptions[0] | null>(null)
+  const [selectedModelForPayment, setSelectedModelForPayment] = useState<IModelOptions | null>(null)
   const [apiKeys, setApiKeys] = useState<string[] | undefined>(); 
   const [subscribers, setSubscribers] = useState<NodeSubscription[] | undefined>();
   const [tasks, setTasks] = useState<Task[] | undefined>();
   const [modelOptions, setModelOptions] = useState<
-    {
-      id: string;
-      name: string;
-      features: string[];
-      price: number;
-      status: string;
-    }[]
+  IModelOptions[]
   >([]);
 
   useEffect(() => {
@@ -137,9 +139,13 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
     return privacyEnabled ? pricePerMillion * 1.05 : pricePerMillion
   }
 
-  const handleStartUsing = () => {
-    setIsLoginModalOpen(true)
-    setLoginError(null)
+  const handleStartUsing = (model:IModelOptions) => {
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true)
+    } else {
+      setSelectedModelForPayment(model)
+      setIsComputeUnitsModalOpen(true)
+    }
   }
 
   const ComputeTab = () => (
@@ -241,12 +247,12 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
           </Card>
         ))}
       </div>
-      <ApiExampleModal
+      {/* <ApiExampleModal
         isOpen={isApiExampleModalOpen}
         onClose={() => setIsApiExampleModalOpen(false)}
         model={selectedModel}
         privacyEnabled={privacyEnabled}
-      />
+      /> */}
     </div>
   )
 
@@ -625,7 +631,8 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
                 <TableRow>
                   <TableHead className="text-gray-600 dark:text-gray-300">Model</TableHead>
                   <TableHead className="text-gray-600 dark:text-gray-300">Price per 1Mtokens</TableHead>
-                </TableRow>              </TableHeader>
+                </TableRow>
+              </TableHeader>
               <TableBody>
                 {modelOptions.map((model) => (
                   <TableRow key={model.id}>
@@ -673,15 +680,21 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
         }}
         setIsLoggedIn={setIsLoggedIn}
       />
-      <ApiExampleModal
+      {isComputeUnitsModalOpen && selectedModelForPayment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <ComputeUnitsPayment
+            modelName={selectedModelForPayment.name}
+            pricePerUnit={selectedModelForPayment.price}
+            onClose={() => setIsComputeUnitsModalOpen(false)}
+          />
+        </div>
+      )}
+      {/* <ApiExampleModal
         isOpen={isApiExampleModalOpen}
         onClose={() => setIsApiExampleModalOpen(false)}
         model={selectedModel}
         privacyEnabled={privacyEnabled}
-      />
+      /> */}
     </div>
   )
 }
-  )
-}
-

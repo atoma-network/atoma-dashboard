@@ -113,11 +113,6 @@ export function LoginRegisterModal({ isOpen, onClose, setIsLoggedIn}: LoginRegis
               <Wallet className="mr-2 h-4 w-4" />
               Connect Wallet
             </Button>
-            <Button variant="link" onClick={toggleMode} className="text-purple-600 hover:text-purple-700">
-              {isLogin
-                ? "Don't have an account? Register"
-                : "Already have an account? Log In"}
-            </Button>
           </div>
         </form>
         <Button variant="link" onClick={toggleMode} className="text-purple-600 hover:text-purple-700">
