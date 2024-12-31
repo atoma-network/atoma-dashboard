@@ -4,8 +4,7 @@ import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Cloud, Database, Key, CreditCardIcon, BookOpen, Calculator, Zap, Sparkles, Brain, MessageSquare, Info, Copy, CheckCircle2, SquareStackIcon as Stripe, ShoppingCartIcon as Paypal } from 'lucide-react'
-import { Badge } from "@/components/ui/badge"
+import { Cloud, Key, CreditCardIcon, BookOpen, Calculator, Zap, Info, Copy, CheckCircle2, SquareStackIcon as Stripe, ShoppingCartIcon as Paypal } from 'lucide-react'
 import {  Delete } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -26,7 +25,6 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { LoginRegisterModal } from "./login-register-modal"
-import { cn } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,

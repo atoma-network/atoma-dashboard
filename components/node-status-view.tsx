@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { Users, Server, BarChartIcon as ChartBar, Cpu, Timer, ArrowUpDown} from "lucide-react";
 import { Line, LineChart, Pie, PieChart, Legend, XAxis, YAxis, Tooltip, Cell } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
@@ -11,13 +10,11 @@ import {
   getComputeUnitsProcessed,
   getLatency,
   // getNodesDistribution,
-  getStatsStacks,
   getSubscriptions,
   getTasks,
   type ComputedUnitsProcessedResponse,
   type LatencyResponse,
   type NodeSubscription,
-  type StatsStack,
   type Task,
 } from "@/lib/atoma";
 import Image from "next/image";
@@ -77,17 +74,17 @@ export function NodeStatusView() {
   const [activityModels, setActivityModels] = useState<{ model_name: string; color: string }[]>([]);
   const [networkActivityData, setNetworkActivityData] = useState<unknown[]>([]);
   const [modelDistribution, setModelDistruibution] = useState<{ model: string, nodesRunning: number }[]>([]);
-  const [statsStack, setStatsStacks] = useState<unknown[]>([]);
+  // const [statsStack, setStatsStacks] = useState<unknown[]>([]);
   // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
   // const [latency, setLatency] = useState<LatencyResponse[]>([]);
   useEffect(() => {
-    getStatsStacks().then((stacks) => {
-      setStatsStacks(stacks.map((data: StatsStack) => ({
-        time: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        bought: data.num_compute_units,
-        settled: data.settled_num_compute_units,
-      })));
-    });
+    // getStatsStacks().then((stacks) => {
+    //   setStatsStacks(stacks.map((data: StatsStack) => ({
+    //     time: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    //     bought: data.num_compute_units,
+    //     settled: data.settled_num_compute_units,
+    //   })));
+    // });
     getComputeUnitsProcessed().then((computeUnits: ComputedUnitsProcessedResponse[]) => {
       // setComputeUnits(computeUnits);
       const totalUnits = computeUnits.reduce((sum, data) => sum + data.amount, 0);
