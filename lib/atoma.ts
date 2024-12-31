@@ -2,7 +2,7 @@ import type { SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 
-const proxy_url = "http://localhost:8081";
+const proxy_url = process.env.NEXT_PUBLIC_PROXY_URL;
 
 export interface NodeSubscription {
   node_small_id: number; // Unique small integer identifier for the node subscription
