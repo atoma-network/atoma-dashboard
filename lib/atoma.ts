@@ -221,7 +221,10 @@ export const payUSDC = async (client: SuiClient, signAndExecuteTransaction: UseM
   if (remainingAmount > 0) {
     throw new Error("Insufficient balance to cover the amount");
   }
-  tx.transferObjects(selectedCoins, "0xd5f66ef59f66b4d90e2620077b23ad7cd7425e8425a626630f4a1c742933e4e1");
+  if (process.env.NEXT_PUBLIC_PROXY_WALLET == null) {
+    throw new Error("Proxy wallet address not found");
+  }
+  tx.transferObjects(selectedCoins, process.env.NEXT_PUBLIC_PROXY_WALLET);
   tx.setSender(currentWallet.accounts[0].address);
   return await signAndExecuteTransaction(
     {
