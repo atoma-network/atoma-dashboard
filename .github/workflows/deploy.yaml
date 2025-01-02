@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - with-logic
+  workflow_dispatch: # Add this line to enable manual triggering
 
 permissions:
   packages: write
