@@ -416,7 +416,7 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-bold text-gray-900 dark:text-white">${(balance/1000000).toFixed(2)}</p>
+                  <p className="text-4xl font-bold text-gray-900 dark:text-white">${balance?(balance/1000000).toFixed(2):"Loading"}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Remaining Balance</p>
                 </div>
                 <Button 
@@ -502,8 +502,8 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {usageHistory.map((item, index) => (
-                  <TableRow key={item.index}>
+                {usageHistory.map((item) => (
+                  <TableRow key={item.id}>
                     <TableCell className="text-gray-900 dark:text-gray-300">{item.date}</TableCell>
                     <TableCell className="text-gray-900 dark:text-gray-300">{item.model}</TableCell>
                     <TableCell className="text-right text-gray-900 dark:text-gray-300">{item.tokens.toLocaleString()}</TableCell>
