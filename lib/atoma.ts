@@ -3,6 +3,7 @@ import { Transaction } from "@mysten/sui/transactions";
 import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 
 const proxy_url = process.env.NEXT_PUBLIC_PROXY_URL;
+const USDC_TYPE = process.env.NEXT_PUBLIC_USDC_TYPE;
 
 export interface NodeSubscription {
   node_small_id: number; // Unique small integer identifier for the node subscription
@@ -192,8 +193,6 @@ export const getSuiAddress = async (): Promise<string> => {
     },
   }).then((response) => response.json());
 }
-
-const USDC_TYPE = '0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const payUSDC = async (client: SuiClient, signAndExecuteTransaction: UseMutateAsyncFunction<any, any, any, unknown>, currentWallet: import("@mysten/wallet-standard").WalletWithRequiredFeatures): Promise<unknown> => {
