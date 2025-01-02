@@ -8,7 +8,7 @@ const USDC_TYPE = process.env.NEXT_PUBLIC_USDC_TYPE;
 export interface NodeSubscription {
   node_small_id: number; // Unique small integer identifier for the node subscription
   task_small_id: number; // Unique small integer identifier for the task
-  price_per_compute_unit: number; // Price per compute unit for the subscription
+  price_per_one_million_compute_units: number; // Price per 1M compute units for the subscription
   max_num_compute_units: number; // Maximum number of compute units for the subscription
   valid: boolean; // Indicates whether the subscription is valid
 }
@@ -71,7 +71,7 @@ export interface AuthResponse {
 
 export interface ComputedUnitsProcessedResponse {
   timestamp: string; // ISO 8601 formatted date string
-  model_name: string,
+  model_name: string;
   amount: number;
   requests: number;
   time: number;
@@ -112,7 +112,7 @@ export const loginUser = async (username: string, password: string): Promise<Aut
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return response.json()
+    return response.json();
   });
 };
 
@@ -122,9 +122,9 @@ export const generateApiKey = async (): Promise<string> => {
       Authorization: `Bearer ${localStorage.getItem("access_token")}`,
     },
   }).then((response) => response.json());
-}
+};
 
-export const revokeApiToken = async (api_token:string): Promise<void> => {
+export const revokeApiToken = async (api_token: string): Promise<void> => {
   await fetch(`${proxy_url}/revoke_api_token`, {
     method: "POST",
     headers: {
@@ -133,7 +133,7 @@ export const revokeApiToken = async (api_token:string): Promise<void> => {
     },
     body: JSON.stringify({ api_token }),
   });
-}
+};
 
 export const listApiKeys = async (): Promise<string[]> => {
   return await fetch(`${proxy_url}/api_tokens`, {
@@ -144,25 +144,25 @@ export const listApiKeys = async (): Promise<string[]> => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return response.json()
+    return response.json();
   });
-}
+};
 
 export const getComputeUnitsProcessed = async (): Promise<ComputedUnitsProcessedResponse[]> => {
   return await fetch(`${proxy_url}/compute_units_processed?hours=24`).then((response) => response.json());
-}
+};
 
 export const getLatency = async (): Promise<LatencyResponse[]> => {
   return await fetch(`${proxy_url}/latency?hours=24`).then((response) => response.json());
-}
+};
 
-export const getNodesDistribution = async (): Promise<{country:string, count:number }[]> => {
+export const getNodesDistribution = async (): Promise<{ country: string; count: number }[]> => {
   return await fetch(`${proxy_url}/get_nodes_distribution`).then((response) => response.json());
-}
+};
 
 export const getStatsStacks = async (): Promise<StatsStack[]> => {
   return await fetch(`${proxy_url}/get_stats_stacks?hours=24`).then((response) => response.json());
-}
+};
 
 export const proofRequest = async (signature: string, walletAddress: string): Promise<void> => {
   await fetch(`${proxy_url}/update_sui_address`, {
@@ -171,9 +171,9 @@ export const proofRequest = async (signature: string, walletAddress: string): Pr
       Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ signature, address:walletAddress }),
+    body: JSON.stringify({ signature, address: walletAddress }),
   });
-}
+};
 
 export const usdcPayment = async (txDigest: string): Promise<void> => {
   await fetch(`${proxy_url}/usdc_payment`, {
@@ -184,7 +184,7 @@ export const usdcPayment = async (txDigest: string): Promise<void> => {
     },
     body: JSON.stringify({ transaction_digest: txDigest }),
   });
-}
+};
 
 export const getSuiAddress = async (): Promise<string> => {
   return await fetch(`${proxy_url}/get_sui_address`, {
@@ -192,11 +192,15 @@ export const getSuiAddress = async (): Promise<string> => {
       Authorization: `Bearer ${localStorage.getItem("access_token")}`,
     },
   }).then((response) => response.json());
-}
+};
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const payUSDC = async (client: SuiClient, signAndExecuteTransaction: UseMutateAsyncFunction<any, any, any, unknown>, currentWallet: import("@mysten/wallet-standard").WalletWithRequiredFeatures): Promise<unknown> => {
-  const amount = 1;
+export const payUSDC = async (
+  amount: number,
+  client: SuiClient,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  signAndExecuteTransaction: UseMutateAsyncFunction<any, any, any, unknown>,
+  currentWallet: import("@mysten/wallet-standard").WalletWithRequiredFeatures
+): Promise<unknown> => {
   const { data: coins } = await client.getCoins({
     owner: currentWallet.accounts[0].address,
     coinType: USDC_TYPE,
@@ -206,11 +210,11 @@ export const payUSDC = async (client: SuiClient, signAndExecuteTransaction: UseM
   const selectedCoins = [];
 
   for (const coin of coins) {
-    if (remainingAmount <= 0) break;
     if (parseInt(coin.balance) >= remainingAmount) {
       const [splitCoin] = tx.splitCoins(coin.coinObjectId, [tx.pure.u64(remainingAmount)]);
       selectedCoins.push(splitCoin);
       remainingAmount = 0;
+      break;
     } else {
       selectedCoins.push(coin.coinObjectId);
       remainingAmount -= parseInt(coin.balance);
@@ -225,8 +229,7 @@ export const payUSDC = async (client: SuiClient, signAndExecuteTransaction: UseM
   }
   tx.transferObjects(selectedCoins, process.env.NEXT_PUBLIC_PROXY_WALLET);
   tx.setSender(currentWallet.accounts[0].address);
-  return await signAndExecuteTransaction(
-    {
-      transaction: tx,
-    });
-}
+  return await signAndExecuteTransaction({
+    transaction: tx,
+  });
+};

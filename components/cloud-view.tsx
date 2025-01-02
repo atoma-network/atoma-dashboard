@@ -65,7 +65,7 @@ interface IModelOptions {
     id: string;
     name: string;
     features: string[];
-    price: number;
+    pricePer1MTokens: number;
     status: string;
 }
 
@@ -94,8 +94,6 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
 
   useEffect(() => {
     if (!subscribers || !tasks) return;
-    console.log('SUBSCRIPTIONS', subscribers);
-    console.log('TASKS', tasks);
     const availableModels : Record<string, NodeSubscription> = {}
     for (const task of tasks) {
       if (!task.model_name) {
@@ -107,9 +105,9 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
         continue;
       }
       if (task.model_name in availableModels) {
-        availableModels[task.model_name] = subs_for_this_task.reduce((min, item) => item.price_per_compute_unit < min.price_per_compute_unit ? item : min, availableModels[task.model_name])
+        availableModels[task.model_name] = subs_for_this_task.reduce((min, item) => item.price_per_one_million_compute_units < min.price_per_one_million_compute_units ? item : min, availableModels[task.model_name])
       } else {
-        availableModels[task.model_name] = subs_for_this_task.reduce((min, item) => item.price_per_compute_unit < min.price_per_compute_unit ? item : min, subs_for_this_task[0])
+        availableModels[task.model_name] = subs_for_this_task.reduce((min, item) => item.price_per_one_million_compute_units < min.price_per_one_million_compute_units ? item : min, subs_for_this_task[0])
       }
     }
     setModelOptions(Object.keys(availableModels).map((model) => (
@@ -117,7 +115,7 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
         id: model,
         name: model,
         features: [],
-        price: availableModels[model].price_per_compute_unit / availableModels[model].max_num_compute_units,
+        pricePer1MTokens: availableModels[model].price_per_one_million_compute_units,
         status: 'Available'
       })
     ))
@@ -132,9 +130,8 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
   }
 
 
-  const getAdjustedPrice = (basePrice: number) => {
-    const pricePerMillion = basePrice * 1000 // Convert from per 1K to per 1M
-    return privacyEnabled ? pricePerMillion * 1.05 : pricePerMillion
+  const getAdjustedPrice = (pricePerMillion: number) => {
+    return (privacyEnabled ? pricePerMillion * 1.05 : pricePerMillion) / 1000000 // Convert from USDC (6 decimals) to USD
   }
 
   const handleStartUsing = (model:IModelOptions) => {
@@ -210,7 +207,7 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Price:</span>
                   <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                    ${getAdjustedPrice(model.price).toFixed(2)} / 1M {model.id === 'flux1' ? 'MP' : 'tokens'}
+                    ${getAdjustedPrice(model.pricePer1MTokens).toFixed(2)} / 1M {model.id === 'flux1' ? 'MP' : 'tokens'}
                   </span>
                 </div>
               </div>
@@ -550,8 +547,8 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
 
     const monthlyCost = useMemo(() => {
       const tokensPerMonth = tokensPerDay * daysPerMonth
-      const costPerMillion = selectedModel.price * 1000
-      return (tokensPerMonth / 1000000) * costPerMillion
+      const costPerMillion = selectedModel.pricePer1MTokens
+      return (tokensPerMonth / 1000000) * (costPerMillion / 1000000)
     }, [selectedModel, tokensPerDay, daysPerMonth])
 
     return (
@@ -628,14 +625,14 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-gray-600 dark:text-gray-300">Model</TableHead>
-                  <TableHead className="text-gray-600 dark:text-gray-300">Price per 1Mtokens</TableHead>
+                  <TableHead className="text-gray-600 dark:text-gray-300">Price per 1M tokens</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {modelOptions.map((model) => (
                   <TableRow key={model.id}>
                     <TableCell className="font-medium text-gray-900 dark:text-gray-300">{model.name}</TableCell>
-                    <TableCell className="text-gray-900 dark:text-gray-300">${(model.price * 1000).toFixed(2)}</TableCell>
+                    <TableCell className="text-gray-900 dark:text-gray-300">${(model.pricePer1MTokens / 1000000).toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -682,7 +679,7 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <ComputeUnitsPayment
             modelName={selectedModelForPayment.name}
-            pricePerUnit={selectedModelForPayment.price}
+            pricePer1MUnits={selectedModelForPayment.pricePer1MTokens}
             onClose={() => setIsComputeUnitsModalOpen(false)}
           />
         </div>

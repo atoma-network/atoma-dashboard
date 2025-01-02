@@ -8,11 +8,11 @@ import {  getSuiAddress, payUSDC, proofRequest, usdcPayment } from "@/lib/atoma"
 
 interface ComputeUnitsPaymentProps {
   modelName: string
-  pricePerUnit: number
+  pricePer1MUnits: number
   onClose: () => void
 }
 
-export function ComputeUnitsPayment({ modelName, pricePerUnit, onClose }: ComputeUnitsPaymentProps) {
+export function ComputeUnitsPayment({ modelName, pricePer1MUnits, onClose }: ComputeUnitsPaymentProps) {
   const [step, setStep] = useState<'units' | 'payment' | 'api'>('units')
   const [computeUnits, setComputeUnits] = useState<number>(1000)
   const suiClient = useSuiClient();
@@ -38,7 +38,7 @@ export function ComputeUnitsPayment({ modelName, pricePerUnit, onClose }: Comput
         // We haven't proven the SUI address yet
         throw new Error("SUI address not found");
       }
-      payUSDC(suiClient, signAndExecuteTransaction, currentWallet).then((res: unknown) => {
+      payUSDC((computeUnits / 1000000) * pricePer1MUnits , suiClient, signAndExecuteTransaction, currentWallet).then((res: unknown) => {
         const txDigest = (res as { digest: string }).digest;
         setTimeout(() => {
           usdcPayment(txDigest).then((res) => {
@@ -132,7 +132,7 @@ curl https://api.atoma.ai/v1/chat/completions \\
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Total Price: ${(computeUnits * pricePerUnit).toFixed(2)}
+                Total Price: ${((computeUnits / 1000000) * (pricePer1MUnits / 1000000)).toFixed(2)}
               </p>
             </div>
           </div>
