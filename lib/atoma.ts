@@ -48,7 +48,7 @@ export interface Stack {
   // Total number of compute units in this stack
   num_compute_units: number;
   // Price of the stack (likely in smallest currency unit)
-  price: number;
+  price_per_one_million_compute_units: number;
   // Number of compute units already processed
   already_computed_units: number;
   // Indicates whether the stack is currently in the settle period
@@ -193,6 +193,22 @@ export const getSuiAddress = async (): Promise<string> => {
     },
   }).then((response) => response.json());
 };
+
+export const getBalance = async (): Promise<number> => {
+  return await fetch(`${proxy_url}/balance`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+  }).then((response) => response.json());
+}
+
+export const getAllStacks = async (): Promise<[Stack, string][]> => {
+  return await fetch(`${proxy_url}/all_stacks`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+  }).then((response) => response.json());
+}
 
 export const payUSDC = async (
   amount: number,

@@ -33,7 +33,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { ComputeUnitsPayment } from "./compute-units-payment"
-import { generateApiKey, getSubscriptions, getTasks, listApiKeys, revokeApiToken, type NodeSubscription, type Task } from "@/lib/atoma"
+import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getTasks, listApiKeys, revokeApiToken, type NodeSubscription, type Task } from "@/lib/atoma"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
@@ -45,14 +45,13 @@ const tabs = [
   { id: 'calculator', icon: Calculator, label: 'Cost Calculator' },
 ] as const;
 
-
-const usageHistory = [
-  { id: 1, date: '2024-03-01', tokens: 1500000, cost: 30.00, model: 'Llama 2 70B' },
-  { id: 2, date: '2024-03-02', tokens: 2000000, cost: 40.00, model: 'Mistral 7B' },
-  { id: 3, date: '2024-03-03', tokens: 1800000, cost: 36.00, model: 'Llama 2 70B' },
-  { id: 4, date: '2024-03-04', tokens: 2200000, cost: 44.00, model: 'Qwen 72B' },
-  { id: 5, date: '2024-03-05', tokens: 1700000, cost: 34.00, model: 'Mixtral 8x7B' },
-]
+interface IUsageHistory {
+  id: string;
+  date: string;
+  tokens: number;
+  cost: number;
+  model: string;
+}
 
 const apiEndpoints = [
   { name: 'Text Generation', endpoint: '/v1/completions', method: 'POST' },
@@ -78,11 +77,30 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
   const [apiKeys, setApiKeys] = useState<string[] | undefined>(); 
   const [subscribers, setSubscribers] = useState<NodeSubscription[] | undefined>();
   const [tasks, setTasks] = useState<Task[] | undefined>();
-  const [modelOptions, setModelOptions] = useState<
-  IModelOptions[]
-  >([]);
-
+  const [modelOptions, setModelOptions] = useState<IModelOptions[]>([]);
+  const [balance, setBalance] = useState<number | null>();
+  const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
+  console.log('usageHistory', usageHistory);
   useEffect(() => {
+    getBalance().then((balance) => {
+      setBalance(balance)
+    })
+    getTasks().then((tasks) => {
+      console.log(tasks);
+      getAllStacks().then((stacks) => {
+        setUsageHistory(
+          stacks.map(([stack,timestamp]) => {
+            return {
+              id: stack.stack_id,
+              date: new Date(timestamp).toLocaleDateString(),
+              tokens: stack.num_compute_units,
+              cost: (stack.num_compute_units / 1000000) * (stack.price_per_one_million_compute_units / 1000000),
+              model: tasks.find((task) => task.task_small_id === stack.task_small_id)?.model_name || "Unknown",
+            };
+          })
+        );
+      });
+    });
     listApiKeys().then((keys) => setApiKeys(keys))
     getSubscriptions().then((subscriptions) => {
       setSubscribers(subscriptions);
@@ -398,7 +416,7 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-bold text-gray-900 dark:text-white">$1.73</p>
+                  <p className="text-4xl font-bold text-gray-900 dark:text-white">${(balance/1000000).toFixed(2)}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Remaining Balance</p>
                 </div>
                 <Button 
@@ -484,8 +502,8 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {usageHistory.map((item) => (
-                  <TableRow key={item.id}>
+                {usageHistory.map((item, index) => (
+                  <TableRow key={item.index}>
                     <TableCell className="text-gray-900 dark:text-gray-300">{item.date}</TableCell>
                     <TableCell className="text-gray-900 dark:text-gray-300">{item.model}</TableCell>
                     <TableCell className="text-right text-gray-900 dark:text-gray-300">{item.tokens.toLocaleString()}</TableCell>
