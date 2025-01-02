@@ -222,7 +222,7 @@ export const payUSDC = async (
     coinType: USDC_TYPE,
   });
   const tx = new Transaction();
-  let remainingAmount = amount;
+  let remainingAmount = Math.floor(amount);
   const selectedCoins = [];
 
   for (const coin of coins) {
