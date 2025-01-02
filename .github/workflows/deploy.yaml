@@ -3,7 +3,7 @@ name: Deploy Atoma Proxy dashboard
 on:
   push:
     branches:
-      - main
+      - with-logic
 
 permissions:
   packages: write
