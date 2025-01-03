@@ -129,7 +129,7 @@ curl https://api.atoma.ai/v1/chat/completions \\
       </Button>
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center text-purple-700 dark:text-purple-300">
-          {step === 'units' && 'Select Compute Units'}
+          {step === 'units' && 'Select Tokens'}
           {step === 'payment' && 'Choose Payment Method'}
           {step === 'api' && 'Connect to Your Model'}
           {step === 'result' && 'Payment Successful'}
@@ -140,7 +140,7 @@ curl https://api.atoma.ai/v1/chat/completions \\
           <div className="space-y-4">
             <div>
               <label htmlFor="computeUnits" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Compute Units
+                Tokens
               </label>
               <Input
                 id="computeUnits"

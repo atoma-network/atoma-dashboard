@@ -18,14 +18,19 @@ export default function Home() {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
-        <WalletProvider autoConnect={true}>
-          <GlobalStateProvider>
-            <Dashboard />
-          </GlobalStateProvider>
-        </WalletProvider>
-      </SuiClientProvider>
-    </QueryClientProvider>
+    <>
+      <head>
+        <link rel="icon" href="/favicon.png" type="image/png" />
+      </head>
+      <QueryClientProvider client={queryClient}>
+        <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
+          <WalletProvider autoConnect={true}>
+            <GlobalStateProvider>
+              <Dashboard />
+            </GlobalStateProvider>
+          </WalletProvider>
+        </SuiClientProvider>
+        </QueryClientProvider>
+    </>
   );
 }
