@@ -361,7 +361,7 @@ export function CloudView() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Example Usage</h3>
             <pre className="bg-gray-100 dark:bg-[#1A1C23] p-4 rounded-md overflow-x-auto">
               <code className="text-sm">
-                {`curl https://api.atoma.ai/v1/chat/completions \\
+                {`curl https://api.atomacloud.com/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{

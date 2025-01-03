@@ -104,7 +104,7 @@ export function ComputeUnitsPayment({ modelName, pricePer1MUnits, onClose }: Com
 
   const getApiSample = () => {
     return `
-curl https://api.atoma.ai/v1/chat/completions \\
+curl https://api.atomacloud.com/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
