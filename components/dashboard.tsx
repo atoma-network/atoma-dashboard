@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Activity, Cloud, Home } from "lucide-react";
 import { NodeStatusView } from "@/components/node-status-view";
 import { MyNodeView } from "@/components/my-node-view";
