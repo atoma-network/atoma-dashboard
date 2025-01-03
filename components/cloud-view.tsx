@@ -79,18 +79,17 @@ export function CloudView() {
   const [subscribers, setSubscribers] = useState<NodeSubscription[] | undefined>();
   const [tasks, setTasks] = useState<Task[] | undefined>();
   const [modelOptions, setModelOptions] = useState<IModelOptions[]>([]);
-  const [balance, setBalance] = useState<number | null>();
+  const [balance, setBalance] = useState<number | undefined>(undefined);
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
   const { isLoggedIn, setIsLoggedIn } = useGlobalState();
 
-  console.log('usageHistory', usageHistory);
   useEffect(() => {
     getBalance()
       .then((balance) => {
         setBalance(balance);
       })
       .catch(() => {
-        setIsLoggedIn(false);
+        setBalance(0);
       });
     getTasks().then((tasks) => {
       console.log(tasks);
@@ -106,7 +105,11 @@ export function CloudView() {
             };
           })
         );
+      }).catch(() => {
+        setIsLoggedIn(false);
       });
+    }).catch((err) => {
+      console.error(err);
     });
     listApiKeys()
       .then((keys) => setApiKeys(keys))
@@ -292,7 +295,7 @@ export function CloudView() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2" onClick={addApiKey}>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               API Key
             </h3>
             {Array.isArray(apiKeys) ? (
@@ -445,7 +448,7 @@ export function CloudView() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-bold text-gray-900 dark:text-white">${balance?(balance/1000000).toFixed(2):"Loading"}</p>
+                  <p className="text-4xl font-bold text-gray-900 dark:text-white">{isLoggedIn ? `$${balance !== undefined ? (balance / 1000000).toFixed(2) : "Loading"}` : "Login first"}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Remaining Balance</p>
                 </div>
                 <Button 
