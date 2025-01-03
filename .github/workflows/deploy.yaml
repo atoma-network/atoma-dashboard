@@ -63,7 +63,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/atoma-network/atoma-dashboard:${{ needs.commit-hash.outputs.commit_hash }}
+          tags: |
+            ghcr.io/atoma-network/atoma-dashboard:${{ needs.commit-hash.outputs.commit_hash }}
+            ghcr.io/atoma-network/atoma-dashboard:latest
           build-args: |
             NEXT_PUBLIC_PROXY_URL=https://credentials.atomacloud.com
             NEXT_PUBLIC_PROXY_WALLET=0xec2c53f7c706e37518afedb71bbe46021fb5b1ab1c2a56754541120cac8d7a9e
