@@ -83,132 +83,108 @@ export interface LatencyResponse {
   requests: number;
 }
 
+interface RequestOptions {
+  path: string;
+  post?: boolean;
+  body?: object;
+  use_auth?: boolean;
+}
+
+const request = async<T>({ path, post , body , use_auth }:RequestOptions): Promise<T> => {
+  const options: RequestInit = {};
+
+  if (post === true) {
+    options.method = "POST";
+  }
+  if (body) {
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers
+    };
+    options.body = JSON.stringify(body);
+  }
+  if (use_auth) {
+    options.headers = {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      ...options.headers,
+    };
+  }
+
+  return await fetch(`${proxy_url}/${path}`, options).then((response) => {
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem("access_token");
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json()
+  });
+};
+
 export const getSubscriptions = async (): Promise<NodeSubscription[]> => {
-  return await fetch(`${proxy_url}/subscriptions`).then((response) => response.json());
+  return await request({ path: "subscriptions" });
 };
 
 export const getTasks = async (): Promise<Task[]> => {
-  return await fetch(`${proxy_url}/tasks`).then((response) => response.json());
+  return await request({ path: "tasks" });
 };
 
 export const registerUser = async (username: string, password: string): Promise<AuthResponse> => {
-  return await fetch(`${proxy_url}/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ username, password }),
-  }).then((response) => response.json());
+  return await request({ path: "register", post: true, body: { username, password } });
 };
 
 export const loginUser = async (username: string, password: string): Promise<AuthResponse> => {
-  return await fetch(`${proxy_url}/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ username, password }),
-  }).then((response) => {
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-  });
+  return await request({ path: "login", post: true, body: { username, password } });
 };
 
 export const generateApiKey = async (): Promise<string> => {
-  return await fetch(`${proxy_url}/generate_api_token`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
-  }).then((response) => response.json());
+  return await request({ path: "generate_api_token", use_auth: true });
 };
 
 export const revokeApiToken = async (api_token: string): Promise<void> => {
-  await fetch(`${proxy_url}/revoke_api_token`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ api_token }),
-  });
+  return await request({path:"revoke_api_token", post: true, body: { api_token }, use_auth: true });
 };
 
 export const listApiKeys = async (): Promise<string[]> => {
-  return await fetch(`${proxy_url}/api_tokens`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
-  }).then((response) => {
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-  });
+  return await request({ path: "api_tokens", use_auth: true });
 };
 
 export const getComputeUnitsProcessed = async (): Promise<ComputedUnitsProcessedResponse[]> => {
-  return await fetch(`${proxy_url}/compute_units_processed?hours=24`).then((response) => response.json());
+  return await request({ path: "compute_units_processed?hours=24" });
 };
 
 export const getLatency = async (): Promise<LatencyResponse[]> => {
-  return await fetch(`${proxy_url}/latency?hours=24`).then((response) => response.json());
+  return await request({ path: "latency?hours=24" });
 };
 
 export const getNodesDistribution = async (): Promise<{ country: string; count: number }[]> => {
-  return await fetch(`${proxy_url}/get_nodes_distribution`).then((response) => response.json());
+  return await request({ path: "get_nodes_distribution" });
 };
 
 export const getStatsStacks = async (): Promise<StatsStack[]> => {
-  return await fetch(`${proxy_url}/get_stats_stacks?hours=24`).then((response) => response.json());
+  return await request({ path: "get_stats_stacks?hours=24" });
 };
 
 export const proofRequest = async (signature: string, walletAddress: string): Promise<void> => {
-  await fetch(`${proxy_url}/update_sui_address`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ signature, address: walletAddress }),
-  });
+  console.log(signature, walletAddress);
+  return await request({path:"update_sui_address", post: true, body: { signature, address: walletAddress }, use_auth: true });
 };
 
 export const usdcPayment = async (txDigest: string): Promise<void> => {
-  await fetch(`${proxy_url}/usdc_payment`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ transaction_digest: txDigest }),
-  });
+  return await request({path:"usdc_payment", post: true, body: { transaction_digest: txDigest }, use_auth: true });
 };
 
 export const getSuiAddress = async (): Promise<string> => {
-  return await fetch(`${proxy_url}/get_sui_address`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
-  }).then((response) => response.json());
+  return await request({path:"get_sui_address", use_auth: true });
 };
 
 export const getBalance = async (): Promise<number> => {
-  return await fetch(`${proxy_url}/balance`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
-  }).then((response) => response.json());
-}
+  return await request({path:"balance", use_auth: true });
+};
 
 export const getAllStacks = async (): Promise<[Stack, string][]> => {
-  return await fetch(`${proxy_url}/all_stacks`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
-  }).then((response) => response.json());
-}
+  return await request({path:"all_stacks", use_auth: true });
+};
 
 export const payUSDC = async (
   amount: number,
@@ -227,6 +203,7 @@ export const payUSDC = async (
 
   for (const coin of coins) {
     if (parseInt(coin.balance) >= remainingAmount) {
+      console.log('add coin', coin.coinObjectId, remainingAmount);
       const [splitCoin] = tx.splitCoins(coin.coinObjectId, [tx.pure.u64(remainingAmount)]);
       selectedCoins.push(splitCoin);
       remainingAmount = 0;

@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dialog"
 import { ComputeUnitsPayment } from "./compute-units-payment"
 import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getTasks, listApiKeys, revokeApiToken, type NodeSubscription, type Task } from "@/lib/atoma"
+import { useGlobalState } from "@/app/GlobalStateContext"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
@@ -68,7 +69,7 @@ interface IModelOptions {
     status: string;
 }
 
-export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, setIsLoggedIn:(isLoggedIn: boolean) => void }) {
+export function CloudView() {
   const [activeTab, setActiveTab] = useState<TabType>('compute')
   const [privacyEnabled, setPrivacyEnabled] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
@@ -80,16 +81,22 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
   const [modelOptions, setModelOptions] = useState<IModelOptions[]>([]);
   const [balance, setBalance] = useState<number | null>();
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
+  const { isLoggedIn, setIsLoggedIn } = useGlobalState();
+
   console.log('usageHistory', usageHistory);
   useEffect(() => {
-    getBalance().then((balance) => {
-      setBalance(balance)
-    })
+    getBalance()
+      .then((balance) => {
+        setBalance(balance);
+      })
+      .catch(() => {
+        setIsLoggedIn(false);
+      });
     getTasks().then((tasks) => {
       console.log(tasks);
       getAllStacks().then((stacks) => {
         setUsageHistory(
-          stacks.map(([stack,timestamp]) => {
+          stacks.map(([stack, timestamp]) => {
             return {
               id: stack.stack_id,
               date: new Date(timestamp).toLocaleDateString(),
@@ -101,14 +108,19 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
         );
       });
     });
-    listApiKeys().then((keys) => setApiKeys(keys))
+    listApiKeys()
+      .then((keys) => setApiKeys(keys))
+      .catch(() => {
+        setIsLoggedIn(false);
+      });
+
     getSubscriptions().then((subscriptions) => {
       setSubscribers(subscriptions);
     });
     getTasks().then((tasks) => {
       setTasks(tasks)
     });
-  }, []);
+  }, [isLoggedIn, setIsLoggedIn]);
 
   useEffect(() => {
     if (!subscribers || !tasks) return;
@@ -280,29 +292,46 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2" onClick={addApiKey}>API Key</h3>
-            {Array.isArray(apiKeys) ?
-                apiKeys.map((apiKey) => {
-                  return (<div className="flex items-center space-x-2" key={apiKey}>
-                    <Input
-                      type="password"
-                      value="••••••••••••••••"
-                      readOnly
-                      className="font-mono bg-gray-100 dark:bg-[#1A1C23] border-purple-200 dark:border-purple-800/30 text-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600"
-                    />
-                    <Button variant="outline" onClick={() => navigator.clipboard.writeText(apiKey)}>
-                      <Copy className="mr-2 h-4 w-4" />
-                      Copy
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2" onClick={addApiKey}>
+              API Key
+            </h3>
+            {Array.isArray(apiKeys) ? (
+              <>
+                {apiKeys.map((apiKey) => {
+                  return (
+                    <div className="flex items-center space-x-2" key={apiKey}>
+                      <Input
+                        type="password"
+                        value="••••••••••••••••"
+                        readOnly
+                        className="font-mono bg-gray-100 dark:bg-[#1A1C23] border-purple-200 dark:border-purple-800/30 text-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600"
+                      />
+                      <Button variant="outline" onClick={() => navigator.clipboard.writeText(apiKey)}>
+                        <Copy className="mr-2 h-4 w-4" />
+                        Copy
+                      </Button>
+                      <Button variant="outline" onClick={() => revokeToken(apiKey)}>
+                        <Delete className="mr-2 h-4 w-4" />
+                        Revoke
+                      </Button>
+                    </div>
+                  );
+                })}
+                {apiKeys.length === 0 && (
+                  <>
+                    <div>No API key generated yet</div>
+                    <Button variant="outline" className="flex justify-start items-center" onClick={addApiKey}>
+                      <Stripe className="mr-2 h-4 w-4" />
+                      Generate API Token
                     </Button>
-                    <Button variant="outline" onClick={()=>revokeToken(apiKey)}>
-                      <Delete className="mr-2 h-4 w-4" />
-                      Revoke
-                    </Button>
-                  </div>)
-                })
-            : <div>Loading</div>}
+                  </>
+                )}
+              </>
+            ) : (
+              <div>{isLoggedIn ? "Loading" : "Login first"}</div>
+            )}
           </div>
-          
+
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Available Endpoints</h3>
             <Table>
@@ -324,12 +353,12 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
               </TableBody>
             </Table>
           </div>
-          
+
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Example Usage</h3>
             <pre className="bg-gray-100 dark:bg-[#1A1C23] p-4 rounded-md overflow-x-auto">
               <code className="text-sm">
-{`curl https://api.atoma.ai/v1/chat/completions \\
+                {`curl https://api.atoma.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
@@ -345,7 +374,7 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
         </CardContent>
       </Card>
     </div>
-  )
+  );
 
   const BillingTab = () => {
     const totalUsage = usageHistory.reduce((sum, item) => sum + item.tokens, 0)
@@ -691,7 +720,6 @@ export function CloudView({ isLoggedIn, setIsLoggedIn }: {isLoggedIn:boolean, se
         onClose={() => {
           setIsLoginModalOpen(false)
         }}
-        setIsLoggedIn={setIsLoggedIn}
       />
       {isComputeUnitsModalOpen && selectedModelForPayment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

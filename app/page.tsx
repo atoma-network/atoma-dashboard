@@ -7,6 +7,7 @@ import { getFullnodeUrl } from "@mysten/sui/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@mysten/dapp-kit/dist/index.css";
 import { useState } from "react";
+import { GlobalStateProvider } from "./GlobalStateContext";
 
 const { networkConfig } = createNetworkConfig({
   testnet: { url: getFullnodeUrl("testnet") },
@@ -20,7 +21,9 @@ export default function Home() {
     <QueryClientProvider client={queryClient}>
       <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
         <WalletProvider autoConnect={true}>
-          <Dashboard />
+          <GlobalStateProvider>
+            <Dashboard />
+          </GlobalStateProvider>
         </WalletProvider>
       </SuiClientProvider>
     </QueryClientProvider>

@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, X } from 'lucide-react'
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
 import {  getSuiAddress, payUSDC, proofRequest, usdcPayment } from "@/lib/atoma"
+import { useGlobalState } from "@/app/GlobalStateContext"
 
 interface ComputeUnitsPaymentProps {
   modelName: string
@@ -13,18 +14,60 @@ interface ComputeUnitsPaymentProps {
 }
 
 export function ComputeUnitsPayment({ modelName, pricePer1MUnits, onClose }: ComputeUnitsPaymentProps) {
-  const [step, setStep] = useState<'units' | 'payment' | 'api'>('units')
+  const [step, setStep] = useState<'units' | 'payment' | 'api' | 'result'>('units')
   const [computeUnits, setComputeUnits] = useState<number>(1000)
   const suiClient = useSuiClient();
   const { currentWallet, connectionStatus } = useCurrentWallet();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
+  const [walletConfirmed, setWalletConfirmed] = useState<boolean>(false);
+  const {setError} = useGlobalState();
   const handleNextStep = () => {
     if (step === 'units') {
       setStep('payment')
     } else if (step === 'payment') {
+      setStep('result')
+    } else if (step === 'result') {
       setStep('api')
+    } 
+  }
+
+  useEffect(() => {
+    getSuiAddress().then((suiAddress) => {
+      setWalletConfirmed(suiAddress != null && suiAddress == currentWallet?.accounts?.[0]?.address)
+    });
+  }, [currentWallet?.accounts]);
+
+  const handleConfirmWallet = async () => {
+    if (currentWallet == null) {
+      return;
     }
+    const access_token = localStorage.getItem("access_token");
+    let user_id;
+    if (access_token) {
+      const base64Url = access_token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const token_json = JSON.parse(jsonPayload);
+      user_id = token_json.user_id;
+    }
+
+    signPersonalMessage({
+      message: new TextEncoder().encode(
+        `Sign this message to prove you are the owner of this wallet. User ID: ${user_id}`
+      ),
+    }).then((res) => {
+      proofRequest(res.signature, currentWallet.accounts[0].address)
+        .then((res) => {
+          console.log("res", res);
+        })
+        .catch((error) => {
+        setError(`${error}`);
+          console.log("error", error);
+        });
+    });
   }
 
   const handleUSDCPayment = async () => {
@@ -34,51 +77,29 @@ export function ComputeUnitsPayment({ modelName, pricePer1MUnits, onClose }: Com
 
     try {
       const suiAddress = await getSuiAddress();
-      if (suiAddress == null) {
+      console.log(suiAddress, currentWallet)
+      if (suiAddress == null || suiAddress != currentWallet.accounts[0].address) {
         // We haven't proven the SUI address yet
-        throw new Error("SUI address not found");
+        throw new Error("SUI address not found or not matching");
       }
       payUSDC((computeUnits / 1000000) * pricePer1MUnits , suiClient, signAndExecuteTransaction, currentWallet).then((res: unknown) => {
         const txDigest = (res as { digest: string }).digest;
         setTimeout(() => {
           usdcPayment(txDigest).then((res) => {
             console.log('res', res)
+            handleNextStep();
           }).catch((error) => {
+            setError(`${error}`);
             console.log('error', error)
           });
         }, 1000);
       }).catch((error) => {
-        console.log('error',error)
+        setError(`${error}`);
+        console.log('error', error)
       });
     } catch {
-      const access_token = localStorage.getItem("access_token");
-      let user_id;
-      if (access_token) {
-        const base64Url = access_token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        const token_json = JSON.parse(jsonPayload);
-        user_id = token_json.user_id;
-      }
-
-      signPersonalMessage({
-        message: new TextEncoder().encode(
-          `Sign this message to prove you are the owner of this wallet. User ID: ${user_id}`
-        ),
-      }).then((res) => {
-        proofRequest(res.signature, currentWallet.accounts[0].address)
-          .then((res) => {
-            console.log("res", res);
-          })
-          .catch((error) => {
-            console.log("error", error);
-          });
-      });
+      handleConfirmWallet();
     }
-
- 
   }
 
   const getApiSample = () => {
@@ -111,6 +132,7 @@ curl https://api.atoma.ai/v1/chat/completions \\
           {step === 'units' && 'Select Compute Units'}
           {step === 'payment' && 'Choose Payment Method'}
           {step === 'api' && 'Connect to Your Model'}
+          {step === 'result' && 'Payment Successful'}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -140,8 +162,8 @@ curl https://api.atoma.ai/v1/chat/completions \\
         {step === 'payment' && (
           <div className="space-y-4">
             {connectionStatus == "connected" ? (
-              <Button onClick={() => handleUSDCPayment()} className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
-                Pay with USDC
+              <Button onClick={() => walletConfirmed?handleUSDCPayment():handleConfirmWallet()} className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
+                {walletConfirmed?"Pay with USDC":"Confirm Wallet"}
               </Button>
             ) : (
               <ConnectModal
@@ -193,6 +215,14 @@ curl https://api.atoma.ai/v1/chat/completions \\
             </div>
           </div>
         )}
+        {step === 'result' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Payment Successful</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Your account has been topped up with ${((computeUnits / 1000000) * (pricePer1MUnits / 1000000)).toFixed(2)}.
+            </p>
+          </div>
+        )}
       </CardContent>
       {step === 'units' && (
         <CardFooter>
@@ -204,6 +234,17 @@ curl https://api.atoma.ai/v1/chat/completions \\
           </Button>
         </CardFooter>
       )}
+      {step === "result" && (
+          <CardFooter>
+            <Button
+              onClick={handleNextStep}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              <ArrowRight className="h-6 w-6" />
+            </Button>
+          </CardFooter>
+        )
+      }
     </Card>
   )
 }

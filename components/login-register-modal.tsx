@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { Wallet } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,18 +10,19 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { loginUser, registerUser } from "@/lib/atoma"
+import { useGlobalState } from "@/app/GlobalStateContext"
 
 interface LoginRegisterModalProps {
   isOpen: boolean
   onClose: () => void
-  setIsLoggedIn: (isLoggedIn: boolean) => void
 }
 
-export function LoginRegisterModal({ isOpen, onClose, setIsLoggedIn}: LoginRegisterModalProps) {
+export function LoginRegisterModal({ isOpen, onClose}: LoginRegisterModalProps) {
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
+  const { setIsLoggedIn } = useGlobalState();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (isLogin) {
@@ -108,10 +108,6 @@ export function LoginRegisterModal({ isOpen, onClose, setIsLoggedIn}: LoginRegis
           <div className="flex flex-col gap-2">
             <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
               {isLogin ? "Log In" : "Register"}
-            </Button>
-            <Button type="button" variant="outline" className="w-full mt-1 flex items-center justify-center" onClick={() => {/* Handle wallet connection */}}>
-              <Wallet className="mr-2 h-4 w-4" />
-              Connect Wallet
             </Button>
           </div>
         </form>

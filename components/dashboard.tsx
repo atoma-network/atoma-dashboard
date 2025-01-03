@@ -10,6 +10,7 @@ import { ThemeProvider } from "next-themes";
 import { AskUtopia } from "@/components/ask-utopia";
 import { LoginRegisterButton } from "@/components/login-register-button";
 import { UserProfileIcon } from "./user-profile-icon";
+import { useGlobalState } from "@/app/GlobalStateContext";
 
 type TabType = "node-status" | "cloud" | "my-node";
 
@@ -21,12 +22,7 @@ const mainTabs = [
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabType>("node-status");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  useEffect(() => {
-    if (localStorage.getItem("access_token")) {
-      setIsLoggedIn(true);
-    }
-  }, []);
+  const { isLoggedIn } = useGlobalState();
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <div className="flex flex-col h-screen bg-white dark:bg-[#1A1C23]">
@@ -36,7 +32,7 @@ export default function Dashboard() {
             <div className="flex items-center space-x-2">
               <ThemeToggle />
               {activeTab === "cloud" &&
-                (isLoggedIn ? <UserProfileIcon /> : <LoginRegisterButton setIsLoggedIn={setIsLoggedIn} />)}
+                (isLoggedIn ? <UserProfileIcon /> : <LoginRegisterButton/>)}
             </div>
           </div>
           <nav className="mt-4">
@@ -62,7 +58,7 @@ export default function Dashboard() {
 
         <main className="flex-1 overflow-auto p-6 bg-gray-50 dark:bg-[#1A1C23]">
           {activeTab === "node-status" && <NodeStatusView />}
-          {activeTab === "cloud" && <CloudView isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>}
+          {activeTab === "cloud" && <CloudView/>}
           {activeTab === "my-node" && <MyNodeView />}
         </main>
 
