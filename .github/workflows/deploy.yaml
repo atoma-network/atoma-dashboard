@@ -63,7 +63,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/atoma-network/atoma-dashboard:${{ needs.commit-hash.outputs.commit_hash }}
+          tags: |
+            ghcr.io/atoma-network/atoma-dashboard:${{ needs.commit-hash.outputs.commit_hash }}
+            ghcr.io/atoma-network/atoma-dashboard:latest
 
   deploy:
     runs-on: ubuntu-latest
