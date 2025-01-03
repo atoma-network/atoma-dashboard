@@ -108,11 +108,15 @@ curl https://api.atomacloud.com/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
+    "stream": true,
     "model": "${modelName}",
     "messages": [
-      {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "What is the capital of France?"}
-    ]
+        {
+            "role": "user",
+            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
+        }
+    ],
+    "max_tokens": 128
   }'
     `
   }

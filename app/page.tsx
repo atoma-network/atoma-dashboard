@@ -20,7 +20,10 @@ export default function Home() {
   return (
     <>
       <head>
-        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="https://mintlify.s3-us-west-1.amazonaws.com/atoma/_generated/favicon/apple-touch-icon.png?v=3"/>
+        <link rel="icon" type="image/png" sizes="32x32" href="https://mintlify.s3-us-west-1.amazonaws.com/atoma/_generated/favicon/favicon-32x32.png?v=3"/>
+        <link rel="icon" type="image/png" sizes="16x16" href="https://mintlify.s3-us-west-1.amazonaws.com/atoma/_generated/favicon/favicon-16x16.png?v=3"/>
+        <link rel="shortcut icon" type="image/x-icon" href="https://mintlify.s3-us-west-1.amazonaws.com/atoma/_generated/favicon/favicon.ico?v=3" />
       </head>
       <QueryClientProvider client={queryClient}>
         <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">

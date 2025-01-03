@@ -55,10 +55,8 @@ interface IUsageHistory {
 }
 
 const apiEndpoints = [
-  { name: 'Text Generation', endpoint: '/v1/completions', method: 'POST' },
   { name: 'Chat Completions', endpoint: '/v1/chat/completions', method: 'POST' },
   { name: 'Image Generation', endpoint: '/v1/images/generations', method: 'POST' },
-  { name: 'Audio Transcription', endpoint: '/v1/audio/transcriptions', method: 'POST' },
 ]
 
 interface IModelOptions {
@@ -365,12 +363,16 @@ export function CloudView() {
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
-    "model": "llama-2-70b",
+    "stream": true,
+    "model": "meta-llama/Llama-3.2-3B-Instruct",
     "messages": [
-      {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "What is the capital of France?"}
-    ]
-  }'`}
+        {
+            "role": "user",
+            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
+        }
+    ],
+    "max_tokens": 128
+}'`}
               </code>
             </pre>
           </div>
@@ -587,7 +589,7 @@ export function CloudView() {
   }
 
   const DocsTab = () => (
-    <div>Documentation</div>
+    <iframe src="https://api.atomacloud.com/swagger-ui" className="w-full h-[calc(100vh-4rem)]" />
   )
 
   const CalculatorTab = () => {
