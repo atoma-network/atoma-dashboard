@@ -11,13 +11,13 @@ import { AskUtopia } from "@/components/ask-utopia";
 import { LoginRegisterButton } from "@/components/login-register-button";
 import { UserProfileIcon } from "./user-profile-icon";
 import { useGlobalState } from "@/app/GlobalStateContext";
+import Image from "next/image";
 
 type TabType = "node-status" | "cloud" | "my-node";
 
 const mainTabs = [
   { id: "node-status", icon: Activity, label: "Network Status" },
   { id: "cloud", icon: Cloud, label: "Developer Portal" },
-  { id: "my-node", icon: Home, label: "MyNode" },
 ] as const;
 
 export default function Dashboard() {
@@ -28,7 +28,7 @@ export default function Dashboard() {
       <div className="flex flex-col h-screen bg-white dark:bg-[#1A1C23]">
         <header className="bg-white dark:bg-[#1A1C23] border-b border-purple-100 dark:border-purple-800/30 p-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Atoma Platform</h1>
+            <Image src="/atoma_logo.png" alt="Atoma" width={177} height={62}/>
             <div className="flex items-center space-x-2">
               <ThemeToggle />
               {activeTab === "cloud" &&

@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Cloud, Key, CreditCardIcon, BookOpen, Calculator, Zap, Info, Copy, CheckCircle2, SquareStackIcon as Stripe, ShoppingCartIcon as Paypal } from 'lucide-react'
+import { Cloud, Key, CreditCardIcon, BookOpen, Calculator, Zap, Info, Copy, CheckCircle2, SquareStackIcon as Stripe, ShoppingCartIcon as Paypal, ArrowRight } from 'lucide-react'
 import {  Delete } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -33,8 +33,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { ComputeUnitsPayment } from "./compute-units-payment"
-import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getTasks, listApiKeys, revokeApiToken, type NodeSubscription, type Task } from "@/lib/atoma"
+import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getSuiAddress, getTasks, listApiKeys, payUSDC, proofRequest, revokeApiToken, usdcPayment, type NodeSubscription, type Task } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
+import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
@@ -55,9 +56,57 @@ interface IUsageHistory {
 }
 
 const apiEndpoints = [
-  { name: 'Chat Completions', endpoint: '/v1/chat/completions', method: 'POST' },
-  { name: 'Image Generation', endpoint: '/v1/images/generations', method: 'POST' },
-]
+  {
+    name: "Chat Completions",
+    endpoint: "/v1/chat/completions",
+    method: "POST",
+    example: `curl https://api.atomacloud.com/v1/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -d '{
+    "stream": true,
+    "model": "MODEL_NAME",
+    "messages": [
+        {
+            "role": "user",
+            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
+        }
+    ],
+    "max_tokens": 128
+}'`,
+  },
+  {
+    name: "Image Generation",
+    endpoint: "/v1/images/generations",
+    method: "POST",
+    example: `curl https://api.atomacloud.com/v1/images/generations \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -d '{
+    "model": "MODEL_NAME",
+    "n": 1,
+    "size": "1024x1024",
+}'`,
+  },
+  {
+    name: "Embeddings",
+    endpoint: "/v1/embeddings",
+    method: "POST",
+    example: `curl https://api.atomacloud.com/v1/embeddings \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -d '{
+    "model": "MODEL_NAME",
+    "messages": [
+        {
+            "role": "user",
+            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
+        }
+    ],
+    "max_tokens": 128
+}'`,
+  },
+];
 
 interface IModelOptions {
     id: string;
@@ -79,8 +128,10 @@ export function CloudView() {
   const [modelOptions, setModelOptions] = useState<IModelOptions[]>([]);
   const [balance, setBalance] = useState<number | undefined>(undefined);
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
+  const [exampleUsage, setExampleUsage] = useState<string>(apiEndpoints[0].example);
   const { isLoggedIn, setIsLoggedIn } = useGlobalState();
 
+  console.log("CloudView", {activeTab,privacyEnabled,isLoginModalOpen,isComputeUnitsModalOpen,selectedModelForPayment,apiKeys,subscribers,tasks,modelOptions,balance,usageHistory,exampleUsage});
   useEffect(() => {
     getBalance()
       .then((balance) => {
@@ -345,7 +396,7 @@ export function CloudView() {
               </TableHeader>
               <TableBody>
                 {apiEndpoints.map((endpoint) => (
-                  <TableRow key={endpoint.name}>
+                  <TableRow key={endpoint.name} onClick={() => setExampleUsage(endpoint.example)}>
                     <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.name}</TableCell>
                     <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.endpoint}</TableCell>
                     <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.method}</TableCell>
@@ -359,20 +410,7 @@ export function CloudView() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Example Usage</h3>
             <pre className="bg-gray-100 dark:bg-[#1A1C23] p-4 rounded-md overflow-x-auto">
               <code className="text-sm">
-                {`curl https://api.atomacloud.com/v1/chat/completions \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -d '{
-    "stream": true,
-    "model": "meta-llama/Llama-3.2-3B-Instruct",
-    "messages": [
-        {
-            "role": "user",
-            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
-        }
-    ],
-    "max_tokens": 128
-}'`}
+                {exampleUsage}
               </code>
             </pre>
           </div>
@@ -388,54 +426,175 @@ export function CloudView() {
     const [isAutoReloadEnabled, setIsAutoReloadEnabled] = useState(false)
     const [isAddFundsModalOpen, setIsAddFundsModalOpen] = useState(false)
     const [cardNumber, setCardNumber] = useState<string | null>(null);
+  
+  
 
-    const AddFundsModal = () => (
-      <Dialog open={isAddFundsModalOpen} onOpenChange={setIsAddFundsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Funds</DialogTitle>
-            <DialogDescription>
-              Choose a payment method to add funds to your account.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-1 gap-4 py-4">
-            <Button 
-              variant="outline" 
-              className="flex justify-start items-center"
-              onClick={() => {
-                // Handle Stripe payment
-                setIsAddFundsModalOpen(false)
-              }}
-            >
-              <Stripe className="mr-2 h-4 w-4" />
-              Pay with Stripe
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex justify-start items-center"
-              onClick={() => {
-                // Handle Credit Card payment
-                setIsAddFundsModalOpen(false)
-              }}
-            >
-              <CreditCardIcon className="mr-2 h-4 w-4" />
-              Pay with Credit Card
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex justify-start items-center"
-              onClick={() => {
-                // Handle PayPal payment
-                setIsAddFundsModalOpen(false)
-              }}
-            >
-              <Paypal className="mr-2 h-4 w-4" />
-              Pay with PayPal
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    )
+  
+    const AddFundsModal = () => {
+      const [amount, setAmount] = useState<number>(10);
+      const [step, setStep] = useState<"payment" | "amount" | "wallet" | "result">("payment");
+      const [walletConfirmed, setWalletConfirmed] = useState<boolean>(false);
+      // const { isLoggedIn } = useGlobalState();
+      const { currentWallet, connectionStatus } = useCurrentWallet();
+      const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+      const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
+      const { setError } = useGlobalState();
+      const suiClient = useSuiClient();
+    
+      useEffect(() => {
+        getSuiAddress().then((suiAddress) => {
+          setWalletConfirmed(suiAddress != null && suiAddress == currentWallet?.accounts?.[0]?.address)
+        });
+      }, [currentWallet?.accounts]);
+
+      const handleConfirmWallet = async () => {
+        if (currentWallet == null) {
+          return;
+        }
+        const access_token = localStorage.getItem("access_token");
+        let user_id;
+        if (access_token) {
+          const base64Url = access_token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          const token_json = JSON.parse(jsonPayload);
+          user_id = token_json.user_id;
+        }
+    
+        signPersonalMessage({
+          message: new TextEncoder().encode(
+            `Sign this message to prove you are the owner of this wallet. User ID: ${user_id}`
+          ),
+        }).then((res) => {
+          proofRequest(res.signature, currentWallet.accounts[0].address)
+            .then((res) => {
+              console.log("res", res);
+            })
+            .catch((error) => {
+            setError(`${error}`);
+              console.log("error", error);
+            });
+        });
+      }
+  
+      console.log('step',step)
+      const handleUSDCPayment = async (amount: number) => {
+        console.log('amount', amount)
+        console.log('currentWallet', currentWallet)
+        if (currentWallet == null) {
+          return;
+        }
+    
+        try {
+          const suiAddress = await getSuiAddress();
+          console.log(suiAddress, currentWallet)
+          if (suiAddress == null || suiAddress != currentWallet.accounts[0].address) {
+            // We haven't proven the SUI address yet
+            throw new Error("SUI address not found or not matching");
+          }
+          payUSDC(amount * 1000000, suiClient, signAndExecuteTransaction, currentWallet).then((res: unknown) => {
+            const txDigest = (res as { digest: string }).digest;
+            setTimeout(() => {
+              usdcPayment(txDigest).then(() => {
+                setStep("result");
+              }).catch((error) => {
+                setError(`${error}`);
+                console.log('error', error)
+              });
+            }, 1000);
+          }).catch((error) => {
+            console.log('error', error)
+            setError(`${error}`);
+          });
+        } catch {
+          handleConfirmWallet();
+        }
+      }
+      return (
+        <Dialog
+          open={isAddFundsModalOpen}
+          onOpenChange={(change) => {
+            if (step === "result") {
+              getBalance()
+                .then((balance) => {
+                  setBalance(balance);
+                })
+                .catch(() => {
+                  setBalance(0);
+                });
+            }
+            setIsAddFundsModalOpen(change);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Funds</DialogTitle>
+              <DialogDescription>
+                {step === "payment" && "Choose a payment method to add funds to your account."}
+                {step === "amount" && "Choose USD amount."}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 gap-4 py-4">
+              {step === "payment" && (
+                <Button
+                  onClick={() => setStep("amount")}
+                  className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+                >
+                  Pay with USDC
+                </Button>
+              )}
+              {step === "amount" && (
+                <div className="space-y-4">
+                  <Input
+                    id="computeUnits"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={amount}
+                    onChange={(e) => setAmount(Number(e.target.value))}
+                    className="border-purple-200 dark:border-purple-800/30"
+                  />
+                  <Button
+                    onClick={() =>
+                      connectionStatus == "connected" && walletConfirmed ? handleUSDCPayment(amount) : setStep("wallet")
+                    }
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    <ArrowRight className="h-6 w-6" />
+                  </Button>
+                </div>
+              )}
+              {step === "wallet" &&
+                (connectionStatus == "connected" ? (
+                  <Button
+                    onClick={() => (walletConfirmed ? handleUSDCPayment(amount) : handleConfirmWallet())}
+                    className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  >
+                    {walletConfirmed ? "Pay with USDC" : "Confirm Wallet"}
+                  </Button>
+                ) : (
+                  <ConnectModal
+                    trigger={
+                      <Button className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
+                        Connect sui wallet
+                      </Button>
+                    }
+                  />
+                ))}
+              {step === "result" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center">
+                    <Label>Your account has been successfully funded with ${amount.toFixed(2)}</Label>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      );
+    };
 
     return (
       <div className="space-y-6">
@@ -460,7 +619,7 @@ export function CloudView() {
                   Add Funds
                 </Button>
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <CreditCardIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
@@ -487,7 +646,7 @@ export function CloudView() {
                     {isAutoReloadEnabled ? "Disable" : "Enable"}
                   </Button>
                 </div>
-              </div>
+              </div> */}
             </CardContent>
           </Card>
 
@@ -589,7 +748,7 @@ export function CloudView() {
   }
 
   const DocsTab = () => (
-    <iframe src="https://api.atomacloud.com/swagger-ui" className="w-full h-[calc(100vh-4rem)]" />
+    <iframe src="https://docs.atoma.network/documentation/get-started/overview" className="w-full h-[calc(100vh-4rem)]" />
   )
 
   const CalculatorTab = () => {

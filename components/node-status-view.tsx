@@ -51,13 +51,13 @@ export function NodeStatusView() {
     {
       title: "Compute Units",
       value: "Loading...",
-      description: "Past 24 hours",
+      description: "Past week",
       icon: Cpu,
     },
     {
       title: "Avg Latency",
       value: "Loading...",
-      description: "Last hour",
+      description: "Past week",
       icon: Timer,
     },
     {
@@ -129,7 +129,7 @@ export function NodeStatusView() {
         prevStats[4],
         {
           ...prevStats[5],
-          value: (totalRequests * ((1000 * 60) / totalTime)).toFixed(0),
+          value: totalTime?(totalRequests * ((1000 * 60) / totalTime)).toFixed(0):"-",
         },
         ...prevStats.slice(6),
       ]);
@@ -142,7 +142,7 @@ export function NodeStatusView() {
         ...prevStats.slice(0, 4),
         {
           ...prevStats[4],
-          value: `${(totalLatency / totalRequests).toFixed(2)}ms`,
+          value: totalRequests?`${(totalLatency / totalRequests).toFixed(2)}ms`:"- ms",
         },
         ...prevStats.slice(5),
       ]);

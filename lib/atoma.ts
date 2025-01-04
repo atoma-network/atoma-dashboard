@@ -150,11 +150,11 @@ export const listApiKeys = async (): Promise<string[]> => {
 };
 
 export const getComputeUnitsProcessed = async (): Promise<ComputedUnitsProcessedResponse[]> => {
-  return await request({ path: "compute_units_processed?hours=24" });
+  return await request({ path: "compute_units_processed?hours=168" });
 };
 
 export const getLatency = async (): Promise<LatencyResponse[]> => {
-  return await request({ path: "latency?hours=24" });
+  return await request({ path: "latency?hours=168" });
 };
 
 export const getNodesDistribution = async (): Promise<{ country: string; count: number }[]> => {
@@ -162,7 +162,7 @@ export const getNodesDistribution = async (): Promise<{ country: string; count: 
 };
 
 export const getStatsStacks = async (): Promise<StatsStack[]> => {
-  return await request({ path: "get_stats_stacks?hours=24" });
+  return await request({ path: "get_stats_stacks?hours=168" });
 };
 
 export const proofRequest = async (signature: string, walletAddress: string): Promise<void> => {

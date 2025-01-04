@@ -14,7 +14,7 @@ interface ComputeUnitsPaymentProps {
 }
 
 export function ComputeUnitsPayment({ modelName, pricePer1MUnits, onClose }: ComputeUnitsPaymentProps) {
-  const [step, setStep] = useState<'units' | 'payment' | 'api' | 'result'>('units')
+  const [step, setStep] = useState<'units' | 'payment' | 'api' | 'result'>('api')
   const [computeUnits, setComputeUnits] = useState<number>(1000)
   const suiClient = useSuiClient();
   const { currentWallet, connectionStatus } = useCurrentWallet();
