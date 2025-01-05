@@ -2,8 +2,8 @@ import type { SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 
-const proxy_url = process.env.NEXT_PUBLIC_PROXY_URL;
-const USDC_TYPE = process.env.NEXT_PUBLIC_USDC_TYPE;
+const proxy_url = "https://credentials.atomacloud.com";
+const USDC_TYPE = "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC";
 
 export interface NodeSubscription {
   node_small_id: number; // Unique small integer identifier for the node subscription
@@ -217,10 +217,7 @@ export const payUSDC = async (
   if (remainingAmount > 0) {
     throw new Error("Insufficient balance to cover the amount");
   }
-  if (process.env.NEXT_PUBLIC_PROXY_WALLET == null) {
-    throw new Error("Proxy wallet address not found");
-  }
-  tx.transferObjects(selectedCoins, process.env.NEXT_PUBLIC_PROXY_WALLET);
+  tx.transferObjects(selectedCoins, "0xec2c53f7c706e37518afedb71bbe46021fb5b1ab1c2a56754541120cac8d7a9e");
   tx.setSender(currentWallet.accounts[0].address);
   return await signAndExecuteTransaction({
     transaction: tx,
