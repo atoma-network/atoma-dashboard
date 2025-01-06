@@ -23,10 +23,10 @@ export const getApiSample = (modality: ModelModality, modelName?: string) => {
     "model": "`}
     {modelName?modelName:curlVariable("MODEL_NAME")}
     {`",
-    "messages": [
+    "messages": [{
             "role": "user",
             "content": "What is the capital of France?"
-    ],
+    }],
     "max_tokens": 128
   }'`}
   </>);
