@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, type JSX } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -36,6 +36,7 @@ import { ComputeUnitsPayment } from "./compute-units-payment"
 import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getSuiAddress, getTasks, listApiKeys, ModelModality, payUSDC, proofRequest, revokeApiToken, usdcPayment, type NodeSubscription, type Task } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
+import { getApiSample } from "@/lib/utils"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
@@ -55,50 +56,25 @@ interface IUsageHistory {
   model: string;
 }
 
+
 const apiEndpoints = [
   {
     name: "Chat Completions",
     endpoint: "/v1/chat/completions",
     method: "POST",
-    example: `curl https://api.atomacloud.com/v1/chat/completions \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -d '{
-    "stream": true,
-    "model": "MODEL_NAME",
-    "messages": [
-        {
-            "role": "user",
-            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
-        }
-    ],
-    "max_tokens": 128
-}'`,
+    example: getApiSample(ModelModality.ChatCompletions),
   },
   {
     name: "Images Generations",
     endpoint: "/v1/images/generations",
     method: "POST",
-    example: `curl https://api.atomacloud.com/v1/images/generations \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -d '{
-    "model": "MODEL_NAME",
-    "n": 1,
-    "size": "1024x1024",
-}'`,
+    example: getApiSample(ModelModality.ImagesGenerations),
   },
   {
     name: "Embeddings",
     endpoint: "/v1/embeddings",
     method: "POST",
-    example: `curl https://api.atomacloud.com/v1/embeddings \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -d '{
-    "model": "MODEL_NAME",
-    "input": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
-}'`,
+    example: getApiSample(ModelModality.Embeddings),
   },
 ];
 
@@ -122,7 +98,7 @@ export function CloudView() {
   const [modelOptions, setModelOptions] = useState<IModelOptions[]>([]);
   const [balance, setBalance] = useState<number | undefined>(undefined);
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
-  const [exampleUsage, setExampleUsage] = useState<string>(apiEndpoints[0].example);
+  const [exampleUsage, setExampleUsage] = useState<JSX>(apiEndpoints[0].example);
   const [exampleModels, setExampleModels] = useState<string[]>([]);
   const { isLoggedIn, setIsLoggedIn } = useGlobalState();
   const [modelModalities, setModelModalities] = useState<Map<string, ModelModality[]>>(new Map());
@@ -138,7 +114,7 @@ export function CloudView() {
     getTasks().then((tasks_with_modalities) => {
       const tasks = tasks_with_modalities.map((task) => task[0]);
       setModelModalities(new Map(tasks_with_modalities.filter(([task]) => task.model_name !== undefined).map(([task, modalities]) => [task.model_name!, modalities])));
-      setExampleModels(apiEndpoints.map((endpoint) => tasks_with_modalities.find(([task, modalities])=> modalities.includes(endpoint.name as ModelModality) && task.model_name)?.[0].model_name || "MODEL_NAME"));
+      setExampleModels(apiEndpoints.map((endpoint) => tasks_with_modalities.find(([task, modalities])=> modalities.includes(endpoint.name as ModelModality) && task.model_name)?.[0].model_name || "$MODEL_NAME"));
       getAllStacks().then((stacks) => {
         setUsageHistory(
           stacks.map(([stack, timestamp]) => {
@@ -384,8 +360,8 @@ export function CloudView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {apiEndpoints.map((endpoint,index) => (
-                  <TableRow key={endpoint.name} onClick={() => setExampleUsage(endpoint.example.replace('MODEL_NAME', exampleModels[index]))}>
+                {apiEndpoints.map((endpoint) => (
+                  <TableRow key={endpoint.name} onClick={() => setExampleUsage(endpoint.example)}>
                     <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.name}</TableCell>
                     <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.endpoint}</TableCell>
                     <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.method}</TableCell>

@@ -6,6 +6,7 @@ import { ArrowRight, X } from 'lucide-react'
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
 import {  getSuiAddress, ModelModality, payUSDC, proofRequest, usdcPayment } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
+import { getApiSample } from "@/lib/utils"
 
 interface ComputeUnitsPaymentProps {
   modelName: string
@@ -103,42 +104,6 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
     }
   }
 
-  const getApiSample = (features: ModelModality[], modelName: string) => {
-    if (features.includes(ModelModality.ImagesGenerations)) {
-      return `curl https://api.atomacloud.com/v1/images/generations \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -d '{
-    "model": "${modelName}",
-    "n": 1,
-    "size": "1024x1024",
-}'`;
-    }
-    if (features.includes(ModelModality.Embeddings)) {
-      return `curl https://api.atomacloud.com/v1/embeddings \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -d '{
-    "model": "MODEL_NAME",
-    "input": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
-}'`;
-    }
-    return `curl https://api.atomacloud.com/v1/chat/completions \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -d '{
-    "stream": true,
-    "model": "${modelName}",
-    "messages": [
-        {
-            "role": "user",
-            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
-        }
-    ],
-    "max_tokens": 128
-}'`;
-  };
-
   return (
     <Card className="w-full max-w-md mx-auto bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30 relative">
       <Button
@@ -227,7 +192,7 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
             </p>
             <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-x-auto">
               <code className="text-sm text-gray-800 dark:text-gray-200">
-                {getApiSample(features, modelName)}
+                {getApiSample(features[0], modelName)}
               </code>
             </pre>
             <div className="mt-4">
