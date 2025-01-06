@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect, type JSX } from "react"
+import { useState, useMemo, useEffect} from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -98,8 +98,7 @@ export function CloudView() {
   const [modelOptions, setModelOptions] = useState<IModelOptions[]>([]);
   const [balance, setBalance] = useState<number | undefined>(undefined);
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
-  const [exampleUsage, setExampleUsage] = useState<JSX>(apiEndpoints[0].example);
-  const [exampleModels, setExampleModels] = useState<string[]>([]);
+  const [exampleUsage, setExampleUsage] = useState(apiEndpoints[0].example);
   const { isLoggedIn, setIsLoggedIn } = useGlobalState();
   const [modelModalities, setModelModalities] = useState<Map<string, ModelModality[]>>(new Map());
 
@@ -114,7 +113,7 @@ export function CloudView() {
     getTasks().then((tasks_with_modalities) => {
       const tasks = tasks_with_modalities.map((task) => task[0]);
       setModelModalities(new Map(tasks_with_modalities.filter(([task]) => task.model_name !== undefined).map(([task, modalities]) => [task.model_name!, modalities])));
-      setExampleModels(apiEndpoints.map((endpoint) => tasks_with_modalities.find(([task, modalities])=> modalities.includes(endpoint.name as ModelModality) && task.model_name)?.[0].model_name || "$MODEL_NAME"));
+      // setExampleModels(apiEndpoints.map((endpoint) => tasks_with_modalities.find(([task, modalities])=> modalities.includes(endpoint.name as ModelModality) && task.model_name)?.[0].model_name || "$MODEL_NAME"));
       getAllStacks().then((stacks) => {
         setUsageHistory(
           stacks.map(([stack, timestamp]) => {
@@ -175,7 +174,7 @@ export function CloudView() {
         status: 'Available'
       })
     ))
-  }, [subscribers, tasks])
+  }, [subscribers, tasks, modelModalities])
 
   const addApiKey = () => {
     generateApiKey().then(() => listApiKeys().then((keys) => setApiKeys(keys)));
