@@ -97,13 +97,7 @@ const apiEndpoints = [
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
     "model": "MODEL_NAME",
-    "messages": [
-        {
-            "role": "user",
-            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
-        }
-    ],
-    "max_tokens": 128
+    "input": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
 }'`,
   },
 ];
