@@ -396,7 +396,7 @@ export function CloudView() {
   
     const AddFundsModal = () => {
       const [amount, setAmount] = useState<number>(10);
-      const [step, setStep] = useState<"payment" | "amount" | "wallet" | "result">("payment");
+      const [step, setStep] = useState<"payment" | "amount" | "wallet" | "result" | "confirmed">("payment");
       const [walletConfirmed, setWalletConfirmed] = useState<boolean>(false);
       // const { isLoggedIn } = useGlobalState();
       const { currentWallet, connectionStatus } = useCurrentWallet();
@@ -433,8 +433,8 @@ export function CloudView() {
           ),
         }).then((res) => {
           proofRequest(res.signature, currentWallet.accounts[0].address)
-            .then((res) => {
-              console.log("res", res);
+            .then(() => {
+              setStep("confirmed");
             })
             .catch((error) => {
             setError(`${error}`);
@@ -547,6 +547,17 @@ export function CloudView() {
                     }
                   />
                 ))}
+              {step === "confirmed" && (
+                <>
+                  <Label>Wallet was confirmed</Label>
+                  <Button
+                    onClick={() => (walletConfirmed ? handleUSDCPayment(amount) : handleConfirmWallet())}
+                    className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  >
+                    {"Pay with USDC"}
+                  </Button>
+                </>
+              )}
               {step === "result" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-center">
@@ -578,9 +589,9 @@ export function CloudView() {
                 </div>
                 <Button 
                   className="bg-purple-600 hover:bg-purple-700 text-white"
-                  onClick={() => setIsAddFundsModalOpen(true)}
+                  onClick={() => isLoggedIn?setIsAddFundsModalOpen(true):setIsLoginModalOpen(true)}
                 >
-                  Add Funds
+                  {isLoggedIn ? "Add Funds" :"Login or Register"}
                 </Button>
               </div>
               {/* <div className="space-y-2">
