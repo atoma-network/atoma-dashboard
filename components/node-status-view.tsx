@@ -254,7 +254,7 @@ export function NodeStatusView() {
           <CardHeader>
             <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Compute Units Processed</CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
-              Processing activity over the past 24 hours
+              Processing activity over the past 7 days
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -311,7 +311,7 @@ export function NodeStatusView() {
           <CardHeader>
             <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Network Activity</CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
-              Model-wise activity distribution over 24 hours
+              Model-wise activity distribution over 7 days
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -385,7 +385,7 @@ export function NodeStatusView() {
           <CardHeader>
             <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Stacks Activity</CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
-              Stacks activity  over 24 hours
+              Stacks activity  over 7 days
             </CardDescription>
           </CardHeader>
           <CardContent>

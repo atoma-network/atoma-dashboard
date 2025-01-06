@@ -497,7 +497,7 @@ export function CloudView() {
               <DialogTitle>Add Funds</DialogTitle>
               <DialogDescription>
                 {step === "payment" && "Choose a payment method to add funds to your account."}
-                {step === "amount" && "Choose USD amount."}
+                {step === "amount" && "Choose USDC amount."}
               </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-1 gap-4 py-4">

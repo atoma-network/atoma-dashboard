@@ -14,21 +14,21 @@ export const getApiSample = (modality: ModelModality, modelName?: string) => {
   if (modality === ModelModality.ChatCompletions) {
     return (<>
         {`curl https://api.atomacloud.com/v1/chat/completions \\
-      -H "Content-Type: application/json" \\
-      -H "Authorization: Bearer `}
-        {curlVariable("YOUR_API_KEY")}
-        {`" \\
-      -d ' \\
-        "stream": true, \\
-        "model": "`}
-        {modelName?modelName:curlVariable("MODEL_NAME")}
-        {`", \\
-        "messages": [ \\
-                "role": "user", \\
-                "content": "What's the capital of France?" \\
-        ], \\
-        "max_tokens": 128 \\
-      }'`}
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer `}
+      {curlVariable("YOUR_API_KEY")}
+      {`" \\
+  -d '{ \\
+    "stream": true, \\
+    "model": "`}
+    {modelName?modelName:curlVariable("MODEL_NAME")}
+    {`", \\
+    "messages": [ \\
+            "role": "user", \\
+            "content": "What's the capital of France?" \\
+    ], \\
+    "max_tokens": 128 \\
+  }'`}
   </>);
   }
   if (modality === ModelModality.ImagesGenerations) {
@@ -39,14 +39,14 @@ export const getApiSample = (modality: ModelModality, modelName?: string) => {
   -H "Authorization: Bearer `}
         {curlVariable("YOUR_API_KEY")}
         {`" \\
-  -d '{
+  -d '{ \\
     "model": "`}
         {modelName?modelName:curlVariable("MODEL_NAME")}
-        {`",
-    "prompt": "Kitten playing with a ball of yarn",
-    "n": 1,
-    "size": "1024x1024",
-}'`}{" "}
+        {`", \\ 
+    "prompt": "Kitten playing with a ball of yarn", \\
+    "n": 1, \\
+    "size": "1024x1024" \\
+  }'`}
       </>
     );
   }
@@ -58,12 +58,12 @@ export const getApiSample = (modality: ModelModality, modelName?: string) => {
   -H "Authorization: Bearer `}
       {curlVariable("YOUR_API_KEY")}
       {`" \\
-  -d '{
+  -d '{ \\
     "model": "`}
         {modelName?modelName:curlVariable("MODEL_NAME")}
-        {`",
-    "input": "What's the capital of France?"
-}'`}{" "}
+        {`", \\
+    "input": "What's the capital of France?" \\
+  }'`}
     </>
   );
 };
