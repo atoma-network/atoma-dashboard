@@ -4,12 +4,12 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, X } from 'lucide-react'
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
-import {  getSuiAddress, ModelCapabilities, payUSDC, proofRequest, usdcPayment } from "@/lib/atoma"
+import {  getSuiAddress, ModelModality, payUSDC, proofRequest, usdcPayment } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
 
 interface ComputeUnitsPaymentProps {
   modelName: string
-  features: ModelCapabilities[]
+  features: ModelModality[]
   pricePer1MUnits: number
   onClose: () => void
 }
@@ -103,8 +103,8 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
     }
   }
 
-  const getApiSample = (features: ModelCapabilities[], modelName: string) => {
-    if (features.includes(ModelCapabilities.ImagesGenerations)) {
+  const getApiSample = (features: ModelModality[], modelName: string) => {
+    if (features.includes(ModelModality.ImagesGenerations)) {
       return `curl https://api.atomacloud.com/v1/images/generations \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
@@ -114,7 +114,7 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
     "size": "1024x1024",
 }'`;
     }
-    if (features.includes(ModelCapabilities.Embeddings)) {
+    if (features.includes(ModelModality.Embeddings)) {
       return `curl https://api.atomacloud.com/v1/embeddings \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\

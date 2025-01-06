@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Cloud, Key, CreditCardIcon, BookOpen, Calculator, Zap, Info, Copy, CheckCircle2, SquareStackIcon as Stripe, ShoppingCartIcon as Paypal, ArrowRight } from 'lucide-react'
+import { Cloud, Key, CreditCardIcon, BookOpen, Calculator, Info, Copy, CheckCircle2, ArrowRight } from 'lucide-react'
 import {  Delete } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -33,7 +33,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { ComputeUnitsPayment } from "./compute-units-payment"
-import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getSuiAddress, getTasks, listApiKeys, ModelCapabilities, payUSDC, proofRequest, revokeApiToken, usdcPayment, type NodeSubscription, type Task } from "@/lib/atoma"
+import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getSuiAddress, getTasks, listApiKeys, ModelModality, payUSDC, proofRequest, revokeApiToken, usdcPayment, type NodeSubscription, type Task } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
 
@@ -105,7 +105,7 @@ const apiEndpoints = [
 interface IModelOptions {
     id: string;
     name: string;
-    features: ModelCapabilities[];
+    features: ModelModality[];
     pricePer1MTokens: number;
     status: string;
 }
@@ -125,8 +125,7 @@ export function CloudView() {
   const [exampleUsage, setExampleUsage] = useState<string>(apiEndpoints[0].example);
   const [exampleModels, setExampleModels] = useState<string[]>([]);
   const { isLoggedIn, setIsLoggedIn } = useGlobalState();
-  const [modelCapabilities, setModelCapabilities] = useState<Map<string, ModelCapabilities[]>>(new Map());
-  console.log('modelCapabilities', modelCapabilities)
+  const [modelModalities, setModelModalities] = useState<Map<string, ModelModality[]>>(new Map());
 
   useEffect(() => {
     getBalance()
@@ -136,10 +135,10 @@ export function CloudView() {
       .catch(() => {
         setBalance(0);
       });
-    getTasks().then((tasks_with_capabilities) => {
-      const tasks = tasks_with_capabilities.map((task) => task[0]);
-      setModelCapabilities(new Map(tasks_with_capabilities.filter(([task]) => task.model_name !== undefined).map(([task, capabilities]) => [task.model_name!, capabilities])));
-      setExampleModels(apiEndpoints.map((endpoint) => tasks_with_capabilities.find(([task, capabilities])=> capabilities.includes(endpoint.name as ModelCapabilities) && task.model_name)?.[0].model_name || "MODEL_NAME"));
+    getTasks().then((tasks_with_modalities) => {
+      const tasks = tasks_with_modalities.map((task) => task[0]);
+      setModelModalities(new Map(tasks_with_modalities.filter(([task]) => task.model_name !== undefined).map(([task, modalities]) => [task.model_name!, modalities])));
+      setExampleModels(apiEndpoints.map((endpoint) => tasks_with_modalities.find(([task, modalities])=> modalities.includes(endpoint.name as ModelModality) && task.model_name)?.[0].model_name || "MODEL_NAME"));
       getAllStacks().then((stacks) => {
         setUsageHistory(
           stacks.map(([stack, timestamp]) => {
@@ -167,8 +166,8 @@ export function CloudView() {
     getSubscriptions().then((subscriptions) => {
       setSubscribers(subscriptions);
     });
-    getTasks().then((tasks_with_capabilities) => {
-      const tasks = tasks_with_capabilities.map((task) => task[0]);
+    getTasks().then((tasks_with_modalities) => {
+      const tasks = tasks_with_modalities.map((task) => task[0]);
       setTasks(tasks)
     });
   }, [isLoggedIn, setIsLoggedIn]);
@@ -195,7 +194,7 @@ export function CloudView() {
       {
         id: model,
         name: model,
-        features: modelCapabilities.get(model) || [],
+        features: modelModalities.get(model) || [],
         pricePer1MTokens: availableModels[model].price_per_one_million_compute_units,
         status: 'Available'
       })
@@ -254,7 +253,7 @@ export function CloudView() {
                     </TooltipTrigger>
                     <TooltipContent className="w-80 p-4">
                       <div className="space-y-2">
-                        <h4 className="font-semibold">Features & Capabilities</h4>
+                        <h4 className="font-semibold">Features & Modalities</h4>
                         <ul className="text-sm space-y-1">
                           {model.features.map((feature, index) => (
                             <li key={index} className="flex items-center gap-2">
@@ -364,7 +363,6 @@ export function CloudView() {
                   <>
                     <div>No API key generated yet</div>
                     <Button variant="outline" className="flex justify-start items-center" onClick={addApiKey}>
-                      <Stripe className="mr-2 h-4 w-4" />
                       Generate API Token
                     </Button>
                   </>

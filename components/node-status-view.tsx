@@ -171,8 +171,8 @@ export function NodeStatusView() {
         ...prevStats.slice(2),
       ]);
     });
-    getTasks().then((tasks_with_capabilities) => {
-      const tasks = tasks_with_capabilities.map((task) => task[0]);
+    getTasks().then((tasks_with_modalities) => {
+      const tasks = tasks_with_modalities.map((task) => task[0]);
       console.log('tasks', tasks);
       const models: { [key: string]: boolean } = {};
       setTasks(tasks);

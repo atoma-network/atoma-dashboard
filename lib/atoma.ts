@@ -13,7 +13,7 @@ export interface NodeSubscription {
   valid: boolean; // Indicates whether the subscription is valid
 }
 
-export enum ModelCapabilities {
+export enum ModelModality {
   ChatCompletions = "Chat Completions",
   ImagesGenerations = "Images Generations",
   Embeddings = "Embeddings",
@@ -131,7 +131,7 @@ export const getSubscriptions = async (): Promise<NodeSubscription[]> => {
   return await request({ path: "subscriptions" });
 };
 
-export const getTasks = async (): Promise<[Task, ModelCapabilities[]][]> => {
+export const getTasks = async (): Promise<[Task, ModelModality[]][]> => {
   return await request({ path: "tasks" });
 };
 
