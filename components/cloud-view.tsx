@@ -33,7 +33,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { ComputeUnitsPayment } from "./compute-units-payment"
-import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getSuiAddress, getTasks, listApiKeys, payUSDC, proofRequest, revokeApiToken, usdcPayment, type NodeSubscription, type Task } from "@/lib/atoma"
+import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getSuiAddress, getTasks, listApiKeys, ModelCapabilities, payUSDC, proofRequest, revokeApiToken, usdcPayment, type NodeSubscription, type Task } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
 
@@ -76,7 +76,7 @@ const apiEndpoints = [
 }'`,
   },
   {
-    name: "Image Generation",
+    name: "Images Generations",
     endpoint: "/v1/images/generations",
     method: "POST",
     example: `curl https://api.atomacloud.com/v1/images/generations \\
@@ -105,7 +105,7 @@ const apiEndpoints = [
 interface IModelOptions {
     id: string;
     name: string;
-    features: string[];
+    features: ModelCapabilities[];
     pricePer1MTokens: number;
     status: string;
 }
@@ -123,9 +123,11 @@ export function CloudView() {
   const [balance, setBalance] = useState<number | undefined>(undefined);
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
   const [exampleUsage, setExampleUsage] = useState<string>(apiEndpoints[0].example);
+  const [exampleModels, setExampleModels] = useState<string[]>([]);
   const { isLoggedIn, setIsLoggedIn } = useGlobalState();
+  const [modelCapabilities, setModelCapabilities] = useState<Map<string, ModelCapabilities[]>>(new Map());
+  console.log('modelCapabilities', modelCapabilities)
 
-  console.log("CloudView", {activeTab,privacyEnabled,isLoginModalOpen,isComputeUnitsModalOpen,selectedModelForPayment,apiKeys,subscribers,tasks,modelOptions,balance,usageHistory,exampleUsage});
   useEffect(() => {
     getBalance()
       .then((balance) => {
@@ -134,8 +136,10 @@ export function CloudView() {
       .catch(() => {
         setBalance(0);
       });
-    getTasks().then((tasks) => {
-      console.log(tasks);
+    getTasks().then((tasks_with_capabilities) => {
+      const tasks = tasks_with_capabilities.map((task) => task[0]);
+      setModelCapabilities(new Map(tasks_with_capabilities.filter(([task]) => task.model_name !== undefined).map(([task, capabilities]) => [task.model_name!, capabilities])));
+      setExampleModels(apiEndpoints.map((endpoint) => tasks_with_capabilities.find(([task, capabilities])=> capabilities.includes(endpoint.name as ModelCapabilities) && task.model_name)?.[0].model_name || "MODEL_NAME"));
       getAllStacks().then((stacks) => {
         setUsageHistory(
           stacks.map(([stack, timestamp]) => {
@@ -163,7 +167,8 @@ export function CloudView() {
     getSubscriptions().then((subscriptions) => {
       setSubscribers(subscriptions);
     });
-    getTasks().then((tasks) => {
+    getTasks().then((tasks_with_capabilities) => {
+      const tasks = tasks_with_capabilities.map((task) => task[0]);
       setTasks(tasks)
     });
   }, [isLoggedIn, setIsLoggedIn]);
@@ -190,7 +195,7 @@ export function CloudView() {
       {
         id: model,
         name: model,
-        features: [],
+        features: modelCapabilities.get(model) || [],
         pricePer1MTokens: availableModels[model].price_per_one_million_compute_units,
         status: 'Available'
       })
@@ -211,12 +216,8 @@ export function CloudView() {
   }
 
   const handleStartUsing = (model:IModelOptions) => {
-    if (!isLoggedIn) {
-      setIsLoginModalOpen(true)
-    } else {
       setSelectedModelForPayment(model)
       setIsComputeUnitsModalOpen(true)
-    }
   }
 
   const ComputeTab = () => (
@@ -305,11 +306,7 @@ export function CloudView() {
               <Button 
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-800 dark:hover:bg-purple-900"
                 onClick={() => {
-                  if (isLoggedIn) { 
                     handleStartUsing(model)
-                  }  else {
-                    setIsLoginModalOpen(true)
-                  }
                 }}
               >
                 Start Using
@@ -389,8 +386,8 @@ export function CloudView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {apiEndpoints.map((endpoint) => (
-                  <TableRow key={endpoint.name} onClick={() => setExampleUsage(endpoint.example)}>
+                {apiEndpoints.map((endpoint,index) => (
+                  <TableRow key={endpoint.name} onClick={() => setExampleUsage(endpoint.example.replace('MODEL_NAME', exampleModels[index]))}>
                     <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.name}</TableCell>
                     <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.endpoint}</TableCell>
                     <TableCell className="text-gray-900 dark:text-gray-300">{endpoint.method}</TableCell>
@@ -416,10 +413,10 @@ export function CloudView() {
   const BillingTab = () => {
     const totalUsage = usageHistory.reduce((sum, item) => sum + item.tokens, 0)
     const totalCost = usageHistory.reduce((sum, item) => sum + item.cost, 0)
-    const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false)
-    const [isAutoReloadEnabled, setIsAutoReloadEnabled] = useState(false)
+    // const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false)
+    // const [isAutoReloadEnabled, setIsAutoReloadEnabled] = useState(false)
     const [isAddFundsModalOpen, setIsAddFundsModalOpen] = useState(false)
-    const [cardNumber, setCardNumber] = useState<string | null>(null);
+    // const [cardNumber, setCardNumber] = useState<string | null>(null);
   
   
 
@@ -701,7 +698,7 @@ export function CloudView() {
             </Table>
           </CardContent>
         </Card>
-        {isNewCardModalOpen && (
+        {/* {isNewCardModalOpen && (
           <Dialog open={isNewCardModalOpen} onOpenChange={setIsNewCardModalOpen}>
             <DialogContent>
               <DialogHeader>
@@ -735,7 +732,7 @@ export function CloudView() {
               </form>
             </DialogContent>
           </Dialog>
-        )}
+        )} */}
         <AddFundsModal />
       </div>
     )
@@ -883,6 +880,7 @@ export function CloudView() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <ComputeUnitsPayment
             modelName={selectedModelForPayment.name}
+            features={selectedModelForPayment.features}
             pricePer1MUnits={selectedModelForPayment.pricePer1MTokens}
             onClose={() => setIsComputeUnitsModalOpen(false)}
           />

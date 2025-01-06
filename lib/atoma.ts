@@ -13,6 +13,12 @@ export interface NodeSubscription {
   valid: boolean; // Indicates whether the subscription is valid
 }
 
+export enum ModelCapabilities {
+  ChatCompletions = "Chat Completions",
+  ImagesGenerations = "Images Generations",
+  Embeddings = "Embeddings",
+}
+
 export interface Task {
   task_small_id: number; // Unique small integer identifier for the task
   task_id: string; // Unique string identifier for the task
@@ -125,7 +131,7 @@ export const getSubscriptions = async (): Promise<NodeSubscription[]> => {
   return await request({ path: "subscriptions" });
 };
 
-export const getTasks = async (): Promise<Task[]> => {
+export const getTasks = async (): Promise<[Task, ModelCapabilities[]][]> => {
   return await request({ path: "tasks" });
 };
 

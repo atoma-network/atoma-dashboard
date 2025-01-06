@@ -4,16 +4,17 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, X } from 'lucide-react'
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
-import {  getSuiAddress, payUSDC, proofRequest, usdcPayment } from "@/lib/atoma"
+import {  getSuiAddress, ModelCapabilities, payUSDC, proofRequest, usdcPayment } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
 
 interface ComputeUnitsPaymentProps {
   modelName: string
+  features: ModelCapabilities[]
   pricePer1MUnits: number
   onClose: () => void
 }
 
-export function ComputeUnitsPayment({ modelName, pricePer1MUnits, onClose }: ComputeUnitsPaymentProps) {
+export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onClose }: ComputeUnitsPaymentProps) {
   const [step, setStep] = useState<'units' | 'payment' | 'api' | 'result'>('api')
   const [computeUnits, setComputeUnits] = useState<number>(1000)
   const suiClient = useSuiClient();
@@ -102,9 +103,27 @@ export function ComputeUnitsPayment({ modelName, pricePer1MUnits, onClose }: Com
     }
   }
 
-  const getApiSample = () => {
-    return `
-curl https://api.atomacloud.com/v1/chat/completions \\
+  const getApiSample = (features: ModelCapabilities[], modelName: string) => {
+    if (features.includes(ModelCapabilities.ImagesGenerations)) {
+      return `curl https://api.atomacloud.com/v1/images/generations \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -d '{
+    "model": "${modelName}",
+    "n": 1,
+    "size": "1024x1024",
+}'`;
+    }
+    if (features.includes(ModelCapabilities.Embeddings)) {
+      return `curl https://api.atomacloud.com/v1/embeddings \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -d '{
+    "model": "MODEL_NAME",
+    "input": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter."
+}'`;
+    }
+    return `curl https://api.atomacloud.com/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
@@ -117,9 +136,8 @@ curl https://api.atomacloud.com/v1/chat/completions \\
         }
     ],
     "max_tokens": 128
-  }'
-    `
-  }
+}'`;
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-800/30 relative">
@@ -209,7 +227,7 @@ curl https://api.atomacloud.com/v1/chat/completions \\
             </p>
             <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-x-auto">
               <code className="text-sm text-gray-800 dark:text-gray-200">
-                {getApiSample()}
+                {getApiSample(features, modelName)}
               </code>
             </pre>
             <div className="mt-4">
