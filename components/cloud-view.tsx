@@ -37,6 +37,7 @@ import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getSuiAddre
 import { useGlobalState } from "@/app/GlobalStateContext"
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
 import { getApiSample } from "@/lib/utils"
+import Image from "next/image"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
@@ -506,6 +507,7 @@ export function CloudView() {
                   onClick={() => setStep("amount")}
                   className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
+                  <Image src="/usdc.svg" alt="USDC" width={24} height={24} className="mr-2" />
                   Pay with USDC
                 </Button>
               )}
