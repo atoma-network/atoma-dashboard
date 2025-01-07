@@ -36,7 +36,7 @@ import { ComputeUnitsPayment } from "./compute-units-payment"
 import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getSuiAddress, getTasks, listApiKeys, ModelModality, payUSDC, proofRequest, revokeApiToken, usdcPayment, type NodeSubscription, type Task } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
-import { getApiSample } from "@/lib/utils"
+import { GetApiSample } from "@/components/ui/GetApiSample"
 import Image from "next/image"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
@@ -63,19 +63,19 @@ const apiEndpoints = [
     name: "Chat Completions",
     endpoint: "/v1/chat/completions",
     method: "POST",
-    example: getApiSample(ModelModality.ChatCompletions),
+    example: <GetApiSample modality={ModelModality.ChatCompletions}/>,
   },
   {
     name: "Images Generations",
     endpoint: "/v1/images/generations",
     method: "POST",
-    example: getApiSample(ModelModality.ImagesGenerations),
+    example: <GetApiSample modality={ModelModality.ImagesGenerations}/>,
   },
   {
     name: "Embeddings",
     endpoint: "/v1/embeddings",
     method: "POST",
-    example: getApiSample(ModelModality.Embeddings),
+    example: <GetApiSample modality={ModelModality.Embeddings}/>,
   },
 ];
 
@@ -374,9 +374,7 @@ export function CloudView() {
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Example Usage</h3>
             <pre className="bg-gray-100 dark:bg-[#1A1C23] p-4 rounded-md overflow-x-auto">
-              <code className="text-sm">
                 {exampleUsage}
-              </code>
             </pre>
           </div>
         </CardContent>
@@ -840,7 +838,14 @@ export function CloudView() {
               key={id}
               variant={activeTab === id ? 'default' : 'outline'}
               className={activeTab === id ? "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300" : "bg-white dark:bg-gray-800"}
-              onClick={() => setActiveTab(id as TabType)}
+              onClick={() => {
+                if (id === "docs") {
+                  window.open("https://docs.atoma.network/cloud-api-reference", "_blank");
+                } else {
+                  setActiveTab(id as TabType);
+                }
+              }
+              }
             >
               <Icon className="mr-2 h-4 w-4" />
               {label}

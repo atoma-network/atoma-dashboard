@@ -6,7 +6,7 @@ import { ArrowRight, X } from 'lucide-react'
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
 import {  getSuiAddress, ModelModality, payUSDC, proofRequest, usdcPayment } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
-import { getApiSample } from "@/lib/utils"
+import { GetApiSample } from "@/components/ui/GetApiSample"
 
 interface ComputeUnitsPaymentProps {
   modelName: string
@@ -190,10 +190,8 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Use the following API call to start using the {modelName} model:
             </p>
-            <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-x-auto">
-              <code className="text-sm text-gray-800 dark:text-gray-200">
-                {getApiSample(features[0], modelName)}
-              </code>
+            <pre className="bg-gray-100 dark:bg-gray-800 rounded-md overflow-x-auto p-0">
+              <GetApiSample modality={features[0]} modelName={modelName}/>
             </pre>
             <div className="mt-4">
               <p className="text-sm text-gray-600 dark:text-gray-400">

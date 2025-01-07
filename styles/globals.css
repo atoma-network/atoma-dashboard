@@ -70,3 +70,16 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+
+.code-container {
+}
+
+
+.copy {
+  box-shadow: 0px 0px 10px 5px rgba(243,244,246, 1);
+}
+
+.dark .copy {
+  box-shadow: 0px 0px 10px 5px rgba(31,41,55, 1);
+}
