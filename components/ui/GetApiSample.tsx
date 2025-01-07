@@ -98,7 +98,7 @@ export function GetApiSample({ modality, modelName }: ApiSampleProps) {
         </div>
         <Image
           src={isCopied ? "/copy-done.svg" : "/copy.svg"}
-          className="cursor dark:invert"
+          className="cursor-pointer dark:invert"
           alt="copy"
           title="Copy to clipboard"
           width={24}
