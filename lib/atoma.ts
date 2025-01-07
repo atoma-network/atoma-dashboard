@@ -5,7 +5,6 @@ import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 const proxy_url = process.env.NEXT_PUBLIC_PROXY_URL;
 const USDC_TYPE = process.env.NEXT_PUBLIC_USDC_TYPE;
 
-
 export interface NodeSubscription {
   node_small_id: number; // Unique small integer identifier for the node subscription
   task_small_id: number; // Unique small integer identifier for the task
