@@ -77,6 +77,9 @@ export function NodeStatusView() {
   // const [statsStack, setStatsStacks] = useState<unknown[]>([]);
   // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
   // const [latency, setLatency] = useState<LatencyResponse[]>([]);
+  console.log('networkActivityData',networkActivityData)
+  console.log('computeUnitsData', computeUnitsData)
+  console.log('activityModels',activityModels)
   useEffect(() => {
     // getStatsStacks().then((stacks) => {
     //   setStatsStacks(stacks.map((data: StatsStack) => ({
@@ -90,7 +93,6 @@ export function NodeStatusView() {
       const totalUnits = computeUnits.reduce((sum, data) => sum + data.amount, 0);
       const totalRequests = computeUnits.reduce((sum, data) => sum + data.requests, 0);
       const totalTime = computeUnits.reduce((sum, data) => sum + data.time, 0);
-      console.log(computeUnits);
       setActivityModels(
         Array.from(new Set(computeUnits.map((data) => data.model_name))).map((model_name, i) => ({
           model_name: model_name,
@@ -104,14 +106,12 @@ export function NodeStatusView() {
         acc[data.timestamp][data.model_name] = data.amount;
         return acc;
       }, {});
-      console.log("group_by_time", group_by_time);
       const sortedGroupByTime = Object.keys(group_by_time)
         .sort()
         .map((key) => ({
-          time: new Date(key).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          time: new Date(key).toLocaleTimeString([], { weekday:"short", hour: "2-digit", minute: "2-digit" }),
           data: group_by_time[key],
         }));
-      console.log("sortedGroupByTime", sortedGroupByTime);
 
       setNetworkActivityData(sortedGroupByTime);
       setComputeUnitsData(
@@ -173,7 +173,6 @@ export function NodeStatusView() {
     });
     getTasks().then((tasks_with_modalities) => {
       const tasks = tasks_with_modalities.map((task) => task[0]);
-      console.log('tasks', tasks);
       const models: { [key: string]: boolean } = {};
       setTasks(tasks);
       for (const task of tasks) {
@@ -275,7 +274,6 @@ export function NodeStatusView() {
                   dataKey="time" 
                   tick={{ fill: 'var(--purple-600)' }}
                   scale="point"
-                  interval={2}
                   padding={{ left: 10, right: 30 }}
                 />
                 <YAxis
@@ -284,6 +282,7 @@ export function NodeStatusView() {
                 />
                 <Tooltip
                   content={({ active, payload, label }) => {
+                    console.log(active, payload, label);
                     if (active && payload && payload.length) {
                       return (
                         <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
@@ -333,17 +332,11 @@ export function NodeStatusView() {
                   dataKey="time" 
                   tick={{ fill: 'var(--purple-600)' }}
                   scale="point"
-                  interval={2}
                   padding={{ left: 10, right: 30 }}
                 />
                 <YAxis
-                  dataKey={"data"}
                   tick={{ fill: 'var(--purple-600)' }}
-                  tickFormatter={(value) => {
-                    console.log(value)
-                  return  `${value / 1000}k`
-                  }
-                  }
+                  tickFormatter={(value) => `${value / 1000}k`}
                 />
                 <Tooltip
                   content={({ active, payload, label }) => {
@@ -369,8 +362,9 @@ export function NodeStatusView() {
                   return (
                     <Line
                       key={model.model_name}
+                      name={model.model_name}
                       type="monotone"
-                      dataKey={model.model_name}
+                      dataKey={(data) => data.data[model.model_name] || 0}
                       stroke={model.color}
                       strokeWidth={2}
                     />
