@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import {
   getComputeUnitsProcessed,
   getLatency,
-  // getNodesDistribution,
+  getNodesDistribution,
   getSubscriptions,
   getTasks,
   type ComputedUnitsProcessedResponse,
@@ -19,15 +19,7 @@ import {
 } from "@/lib/atoma";
 import Image from "next/image";
 import { simplifyModelName } from "@/lib/utils";
-
-const nodeDistribution = [
-  { region: "North America", nodes: 856, percentage: 32.6 },
-  { region: "Europe", nodes: 743, percentage: 28.3 },
-  { region: "Asia Pacific", nodes: 524, percentage: 20.0 },
-  { region: "South America", nodes: 285, percentage: 10.9 },
-  { region: "Africa", nodes: 215, percentage: 8.2 }
-]
-
+import { countries } from 'countries-list'; 
 
 export function NodeStatusView() {
   const [stats, setStats] = useState([
@@ -75,6 +67,7 @@ export function NodeStatusView() {
   const [activityModels, setActivityModels] = useState<{ model_name: string; color: string }[]>([]);
   const [networkActivityData, setNetworkActivityData] = useState<unknown[]>([]);
   const [modelDistribution, setModelDistruibution] = useState<{ model: string, nodesRunning: number }[]>([]);
+  const [nodeDistribution, setNodeDistribution] = useState<Record<string, { name: string; nodes: number; percentage: number }>>({});
   // const [statsStack, setStatsStacks] = useState<unknown[]>([]);
   // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
   // const [latency, setLatency] = useState<LatencyResponse[]>([]);
@@ -83,13 +76,41 @@ export function NodeStatusView() {
   // console.log('activityModels', activityModels)
 
   useEffect(() => {
-    // getStatsStacks().then((stacks) => {
-    //   setStatsStacks(stacks.map((data: StatsStack) => ({
-    //     time: new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    //     bought: data.num_compute_units,
-    //     settled: data.settled_num_compute_units,
-    //   })));
-    // });
+    getNodesDistribution().then((nodes) => {
+      const countryToContinent: Record<string,string> = Object.fromEntries(
+        Object.entries(countries).map(([, country]) => [country.name.toLowerCase(), country.continent])
+      );
+
+      const nodeDistribution:Record<string, { name: string; nodes: number; percentage: number }> = {
+        "EU": { name: "Europe", nodes: 0, percentage: 0 },
+        "AS": { name: "Asia", nodes: 0, percentage: 0 },
+        "NA": { name: "North America", nodes: 0, percentage: 0 },
+        "AF": { name: "Africa", nodes: 0, percentage: 0 },
+        "AN": { name: "Antarctica", nodes: 0, percentage: 0 },
+        "SA": { name: "South America", nodes: 0, percentage: 0 },
+        "OC": { name: "Oceania", nodes: 0, percentage: 0 },
+        "UN": { name:"Unknown", nodes: 0, percentage: 0 }
+      };
+      let totalNodes = 0;
+      nodes.forEach((node) => {
+        const continent = countryToContinent[node.country.toLowerCase()];
+        if (continent in nodeDistribution) {
+          nodeDistribution[continent].nodes += 1;
+        } else {
+          console.log(`${node.country} region not found`);
+          nodeDistribution["UN"].nodes += 1;
+        }
+        totalNodes += 1;
+      });
+      Object.keys(nodeDistribution).forEach((key) => {
+        if (nodeDistribution[key].nodes === 0) {
+          delete nodeDistribution[key];
+        } else {
+          nodeDistribution[key].percentage = (nodeDistribution[key].nodes / totalNodes) * 100;
+        }
+      });
+      setNodeDistribution(nodeDistribution);
+    });
     getComputeUnitsProcessed().then((computeUnits: ComputedUnitsProcessedResponse[]) => {
       // setComputeUnits(computeUnits);
       const totalUnits = computeUnits.reduce((sum, data) => sum + data.amount, 0);
@@ -562,10 +583,10 @@ export function NodeStatusView() {
               <div className="absolute bottom-4 left-4 right-4 text-white">
                 <p className="text-sm font-medium">Node distribution across major regions</p>
                 <div className="mt-2 grid grid-cols-2 gap-2">
-                  {nodeDistribution.map((item) => (
-                    <div key={item.region} className="flex items-center justify-between">
-                      <span className="text-xs">{item.region}</span>
-                      <span className="text-xs font-bold">{item.percentage.toFixed(1)}%</span>
+                  {Object.keys(nodeDistribution).sort().map((item) => (
+                    <div key={nodeDistribution[item].name} className="flex items-center justify-between">
+                      <span className="text-xs">{nodeDistribution[item].name}</span>
+                      <span className="text-xs font-bold">{nodeDistribution[item].percentage.toFixed(1)}%</span>
                     </div>
                   ))}
                 </div>
@@ -591,11 +612,11 @@ export function NodeStatusView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {nodeDistribution.map((item) => (
-                  <TableRow key={item.region} className="border-purple-200 dark:border-purple-800/30">
-                    <TableCell className="font-medium text-purple-700 dark:text-purple-300">{item.region}</TableCell>
-                    <TableCell className="text-purple-600 dark:text-purple-400">{item.nodes}</TableCell>
-                    <TableCell className="text-purple-600 dark:text-purple-400">{item.percentage.toFixed(1)}%</TableCell>
+                {Object.keys(nodeDistribution).sort().map((item) => (
+                  <TableRow key={nodeDistribution[item].name} className="border-purple-200 dark:border-purple-800/30">
+                    <TableCell className="font-medium text-purple-700 dark:text-purple-300">{nodeDistribution[item].name}</TableCell>
+                    <TableCell className="text-purple-600 dark:text-purple-400">{nodeDistribution[item].nodes}</TableCell>
+                    <TableCell className="text-purple-600 dark:text-purple-400">{nodeDistribution[item].percentage.toFixed(1)}%</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
