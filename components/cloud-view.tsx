@@ -442,7 +442,6 @@ export function CloudView() {
         });
       }
   
-      console.log('step',step)
       const handleUSDCPayment = async (amount: number) => {
         console.log('amount', amount)
         console.log('currentWallet', currentWallet)
@@ -517,7 +516,11 @@ export function CloudView() {
                     min="1"
                     step="1"
                     value={amount}
-                    onChange={(e) => setAmount(Number(e.target.value))}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 0;
+                      e.target.value = value.toString();
+                      setAmount(value);
+                    }}
                     className="border-purple-200 dark:border-purple-800/30"
                   />
                   <Button
