@@ -18,6 +18,7 @@ import {
   type Task,
 } from "@/lib/atoma";
 import Image from "next/image";
+import { simplifyModelName } from "@/lib/utils";
 
 const nodeDistribution = [
   { region: "North America", nodes: 856, percentage: 32.6 },
@@ -227,7 +228,7 @@ export function NodeStatusView() {
     // setSubscribers(Object.entries(subscribers).map(([model_name, nodesRunning]) => ({ model_name, nodesRunning })));
     setModelDistruibution(
       Object.entries(subscribers).map(([model, nodesRunning]) => ({
-        model: model.replace(/^.*\//, ""),
+        model: simplifyModelName(model),
         nodesRunning,
       }))
     );
@@ -379,7 +380,7 @@ export function NodeStatusView() {
                   return (
                     <Line
                       key={model.model_name}
-                      name={model.model_name.replace(/^.*\//, "")}
+                      name={simplifyModelName(model.model_name)}
                       type="monotone"
                       dataKey={(data) => data.data[model.model_name] || 0}
                       stroke={model.color}

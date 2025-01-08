@@ -38,6 +38,7 @@ import { useGlobalState } from "@/app/GlobalStateContext"
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
 import { GetApiSample } from "@/components/ui/GetApiSample"
 import Image from "next/image"
+import { simplifyModelName } from "@/lib/utils"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
@@ -219,7 +220,7 @@ export function CloudView() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-lg font-medium text-gray-900 dark:text-white">
                 <div className="flex flex-col">
-                  <span>{model.name.replace(/^.*\//, '')}</span>
+                  <span>{simplifyModelName(model.name)}</span>
                   <span className="text-xs text-gray-600 dark:text-gray-400"> {model.name}</span>
                 </div>
                 <TooltipProvider>
