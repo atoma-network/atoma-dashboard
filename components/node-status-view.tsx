@@ -111,62 +111,89 @@ export function NodeStatusView() {
       });
       setNodeDistribution(nodeDistribution);
     });
-    getComputeUnitsProcessed().then((computeUnits: ComputedUnitsProcessedResponse[]) => {
-      // setComputeUnits(computeUnits);
-      const totalUnits = computeUnits.reduce((sum, data) => sum + data.amount, 0);
-      const totalRequests = computeUnits.reduce((sum, data) => sum + data.requests, 0);
-      const totalTime = computeUnits.reduce((sum, data) => sum + data.time, 0);
-      setActivityModels(
-        Array.from(new Set(computeUnits.map((data) => data.model_name))).map((model_name, i) => ({
-          model_name: model_name,
-          color: `hsl(var(--chart-${i + 1}))`,
-        }))
-      );
-      computeUnits.forEach((value) => {
-        value.timestamp = new Date(value.timestamp).toISOString();
-      })
-      const group_by_time = computeUnits.reduce((acc: { [key: string]: { [key: string]: number } }, data) => {
-        if (!(data.timestamp in acc)) {
-          acc[data.timestamp] = {};
-        }
-        acc[data.timestamp][data.model_name] = data.amount;
-        return acc;
-      }, {});
-      // Fill the empty time slots
-      Array.from({ length: 24 * 7 }, (_, i) => {
-        const date = new Date();
-        date.setHours(date.getHours() - i, 0, 0, 0);
-        const timeKey = date.toISOString();
-        if (!(timeKey in group_by_time)) {
-          group_by_time[timeKey] = {};
-        } 
+    getTasks().then((tasks_with_modalities) => {
+      const tasks = tasks_with_modalities.map((task) => task[0]);
+      const models: { [key: string]: boolean } = {};
+      setTasks(tasks);
+      getComputeUnitsProcessed().then((computeUnits: ComputedUnitsProcessedResponse[]) => {
+        // setComputeUnits(computeUnits);
+        const totalUnits = computeUnits.reduce((sum, data) => sum + data.amount, 0);
+        const totalRequests = computeUnits.reduce((sum, data) => sum + data.requests, 0);
+        const totalTime = computeUnits.reduce((sum, data) => sum + data.time, 0);
+        setActivityModels(
+          Array.from(new Set(computeUnits.map((data) => data.model_name)))
+            .filter((model) => tasks.some((task) => task.model_name === model))
+            .map((model_name, i) => ({
+              model_name: model_name,
+              color: `hsl(var(--chart-${i + 1}))`,
+            }))
+        );
+        computeUnits.forEach((value) => {
+          value.timestamp = new Date(value.timestamp).toISOString();
+        })
+        const group_by_time = computeUnits.reduce((acc: { [key: string]: { [key: string]: number } }, data) => {
+          if (!(data.timestamp in acc)) {
+            acc[data.timestamp] = {};
+          }
+          if (tasks.some((task) => task.model_name === data.model_name)) {
+            acc[data.timestamp][data.model_name] = data.amount;
+          }
+          return acc;
+        }, {});
+        // Fill the empty time slots
+        Array.from({ length: 24 * 7 }, (_, i) => {
+          const date = new Date();
+          date.setHours(date.getHours() - i, 0, 0, 0);
+          const timeKey = date.toISOString();
+          if (!(timeKey in group_by_time)) {
+            group_by_time[timeKey] = {};
+          } 
+        });
+        const sortedGroupByTime = Object.keys(group_by_time)
+          .sort()
+          .map((key) => ({
+            time: new Date(key).toLocaleTimeString([], { month:"numeric", day:"numeric", hour: "2-digit", minute: "2-digit" }),
+            data: group_by_time[key],
+          }));
+        
+        setNetworkActivityData(sortedGroupByTime);
+        setComputeUnitsData(
+          sortedGroupByTime.map((data) => ({
+            time: data.time,
+            units: Object.keys(data.data).reduce((sum, key) => sum + data.data[key] , 0),
+          }))
+        );
+        setStats((prevStats) => [
+          ...prevStats.slice(0, 3),
+          {
+            ...prevStats[3],
+            value: totalUnits.toString(),
+          },
+          prevStats[4],
+          {
+            ...prevStats[5],
+            value: totalTime?(totalRequests * ((1000 * 60) / totalTime)).toFixed(0):"-",
+          },
+          ...prevStats.slice(6),
+        ]);
       });
-      const sortedGroupByTime = Object.keys(group_by_time)
-        .sort()
-        .map((key) => ({
-          time: new Date(key).toLocaleTimeString([], { month:"numeric", day:"numeric", hour: "2-digit", minute: "2-digit" }),
-          data: group_by_time[key],
-        }));
-
-      setNetworkActivityData(sortedGroupByTime);
-      setComputeUnitsData(
-        sortedGroupByTime.map((data) => ({
-          time: data.time,
-          units: Object.keys(data.data).reduce((sum, key) => sum + data.data[key] , 0),
-        }))
-      );
+      for (const task of tasks) {
+        if (!task.model_name) {
+          continue;
+        }
+        if (task.model_name in models) {
+          models[task.model_name] ||= !task.is_deprecated;
+        } else {
+          models[task.model_name] = task.is_deprecated;
+        }
+      }
       setStats((prevStats) => [
-        ...prevStats.slice(0, 3),
+        ...prevStats.slice(0, 2),
         {
-          ...prevStats[3],
-          value: totalUnits.toString(),
+          ...prevStats[2],
+          value: Object.keys(models).length.toString(),
         },
-        prevStats[4],
-        {
-          ...prevStats[5],
-          value: totalTime?(totalRequests * ((1000 * 60) / totalTime)).toFixed(0):"-",
-        },
-        ...prevStats.slice(6),
+        ...prevStats.slice(3),
       ]);
     });
     getLatency().then((latency: LatencyResponse[]) => {
@@ -204,29 +231,6 @@ export function NodeStatusView() {
             .length.toString(),
         },
         ...prevStats.slice(2),
-      ]);
-    });
-    getTasks().then((tasks_with_modalities) => {
-      const tasks = tasks_with_modalities.map((task) => task[0]);
-      const models: { [key: string]: boolean } = {};
-      setTasks(tasks);
-      for (const task of tasks) {
-        if (!task.model_name) {
-          continue;
-        }
-        if (task.model_name in models) {
-          models[task.model_name] ||= !task.is_deprecated;
-        } else {
-          models[task.model_name] = task.is_deprecated;
-        }
-      }
-      setStats((prevStats) => [
-        ...prevStats.slice(0, 2),
-        {
-          ...prevStats[2],
-          value: Object.keys(models).length.toString(),
-        },
-        ...prevStats.slice(3),
       ]);
     });
   }, []);
@@ -544,7 +548,7 @@ export function NodeStatusView() {
               cx="50%"
               cy="50%"
               outerRadius={80}
-              label={(entry) => entry.model}
+              // label={(entry) => entry.model}
             >
               {modelDistribution.map((entry, index) => (
                 <Cell 
