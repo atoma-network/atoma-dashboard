@@ -225,7 +225,12 @@ export function NodeStatusView() {
       ).length;
     }
     // setSubscribers(Object.entries(subscribers).map(([model_name, nodesRunning]) => ({ model_name, nodesRunning })));
-    setModelDistruibution(Object.entries(subscribers).map(([model, nodesRunning]) => ({ model, nodesRunning })));
+    setModelDistruibution(
+      Object.entries(subscribers).map(([model, nodesRunning]) => ({
+        model: model.replace(/^.*\//, ""),
+        nodesRunning,
+      }))
+    );
   }, [tasks, subscriptions]);
   return (
     <div className="space-y-8">
@@ -374,7 +379,7 @@ export function NodeStatusView() {
                   return (
                     <Line
                       key={model.model_name}
-                      name={model.model_name}
+                      name={model.model_name.replace(/^.*\//, "")}
                       type="monotone"
                       dataKey={(data) => data.data[model.model_name] || 0}
                       stroke={model.color}

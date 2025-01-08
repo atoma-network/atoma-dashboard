@@ -218,7 +218,10 @@ export function CloudView() {
           <Card key={model.id} className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-lg font-medium text-gray-900 dark:text-white">
-                <span >{model.name}</span>
+                <div className="flex flex-col">
+                  <span>{model.name.replace(/^.*\//, '')}</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400"> {model.name}</span>
+                </div>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
