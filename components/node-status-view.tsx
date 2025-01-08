@@ -214,7 +214,7 @@ export function NodeStatusView() {
     }
     const subscribers: { [key: string]: number } = {};
     for (const task of tasks) {
-      if (!task.model_name) {
+      if (!task.model_name || task.is_deprecated) {
         continue;
       }
       if (!(task.model_name in subscribers)) {

@@ -152,7 +152,7 @@ export function CloudView() {
     if (!subscribers || !tasks) return;
     const availableModels : Record<string, NodeSubscription> = {}
     for (const task of tasks) {
-      if (!task.model_name) {
+      if (!task.model_name || task.is_deprecated) {
         continue;
       }
       const subs_for_this_task = subscribers.filter((subscription) => subscription.task_small_id === task.task_small_id && subscription.valid);  
