@@ -241,14 +241,14 @@ export function CloudView() {
                             </li>
                           ))}
                         </ul>
-                        <div className="pt-2">
+                        {/* <div className="pt-2">
                           <p className="text-sm font-medium">Technical Specs:</p>
                           <div className="text-sm space-y-1 mt-1">
-                            {/* <p>• {model.ram}</p>
+                            <p>• {model.ram}</p>
                             <p>• {model.cores}</p>
-                            <p>• {model.storage}</p> */}
+                            <p>• {model.storage}</p>
                           </div>
-                        </div>
+                        </div> */}
                       </div>
                     </TooltipContent>
                   </Tooltip>
