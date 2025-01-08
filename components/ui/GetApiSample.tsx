@@ -92,7 +92,7 @@ export function GetApiSample({ modality, modelName }: ApiSampleProps) {
           {getApiSampleInner(modality, modelName)}
         </code>
       </div>
-      <div className="copy bg-gray-100 dark:bg-gray-800 flex gap-2 absolute right-2 top-2 m-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div className="copy bg-gray-100 dark:bg-gray-800 flex gap-2 absolute right-2 top-2 m-0 opacity-1 group-hover:opacity-100 transition-opacity duration-200">
         <div className="p-1 cursor-pointer border-2 rounded-lg border-black dark:border-white" onClick={() => openDocs(modality)}>
           docs
         </div>
