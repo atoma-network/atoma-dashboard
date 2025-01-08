@@ -132,7 +132,9 @@ export const getSubscriptions = async (): Promise<NodeSubscription[]> => {
 };
 
 export const getTasks = async (): Promise<[Task, ModelModality[]][]> => {
-  return await request({ path: "tasks" });
+  const tasks_with_modalities: [Task, ModelModality[]][] = await request({ path: "tasks" });
+  // Filter out deprecated tasks and tasks without model names and modalities (no modalities means the proxy doesn't support the task)
+  return tasks_with_modalities.filter((task) => !task[0].is_deprecated && !!task[0].model_name && task[1].length > 0);
 };
 
 export const registerUser = async (username: string, password: string): Promise<AuthResponse> => {
