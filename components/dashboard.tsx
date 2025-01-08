@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Activity, Cloud } from "lucide-react";
 import { NodeStatusView } from "@/components/node-status-view";
 import { MyNodeView } from "@/components/my-node-view";
@@ -20,13 +20,21 @@ const mainTabs = [
   { id: "cloud", icon: Cloud, label: "Developer Portal" },
 ] as const;
 
+
 function Logo() {
   const { theme } = useTheme();
-  return (
-    <Image src={theme === "dark" ?"/atoma_logo_dark.png": "/atoma_logo.png"} alt="Atoma" width={177} height={62}/>
-  )
-}
+  const [logoSrc, setLogoSrc] = useState("/atoma_logo_dark.png");
+  console.log("render", new Date().toISOString(), logoSrc)
 
+  useEffect(() => {
+    if (theme === "dark") {
+      setLogoSrc("/atoma_logo_dark.png");
+    } else {
+      setLogoSrc("/atoma_logo.png");
+    }
+  }, [theme]);
+  return <Image src={logoSrc} alt="Atoma" width={177} height={62}/>;
+}
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabType>("node-status");
