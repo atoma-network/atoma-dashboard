@@ -6,7 +6,7 @@ import { NodeStatusView } from "@/components/node-status-view";
 import { MyNodeView } from "@/components/my-node-view";
 import { CloudView } from "@/components/cloud-view";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider, useTheme } from "next-themes";
 import { AskUtopia } from "@/components/ask-utopia";
 import { LoginRegisterButton } from "@/components/login-register-button";
 import { UserProfileIcon } from "./user-profile-icon";
@@ -20,6 +20,14 @@ const mainTabs = [
   { id: "cloud", icon: Cloud, label: "Developer Portal" },
 ] as const;
 
+function Logo() {
+  const { theme } = useTheme();
+  return (
+    <Image src={theme === "dark" ?"/atoma_logo_dark.png": "/atoma_logo.png"} alt="Atoma" width={177} height={62}/>
+  )
+}
+
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabType>("node-status");
   const { isLoggedIn } = useGlobalState();
@@ -28,7 +36,7 @@ export default function Dashboard() {
       <div className="flex flex-col h-screen bg-white dark:bg-[#1A1C23]">
         <header className="bg-white dark:bg-[#1A1C23] border-b border-purple-100 dark:border-purple-800/30 p-4">
           <div className="flex items-center justify-between">
-            <Image src="/atoma_logo.png" alt="Atoma" width={177} height={62}/>
+            <Logo/>
             <div className="flex items-center space-x-2">
               <ThemeToggle />
               {activeTab === "cloud" &&
