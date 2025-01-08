@@ -77,9 +77,10 @@ export function NodeStatusView() {
   // const [statsStack, setStatsStacks] = useState<unknown[]>([]);
   // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
   // const [latency, setLatency] = useState<LatencyResponse[]>([]);
-  console.log('networkActivityData',networkActivityData)
-  console.log('computeUnitsData', computeUnitsData)
-  console.log('activityModels',activityModels)
+  // console.log('networkActivityData',networkActivityData)
+  // console.log('computeUnitsData', computeUnitsData)
+  // console.log('activityModels', activityModels)
+
   useEffect(() => {
     // getStatsStacks().then((stacks) => {
     //   setStatsStacks(stacks.map((data: StatsStack) => ({
@@ -99,6 +100,9 @@ export function NodeStatusView() {
           color: `hsl(var(--chart-${i + 1}))`,
         }))
       );
+      computeUnits.forEach((value) => {
+        value.timestamp = new Date(value.timestamp).toISOString();
+      })
       const group_by_time = computeUnits.reduce((acc: { [key: string]: { [key: string]: number } }, data) => {
         if (!(data.timestamp in acc)) {
           acc[data.timestamp] = {};
@@ -106,10 +110,19 @@ export function NodeStatusView() {
         acc[data.timestamp][data.model_name] = data.amount;
         return acc;
       }, {});
+      // Fill the empty time slots
+      Array.from({ length: 24 * 7 }, (_, i) => {
+        const date = new Date();
+        date.setHours(date.getHours() - i, 0, 0, 0);
+        const timeKey = date.toISOString();
+        if (!(timeKey in group_by_time)) {
+          group_by_time[timeKey] = {};
+        } 
+      });
       const sortedGroupByTime = Object.keys(group_by_time)
         .sort()
         .map((key) => ({
-          time: new Date(key).toLocaleTimeString([], { weekday:"short", hour: "2-digit", minute: "2-digit" }),
+          time: new Date(key).toLocaleTimeString([], { month:"numeric", day:"numeric", hour: "2-digit", minute: "2-digit" }),
           data: group_by_time[key],
         }));
 
@@ -282,7 +295,6 @@ export function NodeStatusView() {
                 />
                 <Tooltip
                   content={({ active, payload, label }) => {
-                    console.log(active, payload, label);
                     if (active && payload && payload.length) {
                       return (
                         <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
