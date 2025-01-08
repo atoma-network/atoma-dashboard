@@ -316,7 +316,7 @@ export function NodeStatusView() {
                   dataKey="units"
                   stroke="var(--color-units)"
                   strokeWidth={2}
-                  dot={{ r: 4, fill: "var(--color-units)" }}
+                  dot={false}
                 />
               </LineChart>
             </ChartContainer>
@@ -384,6 +384,7 @@ export function NodeStatusView() {
                       dataKey={(data) => data.data[model.model_name] || 0}
                       stroke={model.color}
                       strokeWidth={2}
+                      dot={false}
                     />
                   )
                 })}
