@@ -213,7 +213,7 @@ export function CloudView() {
 
   const ComputeTab = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-end space-x-2 mb-4">
+      {/* <div className="flex items-center justify-end space-x-2 mb-4">
         <div className="flex items-center space-x-2">
           <Switch
             id="privacy-mode"
@@ -227,7 +227,7 @@ export function CloudView() {
             Privacy Mode
           </label>
         </div>
-      </div>
+      </div> */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {modelOptions.map((model) => (
