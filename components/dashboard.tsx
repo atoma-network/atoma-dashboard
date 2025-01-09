@@ -78,7 +78,7 @@ export default function Dashboard() {
           {activeTab === "my-node" && <MyNodeView />}
         </main>
 
-        <AskUtopia />
+        {/* <AskUtopia /> */}
       </div>
     </ThemeProvider>
   );

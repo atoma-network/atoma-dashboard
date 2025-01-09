@@ -65,9 +65,9 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
         .then((res) => {
           console.log("res", res);
         })
-        .catch((error) => {
-        setError(`${error}`);
-          console.log("error", error);
+        .catch((error:Response) => {
+        setError(`${error.status} : ${error.statusText}`);
+          console.error(error);
         });
     });
   }
@@ -90,14 +90,14 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
           usdcPayment(txDigest).then((res) => {
             console.log('res', res)
             handleNextStep();
-          }).catch((error) => {
-            setError(`${error}`);
-            console.log('error', error)
+          }).catch((error:Response) => {
+            setError(`${error.status} : ${error.statusText}`);
+            console.error(error)
           });
         }, 1000);
       }).catch((error) => {
         setError(`${error}`);
-        console.log('error', error)
+        console.error(error)
       });
     } catch {
       handleConfirmWallet();

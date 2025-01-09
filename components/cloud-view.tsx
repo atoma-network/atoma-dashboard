@@ -126,7 +126,7 @@ export function CloudView() {
           setIsLoggedIn(false);
         });
       }
-    }).catch((err) => {
+    }).catch((err:Response) => {
       console.error(err);
     });
     getSubscriptions().then((subscriptions) => {
@@ -447,9 +447,9 @@ export function CloudView() {
             .then(() => {
               setStep("confirmed");
             })
-            .catch((error) => {
-            setError(`${error}`);
-              console.log("error", error);
+            .catch((error:Response) => {
+            setError(`${error.status} : ${error.statusText}`);
+              console.error(error);
             });
         });
       }
@@ -473,13 +473,13 @@ export function CloudView() {
             setTimeout(() => {
               usdcPayment(txDigest).then(() => {
                 setStep("result");
-              }).catch((error) => {
-                setError(`${error}`);
-                console.log('error', error)
+              }).catch((error:Response) => {
+                setError(`${error.status} : ${error.statusText}`);
+                console.error(error)
               });
             }, 1000);
           }).catch((error) => {
-            console.log('error', error)
+            console.error(error)
             setError(`${error}`);
           });
         } catch {

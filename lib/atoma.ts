@@ -125,7 +125,7 @@ const request = async<T>({ path, post , body , use_auth }:RequestOptions): Promi
       if (response.status === 401) {
         localStorage.removeItem("access_token");
       }
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw response;
     }
     return response.json()
   });
@@ -178,7 +178,6 @@ export const getStatsStacks = async (): Promise<StatsStack[]> => {
 };
 
 export const proofRequest = async (signature: string, walletAddress: string): Promise<void> => {
-  console.log(signature, walletAddress);
   return await request({path:"update_sui_address", post: true, body: { signature, address: walletAddress }, use_auth: true });
 };
 

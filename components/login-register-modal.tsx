@@ -51,8 +51,12 @@ export function LoginRegisterModal({ isOpen, onClose}: LoginRegisterModalProps) 
       document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
       setIsLoggedIn(true);
       onClose();
-    }).catch((error) => {
-      setError(`${error}`);
+    }).catch((error: Response) => {
+      if (error.status === 409) {
+        setError("User already exists");
+      } else {
+        setError(`Server returned an error ${error.status} : ${error.statusText}`);
+      }
     });
   }
 
