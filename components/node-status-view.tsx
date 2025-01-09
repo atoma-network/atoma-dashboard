@@ -95,12 +95,12 @@ export function NodeStatusView() {
       nodes.forEach((node) => {
         const continent = countryToContinent[node?.country?.toLowerCase()];
         if (continent in nodeDistribution) {
-          nodeDistribution[continent].nodes += 1;
+          nodeDistribution[continent].nodes += node.count;
         } else {
           console.warn(`${node.country} region not found`);
           nodeDistribution["UN"].nodes += node.count;
         }
-        totalNodes += 1;
+        totalNodes += node.count;
       });
       Object.keys(nodeDistribution).forEach((key) => {
         if (nodeDistribution[key].nodes === 0) {
