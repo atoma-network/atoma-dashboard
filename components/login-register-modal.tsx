@@ -40,8 +40,12 @@ export function LoginRegisterModal({ isOpen, onClose}: LoginRegisterModalProps) 
       document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
       setIsLoggedIn(true);
       onClose();
-    }).catch((error) => {
-      setError(`${error}`);
+    }).catch((error: Response) => {
+      if (error.status === 401) {
+        setError("Invalid username or password");
+      } else {
+        setError(`${error.status} : ${error.statusText}`);
+      }
     });
   }
 
