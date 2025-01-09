@@ -421,6 +421,8 @@ export function CloudView() {
           return;
         }
         getSuiAddress().then((suiAddress) => {
+          // console.log('suiAddress', suiAddress)
+          // console.log('currentWallet', currentWallet?.accounts?.[0]?.address)
           setWalletConfirmed(suiAddress != null && suiAddress == currentWallet?.accounts?.[0]?.address)
         });
       }, [currentWallet?.accounts]);
@@ -449,6 +451,7 @@ export function CloudView() {
           proofRequest(res.signature, currentWallet.accounts[0].address)
             .then(() => {
               setStep("confirmed");
+              setWalletConfirmed(true);
             })
             .catch((error:Response) => {
             setError(`${error.status} : ${error.statusText}`);
@@ -486,6 +489,7 @@ export function CloudView() {
           handleConfirmWallet();
         }
       }
+      console.log('walletConfirmed',walletConfirmed)
       return (
         <Dialog
           open={isAddFundsModalOpen}
