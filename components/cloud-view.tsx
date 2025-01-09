@@ -54,6 +54,7 @@ interface IUsageHistory {
   id: string;
   date: Date;
   tokens: number;
+  used_tokens: number;
   cost: number;
   model: string;
 }
@@ -102,6 +103,7 @@ export function CloudView() {
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
   const [exampleUsage, setExampleUsage] = useState(apiEndpoints[0].example);
   const [modelModalities, setModelModalities] = useState<Map<string, ModelModality[]>>(new Map());
+  const [lockedBalance, setLockedBalance] = useState<number | undefined>();
   const { isLoggedIn, setIsLoggedIn } = useGlobalState();
 
   useEffect(() => {
@@ -111,12 +113,21 @@ export function CloudView() {
       // setExampleModels(apiEndpoints.map((endpoint) => tasks_with_modalities.find(([task, modalities])=> modalities.includes(endpoint.name as ModelModality) && task.model_name)?.[0].model_name || "$MODEL_NAME"));
       if (isLoggedIn) {
         getAllStacks().then((stacks) => {
+          console.log('stacks', stacks)
+          let lockedBalance = 0;
+          stacks.forEach(([stack]) => {
+            const freeTokens = stack.num_compute_units - stack.already_computed_units;
+            console.log('freeTokens', freeTokens)
+            lockedBalance += freeTokens/1_000_000*stack.price_per_one_million_compute_units;
+          });
+          setLockedBalance(lockedBalance);
           setUsageHistory(
             stacks.map(([stack, timestamp]) => {
               return {
                 id: stack.stack_id,
                 date: new Date(timestamp),
                 tokens: stack.num_compute_units,
+                used_tokens: stack.already_computed_units,
                 cost: (stack.num_compute_units / 1000000) * (stack.price_per_one_million_compute_units / 1000000),
                 model: tasks.find((task) => task.task_small_id === stack.task_small_id)?.model_name || "Unknown",
               };
@@ -395,7 +406,7 @@ export function CloudView() {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-
+    console.log('usageHistory',usageHistory)
     const totalUsage = isLoggedIn
       ? usageHistory.reduce((sum, item) => sum + (item.date >= startOfMonth ? item.tokens : 0), 0)
       : 0;
@@ -605,7 +616,7 @@ export function CloudView() {
                 <div>
                   <p className="text-4xl font-bold text-gray-900 dark:text-white">
                     {isLoggedIn
-                      ? `$${balance !== undefined ? (balance / 1000000).toFixed(2) : "Loading"}`
+                      ? `$${balance !== undefined ? (balance / 1000000).toFixed(2) : "Loading"} (locked $${lockedBalance !== undefined ? (lockedBalance / 1000000).toFixed(2) : "Loading"})`
                       : "Login first"}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Remaining Balance</p>
@@ -693,8 +704,8 @@ export function CloudView() {
                 <TableRow>
                   <TableHead className="text-gray-600 dark:text-gray-300">Date</TableHead>
                   <TableHead className="text-gray-600 dark:text-gray-300">Model</TableHead>
-                  <TableHead className="text-right text-gray-600 dark:text-gray-300">Tokens</TableHead>
-                  <TableHead className="text-right text-gray-600 dark:text-gray-300">Cost</TableHead>
+                  <TableHead className="text-right text-gray-600 dark:text-gray-300">Used tokens/Total tokens</TableHead>
+                  <TableHead className="text-right text-gray-600 dark:text-gray-300">Used cost/Total Cost</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -704,10 +715,10 @@ export function CloudView() {
                       <TableCell className="text-gray-900 dark:text-gray-300">{item.date.toLocaleDateString(undefined, { dateStyle: "long" })}</TableCell>
                       <TableCell className="text-gray-900 dark:text-gray-300">{item.model}</TableCell>
                       <TableCell className="text-right text-gray-900 dark:text-gray-300">
-                        {item.tokens.toLocaleString()}
+                        {item.used_tokens.toLocaleString()} / {item.tokens.toLocaleString()}
                       </TableCell>
                       <TableCell className="text-right text-gray-900 dark:text-gray-300">
-                        ${item.cost.toFixed(2)}
+                        ${(item.cost*item.used_tokens/item.tokens).toFixed(2)} / ${item.cost.toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))}
