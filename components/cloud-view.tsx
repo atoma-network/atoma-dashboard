@@ -91,7 +91,7 @@ interface IModelOptions {
 
 export function CloudView() {
   const [activeTab, setActiveTab] = useState<TabType>('compute')
-  const [privacyEnabled, setPrivacyEnabled] = useState(false)
+  // const [privacyEnabled, setPrivacyEnabled] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [isComputeUnitsModalOpen, setIsComputeUnitsModalOpen] = useState(false)
   const [selectedModelForPayment, setSelectedModelForPayment] = useState<IModelOptions | null>(null)
@@ -203,7 +203,8 @@ export function CloudView() {
 
 
   const getAdjustedPrice = (pricePerMillion: number) => {
-    return (privacyEnabled ? pricePerMillion * 1.05 : pricePerMillion) / 1000000 // Convert from USDC (6 decimals) to USD
+    return pricePerMillion / 1000000 // Convert from USDC (6 decimals) to USD
+    // return (privacyEnabled ? pricePerMillion * 1.05 : pricePerMillion) / 1000000 // Convert from USDC (6 decimals) to USD
   }
 
   const handleStartUsing = (model:IModelOptions) => {
