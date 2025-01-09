@@ -84,6 +84,7 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
         const txDigest = (res as { digest: string }).digest;
         setTimeout(() => {
           usdcPayment(txDigest).then((res) => {
+            console.log('res', res)
             handleNextStep();
           }).catch((error:Response) => {
             setError(`${error.status} : ${error.statusText}`);

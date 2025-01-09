@@ -84,6 +84,7 @@ const apiEndpoints = [
 interface IModelOptions {
     id: string;
     name: string;
+    modality:ModelModality[]
     features: string[];
     pricePer1MTokens: number;
     status: string;
@@ -199,6 +200,7 @@ export function CloudView() {
       {
         id: model,
         name: model,
+        modality: modelModalities.get(model) || [],
         features: modelModalities?.get(model)?.map((modality) => modalityToFeatureName(modality)) || [],
         pricePer1MTokens: availableModels[model].price_per_one_million_compute_units,
         status: 'Available'
@@ -929,7 +931,7 @@ export function CloudView() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <ComputeUnitsPayment
             modelName={selectedModelForPayment.name}
-            features={selectedModelForPayment.features}
+            features={selectedModelForPayment.modality}
             pricePer1MUnits={selectedModelForPayment.pricePer1MTokens}
             onClose={() => setIsComputeUnitsModalOpen(false)}
           />
