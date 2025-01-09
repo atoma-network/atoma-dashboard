@@ -84,9 +84,22 @@ const apiEndpoints = [
 interface IModelOptions {
     id: string;
     name: string;
-    features: ModelModality[];
+    features: string[];
     pricePer1MTokens: number;
     status: string;
+}
+
+const modalityToFeatureName = (modality: ModelModality): string => { 
+  switch (modality) {
+    case ModelModality.ChatCompletions:
+      return 'Chat Completion';
+    case ModelModality.ImagesGenerations:
+      return 'Image Generation';
+    case ModelModality.Embeddings:
+      return 'Embeddings';
+    default:
+      return modality;
+  }
 }
 
 export function CloudView() {
@@ -186,7 +199,7 @@ export function CloudView() {
       {
         id: model,
         name: model,
-        features: modelModalities.get(model) || [],
+        features: modelModalities?.get(model)?.map((modality) => modalityToFeatureName(modality)) || [],
         pricePer1MTokens: availableModels[model].price_per_one_million_compute_units,
         status: 'Available'
       })
