@@ -24,7 +24,6 @@ const mainTabs = [
 function Logo() {
   const { theme } = useTheme();
   const [logoSrc, setLogoSrc] = useState("/atoma_logo_dark.png");
-  console.log("render", new Date().toISOString(), logoSrc)
 
   useEffect(() => {
     if (theme === "dark") {

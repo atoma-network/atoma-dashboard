@@ -62,9 +62,6 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
       ),
     }).then((res) => {
       proofRequest(res.signature, currentWallet.accounts[0].address)
-        .then((res) => {
-          console.log("res", res);
-        })
         .catch((error:Response) => {
         setError(`${error.status} : ${error.statusText}`);
           console.error(error);
@@ -79,7 +76,6 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
 
     try {
       const suiAddress = await getSuiAddress();
-      console.log(suiAddress, currentWallet)
       if (suiAddress == null || suiAddress != currentWallet.accounts[0].address) {
         // We haven't proven the SUI address yet
         throw new Error("SUI address not found or not matching");
@@ -88,7 +84,6 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
         const txDigest = (res as { digest: string }).digest;
         setTimeout(() => {
           usdcPayment(txDigest).then((res) => {
-            console.log('res', res)
             handleNextStep();
           }).catch((error:Response) => {
             setError(`${error.status} : ${error.statusText}`);

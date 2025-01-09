@@ -38,7 +38,7 @@ import { useGlobalState } from "@/app/GlobalStateContext"
 import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
 import { GetApiSample } from "@/components/ui/GetApiSample"
 import Image from "next/image"
-import { simplifyModelName } from "@/lib/utils"
+import { formatNumber, simplifyModelName } from "@/lib/utils"
 
 type TabType = 'compute' | 'models' | 'api' | 'billing' | 'docs' | 'calculator';
 
@@ -52,7 +52,7 @@ const tabs = [
 
 interface IUsageHistory {
   id: string;
-  date: string;
+  date: Date;
   tokens: number;
   cost: number;
   model: string;
@@ -115,7 +115,7 @@ export function CloudView() {
             stacks.map(([stack, timestamp]) => {
               return {
                 id: stack.stack_id,
-                date: new Date(timestamp).toLocaleDateString(),
+                date: new Date(timestamp),
                 tokens: stack.num_compute_units,
                 cost: (stack.num_compute_units / 1000000) * (stack.price_per_one_million_compute_units / 1000000),
                 model: tasks.find((task) => task.task_small_id === stack.task_small_id)?.model_name || "Unknown",
@@ -392,16 +392,19 @@ export function CloudView() {
   );
 
   const BillingTab = () => {
-    const totalUsage = isLoggedIn ? usageHistory.reduce((sum, item) => sum + item.tokens, 0) : 0;
-    const totalCost = isLoggedIn ? usageHistory.reduce((sum, item) => sum + item.cost, 0) : 0;
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    const totalUsage = isLoggedIn
+      ? usageHistory.reduce((sum, item) => sum + (item.date >= startOfMonth ? item.tokens : 0), 0)
+      : 0;
+    // const totalCost = isLoggedIn ? usageHistory.reduce((sum, item) => sum + item.cost, 0) : 0;
     // const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false)
     // const [isAutoReloadEnabled, setIsAutoReloadEnabled] = useState(false)
     const [isAddFundsModalOpen, setIsAddFundsModalOpen] = useState(false)
     // const [cardNumber, setCardNumber] = useState<string | null>(null);
-  
-  
-
-  
+ 
     const AddFundsModal = () => {
       const [amount, setAmount] = useState<number>(10);
       const [step, setStep] = useState<"payment" | "amount" | "wallet" | "result" | "confirmed">("payment");
@@ -455,15 +458,12 @@ export function CloudView() {
       }
   
       const handleUSDCPayment = async (amount: number) => {
-        console.log('amount', amount)
-        console.log('currentWallet', currentWallet)
         if (currentWallet == null) {
           return;
         }
     
         try {
           const suiAddress = await getSuiAddress();
-          console.log(suiAddress, currentWallet)
           if (suiAddress == null || suiAddress != currentWallet.accounts[0].address) {
             // We haven't proven the SUI address yet
             throw new Error("SUI address not found or not matching");
@@ -599,14 +599,18 @@ export function CloudView() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-bold text-gray-900 dark:text-white">{isLoggedIn ? `$${balance !== undefined ? (balance / 1000000).toFixed(2) : "Loading"}` : "Login first"}</p>
+                  <p className="text-4xl font-bold text-gray-900 dark:text-white">
+                    {isLoggedIn
+                      ? `$${balance !== undefined ? (balance / 1000000).toFixed(2) : "Loading"}`
+                      : "Login first"}
+                  </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Remaining Balance</p>
                 </div>
-                <Button 
+                <Button
                   className="bg-purple-600 hover:bg-purple-700 text-white"
-                  onClick={() => isLoggedIn?setIsAddFundsModalOpen(true):setIsLoginModalOpen(true)}
+                  onClick={() => (isLoggedIn ? setIsAddFundsModalOpen(true) : setIsLoginModalOpen(true))}
                 >
-                  {isLoggedIn ? "Add Funds" :"Login or Register"}
+                  {isLoggedIn ? "Add Funds" : "Login or Register"}
                 </Button>
               </div>
               {/* <div className="space-y-2">
@@ -650,9 +654,11 @@ export function CloudView() {
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Usage:</span>
-                <span className="text-lg font-bold text-gray-900 dark:text-white">{totalUsage.toLocaleString()} tokens</span>
+                <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  {formatNumber(totalUsage)} tokens
+                </span>
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-500 dark:text-gray-400">Monthly budget:</span>
                   <span className="font-medium text-gray-900 dark:text-white">$100.00</span>
@@ -661,8 +667,11 @@ export function CloudView() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {totalCost.toFixed(2)} / $100.00 used
                 </p>
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Billing period: March 1, 2024 - March 31, 2024</p>
+              </div> */}
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Billing period: {startOfMonth.toLocaleDateString(undefined, { dateStyle: "long" })} -{" "}
+                {endOfMonth.toLocaleDateString(undefined, { dateStyle: "long" })}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -685,14 +694,19 @@ export function CloudView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoggedIn && usageHistory.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="text-gray-900 dark:text-gray-300">{item.date}</TableCell>
-                    <TableCell className="text-gray-900 dark:text-gray-300">{item.model}</TableCell>
-                    <TableCell className="text-right text-gray-900 dark:text-gray-300">{item.tokens.toLocaleString()}</TableCell>
-                    <TableCell className="text-right text-gray-900 dark:text-gray-300">${item.cost.toFixed(2)}</TableCell>
-                  </TableRow>
-                ))}
+                {isLoggedIn &&
+                  usageHistory.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="text-gray-900 dark:text-gray-300">{item.date.toLocaleDateString(undefined, { dateStyle: "long" })}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-gray-300">{item.model}</TableCell>
+                      <TableCell className="text-right text-gray-900 dark:text-gray-300">
+                        {item.tokens.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right text-gray-900 dark:text-gray-300">
+                        ${item.cost.toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </CardContent>
@@ -734,7 +748,7 @@ export function CloudView() {
         )} */}
         <AddFundsModal />
       </div>
-    )
+    );
   }
 
   const DocsTab = () => (

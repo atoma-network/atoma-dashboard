@@ -109,7 +109,6 @@ export function GetApiSample({ modality, modelName }: ApiSampleProps) {
               navigator.clipboard
                 .writeText(codeContent)
                 .then(() => {
-                  console.log("Copied to clipboard");
                   setIsCopied(true);
                   setTimeout(() => setIsCopied(false), 2000);
                 })
