@@ -101,45 +101,34 @@ export function CloudView() {
   const [balance, setBalance] = useState<number | undefined>(undefined);
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
   const [exampleUsage, setExampleUsage] = useState(apiEndpoints[0].example);
-  const { isLoggedIn, setIsLoggedIn } = useGlobalState();
   const [modelModalities, setModelModalities] = useState<Map<string, ModelModality[]>>(new Map());
+  const { isLoggedIn, setIsLoggedIn } = useGlobalState();
 
   useEffect(() => {
-    getBalance()
-      .then((balance) => {
-        setBalance(balance);
-      })
-      .catch(() => {
-        setBalance(0);
-      });
     getTasks().then((tasks_with_modalities) => {
       const tasks = tasks_with_modalities.map((task) => task[0]);
       setModelModalities(new Map(tasks_with_modalities.filter(([task]) => task.model_name !== undefined).map(([task, modalities]) => [task.model_name!, modalities])));
       // setExampleModels(apiEndpoints.map((endpoint) => tasks_with_modalities.find(([task, modalities])=> modalities.includes(endpoint.name as ModelModality) && task.model_name)?.[0].model_name || "$MODEL_NAME"));
-      getAllStacks().then((stacks) => {
-        setUsageHistory(
-          stacks.map(([stack, timestamp]) => {
-            return {
-              id: stack.stack_id,
-              date: new Date(timestamp).toLocaleDateString(),
-              tokens: stack.num_compute_units,
-              cost: (stack.num_compute_units / 1000000) * (stack.price_per_one_million_compute_units / 1000000),
-              model: tasks.find((task) => task.task_small_id === stack.task_small_id)?.model_name || "Unknown",
-            };
-          })
-        );
-      }).catch(() => {
-        setIsLoggedIn(false);
-      });
+      if (isLoggedIn) {
+        getAllStacks().then((stacks) => {
+          setUsageHistory(
+            stacks.map(([stack, timestamp]) => {
+              return {
+                id: stack.stack_id,
+                date: new Date(timestamp).toLocaleDateString(),
+                tokens: stack.num_compute_units,
+                cost: (stack.num_compute_units / 1000000) * (stack.price_per_one_million_compute_units / 1000000),
+                model: tasks.find((task) => task.task_small_id === stack.task_small_id)?.model_name || "Unknown",
+              };
+            })
+          );
+        }).catch(() => {
+          setIsLoggedIn(false);
+        });
+      }
     }).catch((err) => {
       console.error(err);
     });
-    listApiKeys()
-      .then((keys) => setApiKeys(keys))
-      .catch(() => {
-        setIsLoggedIn(false);
-      });
-
     getSubscriptions().then((subscriptions) => {
       setSubscribers(subscriptions);
     });
@@ -147,6 +136,21 @@ export function CloudView() {
       const tasks = tasks_with_modalities.map((task) => task[0]);
       setTasks(tasks)
     });
+    if (!isLoggedIn) {
+      return;
+    }
+    getBalance()
+      .then((balance) => {
+        setBalance(balance);
+      })
+      .catch(() => {
+        setBalance(0);
+      });
+    listApiKeys()
+      .then((keys) => setApiKeys(keys))
+      .catch(() => {
+        setIsLoggedIn(false);
+      });
   }, [isLoggedIn, setIsLoggedIn]);
 
   useEffect(() => {
@@ -317,7 +321,8 @@ export function CloudView() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               API Key
             </h3>
-            {Array.isArray(apiKeys) ? (
+            {isLoggedIn?
+            Array.isArray(apiKeys) ? (
               <>
                 {apiKeys.map((apiKey) => {
                   return (
@@ -349,8 +354,8 @@ export function CloudView() {
                 )}
               </>
             ) : (
-              <div>{isLoggedIn ? "Loading" : "Login first"}</div>
-            )}
+              <div>Loading</div>
+            ):"Login first"}
           </div>
 
           <div>
@@ -387,8 +392,8 @@ export function CloudView() {
   );
 
   const BillingTab = () => {
-    const totalUsage = usageHistory.reduce((sum, item) => sum + item.tokens, 0)
-    const totalCost = usageHistory.reduce((sum, item) => sum + item.cost, 0)
+    const totalUsage = isLoggedIn ? usageHistory.reduce((sum, item) => sum + item.tokens, 0) : 0;
+    const totalCost = isLoggedIn ? usageHistory.reduce((sum, item) => sum + item.cost, 0) : 0;
     // const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false)
     // const [isAutoReloadEnabled, setIsAutoReloadEnabled] = useState(false)
     const [isAddFundsModalOpen, setIsAddFundsModalOpen] = useState(false)
@@ -409,6 +414,9 @@ export function CloudView() {
       const suiClient = useSuiClient();
     
       useEffect(() => {
+        if (!isLoggedIn) {
+          return;
+        }
         getSuiAddress().then((suiAddress) => {
           setWalletConfirmed(suiAddress != null && suiAddress == currentWallet?.accounts?.[0]?.address)
         });
@@ -677,7 +685,7 @@ export function CloudView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {usageHistory.map((item) => (
+                {isLoggedIn && usageHistory.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="text-gray-900 dark:text-gray-300">{item.date}</TableCell>
                     <TableCell className="text-gray-900 dark:text-gray-300">{item.model}</TableCell>

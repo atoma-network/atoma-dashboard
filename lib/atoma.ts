@@ -89,6 +89,10 @@ export interface LatencyResponse {
   requests: number;
 }
 
+export interface UserProfile {
+  username: string;
+}
+
 interface RequestOptions {
   path: string;
   post?: boolean;
@@ -193,6 +197,10 @@ export const getBalance = async (): Promise<number> => {
 export const getAllStacks = async (): Promise<[Stack, string][]> => {
   return await request({path:"all_stacks", use_auth: true });
 };
+
+export const getUserProfile = async (): Promise<UserProfile> => {
+  return await request({path:"user_profile", use_auth: true });
+}
 
 export const payUSDC = async (
   amount: number,
