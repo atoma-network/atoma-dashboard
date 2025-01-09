@@ -18,7 +18,7 @@ import {
   type Task,
 } from "@/lib/atoma";
 import Image from "next/image";
-import { simplifyModelName } from "@/lib/utils";
+import { formatNumber, simplifyModelName } from "@/lib/utils";
 import { countries } from 'countries-list'; 
 
 export function NodeStatusView() {
@@ -167,12 +167,12 @@ export function NodeStatusView() {
           ...prevStats.slice(0, 3),
           {
             ...prevStats[3],
-            value: totalUnits.toString(),
+            value: formatNumber(totalUnits),
           },
           prevStats[4],
           {
             ...prevStats[5],
-            value: totalTime?(totalRequests * ((1000 * 60) / totalTime)).toFixed(0):"-",
+            value: totalTime?formatNumber((totalRequests * ((1000 * 60) / totalTime))):"-",
           },
           ...prevStats.slice(6),
         ]);
@@ -191,7 +191,7 @@ export function NodeStatusView() {
         ...prevStats.slice(0, 2),
         {
           ...prevStats[2],
-          value: Object.keys(models).length.toString(),
+          value: formatNumber(Object.keys(models).length),
         },
         ...prevStats.slice(3),
       ]);
@@ -222,13 +222,11 @@ export function NodeStatusView() {
       setStats((prevStats) => [
         {
           ...prevStats[0],
-          value: Object.keys(nodes).length.toString(),
+          value: formatNumber(Object.keys(nodes).length),
         },
         {
           ...prevStats[1],
-          value: Object.values(nodes)
-            .filter((v) => v)
-            .length.toString(),
+          value: formatNumber(Object.values(nodes).filter((v) => v).length),
         },
         ...prevStats.slice(2),
       ]);
@@ -322,7 +320,7 @@ export function NodeStatusView() {
                 />
                 <YAxis
                   tick={{ fill: 'var(--purple-600)' }}
-                  tickFormatter={(value) => `${value / 1000}k`}
+                  tickFormatter={formatNumber}
                 />
                 <Tooltip
                   content={({ active, payload, label }) => {
@@ -330,7 +328,7 @@ export function NodeStatusView() {
                       return (
                         <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
                           <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
-                          <p className="text-purple-600 dark:text-purple-400">{`Units: ${payload?.[0]?.value?.toLocaleString()}`}</p>
+                          <p className="text-purple-600 dark:text-purple-400">{`Units: ${typeof payload?.[0]?.value === 'number' ? formatNumber(payload?.[0]?.value) : ''}`}</p>
                         </div>
                       );
                     }
@@ -379,7 +377,7 @@ export function NodeStatusView() {
                 />
                 <YAxis
                   tick={{ fill: 'var(--purple-600)' }}
-                  tickFormatter={(value) => `${value / 1000}k`}
+                  tickFormatter={formatNumber}
                 />
                 <Tooltip
                   content={({ active, payload, label }) => {
@@ -388,7 +386,7 @@ export function NodeStatusView() {
                         <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
                           <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
                           {payload.map((entry, index) => (
-                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${entry?.value?.toLocaleString()}`}</p>
+                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${typeof entry?.value === 'number'?formatNumber(entry?.value):''}`}</p>
                           ))}
                         </div>
                       );
@@ -508,7 +506,7 @@ export function NodeStatusView() {
             {modelDistribution.map((item) => (
               <TableRow key={item.model} className="border-purple-200 dark:border-purple-800/30">
                 <TableCell className="font-medium text-purple-700 dark:text-purple-300">{item.model}</TableCell>
-                <TableCell className="text-purple-600 dark:text-purple-400">{item.nodesRunning}</TableCell>
+                <TableCell className="text-purple-600 dark:text-purple-400">{formatNumber(item.nodesRunning)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -619,7 +617,7 @@ export function NodeStatusView() {
                 {Object.keys(nodeDistribution).sort().map((item) => (
                   <TableRow key={nodeDistribution[item].name} className="border-purple-200 dark:border-purple-800/30">
                     <TableCell className="font-medium text-purple-700 dark:text-purple-300">{nodeDistribution[item].name}</TableCell>
-                    <TableCell className="text-purple-600 dark:text-purple-400">{nodeDistribution[item].nodes}</TableCell>
+                    <TableCell className="text-purple-600 dark:text-purple-400">{formatNumber(nodeDistribution[item].nodes)}</TableCell>
                     <TableCell className="text-purple-600 dark:text-purple-400">{nodeDistribution[item].percentage.toFixed(1)}%</TableCell>
                   </TableRow>
                 ))}
