@@ -10,7 +10,7 @@ const getApiSampleInner = (modality: ModelModality, modelName?: string) => {
   if (modality === ModelModality.ChatCompletions) {
     return (
       <>
-        {`curl https://api.atomacloud.com/v1/chat/completions \\
+        {`curl https://api.atoma.network/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer `}
         {curlVariable("YOUR_API_KEY")}
@@ -32,7 +32,7 @@ const getApiSampleInner = (modality: ModelModality, modelName?: string) => {
   if (modality === ModelModality.ImagesGenerations) {
     return (
       <>
-        {`curl https://api.atomacloud.com/v1/images/generations \\
+        {`curl https://api.atoma.network/v1/images/generations \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer `}
         {curlVariable("YOUR_API_KEY")}
@@ -51,7 +51,7 @@ const getApiSampleInner = (modality: ModelModality, modelName?: string) => {
   if (modality === ModelModality.Embeddings) {
     return (
       <>
-        {`curl https://api.atomacloud.com/v1/embeddings \\
+        {`curl https://api.atoma.network/v1/embeddings \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer `}
         {curlVariable("YOUR_API_KEY")}
