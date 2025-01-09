@@ -35,7 +35,7 @@ import {
 import { ComputeUnitsPayment } from "./compute-units-payment"
 import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getSuiAddress, getTasks, listApiKeys, ModelModality, payUSDC, proofRequest, revokeApiToken, usdcPayment, type NodeSubscription, type Task } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
-import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
+import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient, useSwitchAccount, useWallets } from "@mysten/dapp-kit"
 import { GetApiSample } from "@/components/ui/GetApiSample"
 import Image from "next/image"
 import { formatNumber, simplifyModelName } from "@/lib/utils"
@@ -422,7 +422,8 @@ export function CloudView() {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-    console.log('usageHistory',usageHistory)
+    const totalUsedTokens =isLoggedIn? usageHistory.reduce((sum, item) => sum + (item.date >= startOfMonth ? item.used_tokens : 0), 0)
+    : 0;
     const totalUsage = isLoggedIn
       ? usageHistory.reduce((sum, item) => sum + (item.date >= startOfMonth ? item.tokens : 0), 0)
       : 0;
@@ -516,7 +517,6 @@ export function CloudView() {
           handleConfirmWallet();
         }
       }
-      console.log('walletConfirmed',walletConfirmed)
       return (
         <Dialog
           open={isAddFundsModalOpen}
@@ -686,7 +686,7 @@ export function CloudView() {
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Usage:</span>
                 <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  {formatNumber(totalUsage)} tokens
+                  {formatNumber(totalUsedTokens)} / {formatNumber(totalUsage)} tokens
                 </span>
               </div>
               {/* <div className="space-y-2">
