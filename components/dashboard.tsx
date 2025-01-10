@@ -7,7 +7,7 @@ import { MyNodeView } from "@/components/my-node-view";
 import { CloudView } from "@/components/cloud-view";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ThemeProvider, useTheme } from "next-themes";
-import { AskUtopia } from "@/components/ask-utopia";
+// import { AskUtopia } from "@/components/ask-utopia";
 import { LoginRegisterButton } from "@/components/login-register-button";
 import { UserProfileIcon } from "./user-profile-icon";
 import { useGlobalState } from "@/app/GlobalStateContext";
@@ -22,16 +22,15 @@ const mainTabs = [
 
 
 function Logo() {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const [logoSrc, setLogoSrc] = useState("/atoma_logo_dark.png");
-
   useEffect(() => {
-    if (theme === "dark") {
+    if (resolvedTheme === "dark") {
       setLogoSrc("/atoma_logo_dark.png");
     } else {
       setLogoSrc("/atoma_logo.png");
     }
-  }, [theme]);
+  }, [resolvedTheme]);
   return <Image src={logoSrc} alt="Atoma" width={177} height={62}/>;
 }
 
