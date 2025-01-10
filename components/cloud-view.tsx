@@ -8,7 +8,7 @@ import { Cloud, Key, CreditCardIcon, BookOpen, Calculator, Info, Copy, CheckCirc
 import {  Delete } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Progress } from "@/components/ui/progress"
+// import { Progress } from "@/components/ui/progress"
 import { Label } from "@/components/ui/label"
 import {
   Accordion,
@@ -22,7 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Switch } from "@/components/ui/switch"
+// import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { LoginRegisterModal } from "./login-register-modal"
 import {
@@ -35,7 +35,7 @@ import {
 import { ComputeUnitsPayment } from "./compute-units-payment"
 import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getSuiAddress, getTasks, listApiKeys, ModelModality, payUSDC, proofRequest, revokeApiToken, usdcPayment, type NodeSubscription, type Task } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
-import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient, useSwitchAccount, useWallets } from "@mysten/dapp-kit"
+import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
 import { GetApiSample } from "@/components/ui/GetApiSample"
 import Image from "next/image"
 import { formatNumber, simplifyModelName } from "@/lib/utils"
@@ -117,9 +117,11 @@ export function CloudView() {
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
   const [exampleUsage, setExampleUsage] = useState(apiEndpoints[0].example);
   const [modelModalities, setModelModalities] = useState<Map<string, ModelModality[]>>(new Map());
-  const [lockedBalance, setLockedBalance] = useState<number | undefined>();
+  const [partialBalance, setPartialBalance] = useState<number | undefined>();
   const { isLoggedIn, setIsLoggedIn } = useGlobalState();
 
+  console.log('balance', balance)
+  console.log('partialBalance', partialBalance)
   useEffect(() => {
     getTasks().then((tasks_with_modalities) => {
       const tasks = tasks_with_modalities.map((task) => task[0]);
@@ -128,13 +130,11 @@ export function CloudView() {
       if (isLoggedIn) {
         getAllStacks().then((stacks) => {
           console.log('stacks', stacks)
-          let lockedBalance = 0;
+          let partialBalance = 0;
           stacks.forEach(([stack]) => {
-            const freeTokens = stack.num_compute_units - stack.already_computed_units;
-            console.log('freeTokens', freeTokens)
-            lockedBalance += freeTokens/1_000_000*stack.price_per_one_million_compute_units;
+            partialBalance += stack.already_computed_units / stack.num_compute_units * stack.price_per_one_million_compute_units;
           });
-          setLockedBalance(lockedBalance);
+          setPartialBalance(partialBalance);
           setUsageHistory(
             stacks.map(([stack, timestamp]) => {
               return {
@@ -632,7 +632,7 @@ export function CloudView() {
                 <div>
                   <p className="text-4xl font-bold text-gray-900 dark:text-white">
                     {isLoggedIn
-                      ? `$${balance !== undefined ? (balance / 1000000).toFixed(2) : "Loading"} (locked $${lockedBalance !== undefined ? (lockedBalance / 1000000).toFixed(2) : "Loading"})`
+                      ? `$${balance !== undefined && partialBalance !== undefined ? ((balance+partialBalance) / 1000000).toFixed(2) : "Loading"}`
                       : "Login first"}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Remaining Balance</p>
@@ -686,7 +686,7 @@ export function CloudView() {
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Usage:</span>
                 <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  {formatNumber(totalUsedTokens)} / {formatNumber(totalUsage)} tokens
+                  {formatNumber(totalUsedTokens)} tokens
                 </span>
               </div>
               {/* <div className="space-y-2">
@@ -720,8 +720,8 @@ export function CloudView() {
                 <TableRow>
                   <TableHead className="text-gray-600 dark:text-gray-300">Date</TableHead>
                   <TableHead className="text-gray-600 dark:text-gray-300">Model</TableHead>
-                  <TableHead className="text-right text-gray-600 dark:text-gray-300">Used tokens/Total tokens</TableHead>
-                  <TableHead className="text-right text-gray-600 dark:text-gray-300">Used cost/Total Cost</TableHead>
+                  <TableHead className="text-right text-gray-600 dark:text-gray-300">Tokens</TableHead>
+                  <TableHead className="text-right text-gray-600 dark:text-gray-300">Cost</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -731,10 +731,10 @@ export function CloudView() {
                       <TableCell className="text-gray-900 dark:text-gray-300">{item.date.toLocaleDateString(undefined, { dateStyle: "long" })}</TableCell>
                       <TableCell className="text-gray-900 dark:text-gray-300">{item.model}</TableCell>
                       <TableCell className="text-right text-gray-900 dark:text-gray-300">
-                        {item.used_tokens.toLocaleString()} / {item.tokens.toLocaleString()}
+                        {item.used_tokens.toLocaleString()}
                       </TableCell>
                       <TableCell className="text-right text-gray-900 dark:text-gray-300">
-                        ${(item.cost*item.used_tokens/item.tokens).toFixed(2)} / ${item.cost.toFixed(2)}
+                        ${(item.cost*item.used_tokens/item.tokens).toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))}
