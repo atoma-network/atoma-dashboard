@@ -110,6 +110,13 @@ export function NodeStatusView() {
         }
       });
       setNodeDistribution(nodeDistribution);
+      setStats((prevStats) => [
+        {
+          ...prevStats[0],
+          value: formatNumber(totalNodes),
+        },
+        ...prevStats.slice(1),
+      ]);
     });
     getTasks().then((tasks_with_modalities) => {
       const tasks = tasks_with_modalities.map((task) => task[0]);
@@ -220,10 +227,7 @@ export function NodeStatusView() {
         }
       }
       setStats((prevStats) => [
-        {
-          ...prevStats[0],
-          value: formatNumber(Object.keys(nodes).length),
-        },
+        prevStats[0],
         {
           ...prevStats[1],
           value: formatNumber(Object.values(nodes).filter((v) => v).length),
