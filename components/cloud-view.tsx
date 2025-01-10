@@ -35,7 +35,7 @@ import {
 import { ComputeUnitsPayment } from "./compute-units-payment"
 import { generateApiKey, getAllStacks, getBalance, getSubscriptions, getSuiAddress, getTasks, listApiKeys, ModelModality, payUSDC, proofRequest, revokeApiToken, usdcPayment, type NodeSubscription, type Task } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
-import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
+import { ConnectModal,  useCurrentAccount, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient} from "@mysten/dapp-kit"
 import { GetApiSample } from "@/components/ui/GetApiSample"
 import Image from "next/image"
 import { formatNumber, simplifyModelName } from "@/lib/utils"
@@ -424,9 +424,9 @@ export function CloudView() {
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
     const totalUsedTokens =isLoggedIn? usageHistory.reduce((sum, item) => sum + (item.date >= startOfMonth ? item.used_tokens : 0), 0)
     : 0;
-    const totalUsage = isLoggedIn
-      ? usageHistory.reduce((sum, item) => sum + (item.date >= startOfMonth ? item.tokens : 0), 0)
-      : 0;
+    // const totalUsage = isLoggedIn
+    //   ? usageHistory.reduce((sum, item) => sum + (item.date >= startOfMonth ? item.tokens : 0), 0)
+    //   : 0;
     // const totalCost = isLoggedIn ? usageHistory.reduce((sum, item) => sum + item.cost, 0) : 0;
     // const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false)
     // const [isAutoReloadEnabled, setIsAutoReloadEnabled] = useState(false)
@@ -437,12 +437,13 @@ export function CloudView() {
       const [amount, setAmount] = useState<number>(10);
       const [step, setStep] = useState<"payment" | "amount" | "wallet" | "result" | "confirmed">("payment");
       const [walletConfirmed, setWalletConfirmed] = useState<boolean>(false);
+      const { connectionStatus } = useCurrentWallet();
       // const { isLoggedIn } = useGlobalState();
-      const { currentWallet, connectionStatus } = useCurrentWallet();
       const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
       const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
       const { setError } = useGlobalState();
       const suiClient = useSuiClient();
+      const account = useCurrentAccount();
     
       useEffect(() => {
         if (!isLoggedIn) {
@@ -450,13 +451,12 @@ export function CloudView() {
         }
         getSuiAddress().then((suiAddress) => {
           // console.log('suiAddress', suiAddress)
-          // console.log('currentWallet', currentWallet?.accounts?.[0]?.address)
-          setWalletConfirmed(suiAddress != null && suiAddress == currentWallet?.accounts?.[0]?.address)
+          setWalletConfirmed(suiAddress != null && suiAddress == account?.address)
         });
-      }, [currentWallet?.accounts]);
+      }, [account]);
 
       const handleConfirmWallet = async () => {
-        if (currentWallet == null) {
+        if (account == null) {
           return;
         }
         const access_token = localStorage.getItem("access_token");
@@ -472,11 +472,12 @@ export function CloudView() {
         }
     
         signPersonalMessage({
+          account,
           message: new TextEncoder().encode(
             `Sign this message to prove you are the owner of this wallet. User ID: ${user_id}`
           ),
         }).then((res) => {
-          proofRequest(res.signature, currentWallet.accounts[0].address)
+          proofRequest(res.signature, account.address)
             .then(() => {
               setStep("confirmed");
               setWalletConfirmed(true);
@@ -489,17 +490,17 @@ export function CloudView() {
       }
   
       const handleUSDCPayment = async (amount: number) => {
-        if (currentWallet == null) {
+        if (account == null) {
           return;
         }
     
         try {
           const suiAddress = await getSuiAddress();
-          if (suiAddress == null || suiAddress != currentWallet.accounts[0].address) {
+          if (suiAddress == null || suiAddress != account?.address) {
             // We haven't proven the SUI address yet
             throw new Error("SUI address not found or not matching");
           }
-          payUSDC(amount * 1000000, suiClient, signAndExecuteTransaction, currentWallet).then((res: unknown) => {
+          payUSDC(amount * 1000000, suiClient, signAndExecuteTransaction, account).then((res: unknown) => {
             const txDigest = (res as { digest: string }).digest;
             setTimeout(() => {
               usdcPayment(txDigest).then(() => {

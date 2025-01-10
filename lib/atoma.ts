@@ -1,6 +1,7 @@
 import type { SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import type { UseMutateAsyncFunction } from "@tanstack/react-query";
+import { WalletAccount } from "@mysten/wallet-standard";
 
 const proxy_url = process.env.NEXT_PUBLIC_PROXY_URL;
 const USDC_TYPE = process.env.NEXT_PUBLIC_USDC_TYPE;
@@ -206,10 +207,10 @@ export const payUSDC = async (
   client: SuiClient,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   signAndExecuteTransaction: UseMutateAsyncFunction<any, any, any, unknown>,
-  currentWallet: import("@mysten/wallet-standard").WalletWithRequiredFeatures
+  account: WalletAccount,
 ): Promise<unknown> => {
   const { data: coins } = await client.getCoins({
-    owner: currentWallet.accounts[0].address,
+    owner: account.address,
     coinType: USDC_TYPE,
   });
   const tx = new Transaction();
@@ -236,8 +237,9 @@ export const payUSDC = async (
     throw new Error("Proxy wallet address not found");
   }
   tx.transferObjects(selectedCoins, process.env.NEXT_PUBLIC_PROXY_WALLET);
-  tx.setSender(currentWallet.accounts[0].address);
+  tx.setSender(account.address);
   return await signAndExecuteTransaction({
     transaction: tx,
+    account,
   });
 };

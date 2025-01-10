@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, X } from 'lucide-react'
-import { ConnectModal, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
+import { ConnectModal, useCurrentAccount, useCurrentWallet, useSignAndExecuteTransaction, useSignPersonalMessage, useSuiClient } from "@mysten/dapp-kit"
 import {  getSuiAddress, ModelModality, payUSDC, proofRequest, usdcPayment } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
 import { GetApiSample } from "@/components/ui/GetApiSample"
@@ -19,11 +19,12 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
   const [step, setStep] = useState<'units' | 'payment' | 'api' | 'result'>('api')
   const [computeUnits, setComputeUnits] = useState<number>(1000)
   const suiClient = useSuiClient();
-  const { currentWallet, connectionStatus } = useCurrentWallet();
+  const { connectionStatus } = useCurrentWallet();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
   const [walletConfirmed, setWalletConfirmed] = useState<boolean>(false);
-  const {setError} = useGlobalState();
+  const { setError } = useGlobalState();
+  const account = useCurrentAccount();
   const handleNextStep = () => {
     if (step === 'units') {
       setStep('payment')
@@ -36,12 +37,12 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
 
   useEffect(() => {
     getSuiAddress().then((suiAddress) => {
-      setWalletConfirmed(suiAddress != null && suiAddress == currentWallet?.accounts?.[0]?.address)
+      setWalletConfirmed(suiAddress != null && suiAddress == account?.address)
     });
-  }, [currentWallet?.accounts]);
+  }, [account]);
 
   const handleConfirmWallet = async () => {
-    if (currentWallet == null) {
+    if (account == null) {
       return;
     }
     const access_token = localStorage.getItem("access_token");
@@ -57,11 +58,12 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
     }
 
     signPersonalMessage({
+      account,
       message: new TextEncoder().encode(
         `Sign this message to prove you are the owner of this wallet. User ID: ${user_id}`
       ),
     }).then((res) => {
-      proofRequest(res.signature, currentWallet.accounts[0].address)
+      proofRequest(res.signature, account.address)
         .catch((error:Response) => {
         setError(`${error.status} : ${error.statusText}`);
           console.error(error);
@@ -70,17 +72,17 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
   }
 
   const handleUSDCPayment = async () => {
-    if (currentWallet == null) {
+    if (account == null) {
       return;
     }
 
     try {
       const suiAddress = await getSuiAddress();
-      if (suiAddress == null || suiAddress != currentWallet.accounts[0].address) {
+      if (suiAddress == null || suiAddress != account?.address) {
         // We haven't proven the SUI address yet
         throw new Error("SUI address not found or not matching");
       }
-      payUSDC((computeUnits / 1000000) * pricePer1MUnits , suiClient, signAndExecuteTransaction, currentWallet).then((res: unknown) => {
+      payUSDC((computeUnits / 1000000) * pricePer1MUnits , suiClient, signAndExecuteTransaction, account).then((res: unknown) => {
         const txDigest = (res as { digest: string }).digest;
         setTimeout(() => {
           usdcPayment(txDigest).then((res) => {
