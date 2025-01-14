@@ -382,7 +382,7 @@ export function CloudView() {
               </>
             ) : (
               <div>Loading</div>
-            ):"Login first"}
+            ):"N/A"}
           </div>
 
           <div>
@@ -634,7 +634,7 @@ export function CloudView() {
                   <p className="text-4xl font-bold text-gray-900 dark:text-white">
                     {isLoggedIn
                       ? `$${balance !== undefined && partialBalance !== undefined ? ((balance+partialBalance) / 1000000).toFixed(2) : "Loading"}`
-                      : "Login first"}
+                      : "N/A"}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Remaining Balance</p>
                 </div>
