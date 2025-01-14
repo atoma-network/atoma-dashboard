@@ -178,7 +178,7 @@ export function NodeStatusView() {
         }, {});
 
         const sortedGroupByTime = Object.keys(groupedByDay).map((key) => ({
-          time: new Date(key).toLocaleDateString(),
+          time: new Date(key).toLocaleDateString([], { month: "short", day: "numeric" }),
           data: groupedByDay[key],
         }));
 
