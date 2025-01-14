@@ -198,7 +198,7 @@ export function NodeStatusView() {
           prevStats[4],
           {
             ...prevStats[5],
-            value: totalTime ? formatNumber(totalRequests * (60 / totalTime)) : "-", // Throughput
+            value: totalTime ? (totalRequests * (60 / totalTime)).toFixed(2) : "-", // Throughput
           },
           ...prevStats.slice(6),
         ]);
