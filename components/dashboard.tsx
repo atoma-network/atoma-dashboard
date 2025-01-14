@@ -45,8 +45,7 @@ export default function Dashboard() {
             <Logo/>
             <div className="flex items-center space-x-2">
               <ThemeToggle />
-              {activeTab === "cloud" &&
-                (isLoggedIn ? <UserProfileIcon /> : <LoginRegisterButton/>)}
+              {(isLoggedIn ? <UserProfileIcon /> : <LoginRegisterButton/>)}
             </div>
           </div>
           <nav className="mt-4">
