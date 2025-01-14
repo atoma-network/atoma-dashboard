@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Users, Server, BarChartIcon as ChartBar, Cpu, Timer, ArrowUpDown} from "lucide-react";
+import { Users, Server, BarChartIcon as ChartBar, Cpu, Timer, ArrowUpDown } from "lucide-react";
 import { Line, LineChart, Pie, PieChart, Legend, XAxis, YAxis, Tooltip, Cell } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
 import { useEffect, useState } from "react";
@@ -19,7 +19,7 @@ import {
 } from "@/lib/atoma";
 import Image from "next/image";
 import { formatNumber, simplifyModelName } from "@/lib/utils";
-import { countries } from 'countries-list'; 
+import { countries } from "countries-list";
 
 export function NodeStatusView() {
   const [stats, setStats] = useState([
@@ -66,8 +66,10 @@ export function NodeStatusView() {
   const [computeUnitsData, setComputeUnitsData] = useState<{ time: string; units: number }[]>([]);
   const [activityModels, setActivityModels] = useState<{ model_name: string; color: string }[]>([]);
   const [networkActivityData, setNetworkActivityData] = useState<unknown[]>([]);
-  const [modelDistribution, setModelDistruibution] = useState<{ model: string, nodesRunning: number }[]>([]);
-  const [nodeDistribution, setNodeDistribution] = useState<Record<string, { name: string; nodes: number; percentage: number }>>({});
+  const [modelDistribution, setModelDistribution] = useState<{ model: string; nodesRunning: number }[]>([]);
+  const [nodeDistribution, setNodeDistribution] = useState<
+    Record<string, { name: string; nodes: number; percentage: number }>
+  >({});
   // const [statsStack, setStatsStacks] = useState<unknown[]>([]);
   // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
   // const [latency, setLatency] = useState<LatencyResponse[]>([]);
@@ -77,19 +79,19 @@ export function NodeStatusView() {
 
   useEffect(() => {
     getNodesDistribution().then((nodes) => {
-      const countryToContinent: Record<string,string> = Object.fromEntries(
+      const countryToContinent: Record<string, string> = Object.fromEntries(
         Object.entries(countries).map(([, country]) => [country.name.toLowerCase(), country.continent])
       );
 
-      const nodeDistribution:Record<string, { name: string; nodes: number; percentage: number }> = {
-        "EU": { name: "Europe", nodes: 0, percentage: 0 },
-        "AS": { name: "Asia", nodes: 0, percentage: 0 },
-        "NA": { name: "North America", nodes: 0, percentage: 0 },
-        "AF": { name: "Africa", nodes: 0, percentage: 0 },
-        "AN": { name: "Antarctica", nodes: 0, percentage: 0 },
-        "SA": { name: "South America", nodes: 0, percentage: 0 },
-        "OC": { name: "Oceania", nodes: 0, percentage: 0 },
-        "UN": { name:"Unknown", nodes: 0, percentage: 0 }
+      const nodeDistribution: Record<string, { name: string; nodes: number; percentage: number }> = {
+        EU: { name: "Europe", nodes: 0, percentage: 0 },
+        AS: { name: "Asia", nodes: 0, percentage: 0 },
+        NA: { name: "North America", nodes: 0, percentage: 0 },
+        AF: { name: "Africa", nodes: 0, percentage: 0 },
+        AN: { name: "Antarctica", nodes: 0, percentage: 0 },
+        SA: { name: "South America", nodes: 0, percentage: 0 },
+        OC: { name: "Oceania", nodes: 0, percentage: 0 },
+        UN: { name: "Unknown", nodes: 0, percentage: 0 },
       };
       let totalNodes = 0;
       nodes.forEach((node) => {
@@ -137,7 +139,7 @@ export function NodeStatusView() {
         );
         computeUnits.forEach((value) => {
           value.timestamp = new Date(value.timestamp).toISOString();
-        })
+        });
         const group_by_time = computeUnits.reduce((acc: { [key: string]: { [key: string]: number } }, data) => {
           if (!(data.timestamp in acc)) {
             acc[data.timestamp] = {};
@@ -154,20 +156,37 @@ export function NodeStatusView() {
           const timeKey = date.toISOString();
           if (!(timeKey in group_by_time)) {
             group_by_time[timeKey] = {};
-          } 
+          }
         });
-        const sortedGroupByTime = Object.keys(group_by_time)
-          .sort()
-          .map((key) => ({
-            time: new Date(key).toLocaleTimeString([], { month:"numeric", day:"numeric", hour: "2-digit", minute: "2-digit" }),
-            data: group_by_time[key],
-          }));
-        
+        const sortedGroupByTime2 = Object.keys(group_by_time).sort();
+
+        // Group by day
+        const groupedByDay = sortedGroupByTime2.reduce((acc: typeof group_by_time, precise_timestamp) => {
+          const rounded_timestamp = new Date(precise_timestamp);
+          rounded_timestamp.setHours(0, 0, 0, 0);
+          const timestamp = rounded_timestamp.toISOString();
+          if (!acc[timestamp]) {
+            acc[timestamp] = {};
+          }
+          Object.keys(group_by_time[precise_timestamp]).forEach((model) => {
+            if (!acc[timestamp][model]) {
+              acc[timestamp][model] = 0;
+            }
+            acc[timestamp][model] += group_by_time[precise_timestamp][model];
+          });
+          return acc;
+        }, {});
+
+        const sortedGroupByTime = Object.keys(groupedByDay).map((key) => ({
+          time: new Date(key).toLocaleDateString(),
+          data: groupedByDay[key],
+        }));
+
         setNetworkActivityData(sortedGroupByTime);
         setComputeUnitsData(
           sortedGroupByTime.map((data) => ({
             time: data.time,
-            units: Object.keys(data.data).reduce((sum, key) => sum + data.data[key] , 0),
+            units: Object.keys(data.data).reduce((sum, key) => sum + data.data[key], 0),
           }))
         );
         setStats((prevStats) => [
@@ -179,7 +198,7 @@ export function NodeStatusView() {
           prevStats[4],
           {
             ...prevStats[5],
-            value: totalTime?formatNumber((totalRequests * ((1000 * 60) / totalTime))):"-",
+            value: totalTime ? formatNumber(totalRequests * ((1000 * 60) / totalTime)) : "-",
           },
           ...prevStats.slice(6),
         ]);
@@ -211,7 +230,7 @@ export function NodeStatusView() {
         ...prevStats.slice(0, 4),
         {
           ...prevStats[4],
-          value: totalRequests?`${(totalLatency / totalRequests).toFixed(2)}ms`:"- ms",
+          value: totalRequests ? `${(totalLatency / totalRequests).toFixed(2)}ms` : "- ms",
         },
         ...prevStats.slice(5),
       ]);
@@ -253,7 +272,7 @@ export function NodeStatusView() {
       ).length;
     }
     // setSubscribers(Object.entries(subscribers).map(([model_name, nodesRunning]) => ({ model_name, nodesRunning })));
-    setModelDistruibution(
+    setModelDistribution(
       Object.entries(subscribers).map(([model, nodesRunning]) => ({
         model: simplifyModelName(model),
         nodesRunning,
@@ -265,7 +284,10 @@ export function NodeStatusView() {
       {/* Stats Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
         {stats.map((stat) => (
-          <Card key={stat.title} className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
+          <Card
+            key={stat.title}
+            className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm"
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 {stat.title}
@@ -312,40 +334,30 @@ export function NodeStatusView() {
               }}
               className="h-[300px] w-full"
             >
-              <LineChart
-                data={computeUnitsData}
-                margin={{ top: 5, right: 0, bottom: 25, left: 20 }}
-              >
-                <XAxis 
-                  dataKey="time" 
-                  tick={{ fill: 'var(--purple-600)' }}
+              <LineChart data={computeUnitsData} margin={{ top: 5, right: 0, bottom: 25, left: 20 }}>
+                <XAxis
+                  dataKey="time"
+                  tick={{ fill: "var(--purple-600)" }}
                   scale="point"
                   padding={{ left: 10, right: 30 }}
                 />
-                <YAxis
-                  tick={{ fill: 'var(--purple-600)' }}
-                  tickFormatter={formatNumber}
-                />
+                <YAxis tick={{ fill: "var(--purple-600)" }} tickFormatter={formatNumber} />
                 <Tooltip
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
                       return (
                         <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
                           <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
-                          <p className="text-purple-600 dark:text-purple-400">{`Units: ${typeof payload?.[0]?.value === 'number' ? formatNumber(payload?.[0]?.value) : ''}`}</p>
+                          <p className="text-purple-600 dark:text-purple-400">{`Units: ${
+                            typeof payload?.[0]?.value === "number" ? formatNumber(payload?.[0]?.value) : ""
+                          }`}</p>
                         </div>
                       );
                     }
                     return null;
                   }}
                 />
-                <Line
-                  type="monotone"
-                  dataKey="units"
-                  stroke="var(--color-units)"
-                  strokeWidth={2}
-                  dot={false}
-                />
+                <Line type="monotone" dataKey="units" stroke="var(--color-units)" strokeWidth={2} dot={false} />
               </LineChart>
             </ChartContainer>
           </CardContent>
@@ -369,20 +381,14 @@ export function NodeStatusView() {
               }, {})}
               className="h-[300px] w-full"
             >
-              <LineChart
-                data={networkActivityData}
-                margin={{ top: 5, right: 0, bottom: 25, left: 20 }}
-              >
-                <XAxis 
-                  dataKey="time" 
-                  tick={{ fill: 'var(--purple-600)' }}
+              <LineChart data={networkActivityData} margin={{ top: 5, right: 0, bottom: 25, left: 20 }}>
+                <XAxis
+                  dataKey="time"
+                  tick={{ fill: "var(--purple-600)" }}
                   scale="point"
                   padding={{ left: 10, right: 30 }}
                 />
-                <YAxis
-                  tick={{ fill: 'var(--purple-600)' }}
-                  tickFormatter={formatNumber}
-                />
+                <YAxis tick={{ fill: "var(--purple-600)" }} tickFormatter={formatNumber} />
                 <Tooltip
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
@@ -390,7 +396,9 @@ export function NodeStatusView() {
                         <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
                           <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
                           {payload.map((entry, index) => (
-                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${typeof entry?.value === 'number'?formatNumber(entry?.value):''}`}</p>
+                            <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${
+                              typeof entry?.value === "number" ? formatNumber(entry?.value) : ""
+                            }`}</p>
                           ))}
                         </div>
                       );
@@ -398,11 +406,7 @@ export function NodeStatusView() {
                     return null;
                   }}
                 />
-                <Legend 
-                  verticalAlign="top" 
-                  align="right"
-                  wrapperStyle={{ paddingBottom: "20px" }}
-                />
+                <Legend verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: "20px" }} />
                 {activityModels.map((model) => {
                   return (
                     <Line
@@ -414,7 +418,7 @@ export function NodeStatusView() {
                       strokeWidth={2}
                       dot={false}
                     />
-                  )
+                  );
                 })}
               </LineChart>
             </ChartContainer>
@@ -490,84 +494,82 @@ export function NodeStatusView() {
 
       {/* Models Running Section */}
       <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
-  <CardHeader>
-    <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Models Running</CardTitle>
-    <CardDescription className="text-gray-500 dark:text-gray-400">
-      Distribution of nodes across different models
-    </CardDescription>
-  </CardHeader>
-  <CardContent>
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div>
-        <Table>
-          <TableHeader>
-            <TableRow className="border-purple-200 dark:border-purple-800/30">
-              <TableHead className="text-purple-600 dark:text-purple-300">Model</TableHead>
-              <TableHead className="text-purple-600 dark:text-purple-300">Nodes Running</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {modelDistribution.map((item) => (
-              <TableRow key={item.model} className="border-purple-200 dark:border-purple-800/30">
-                <TableCell className="font-medium text-purple-700 dark:text-purple-300">{item.model}</TableCell>
-                <TableCell className="text-purple-600 dark:text-purple-400">{formatNumber(item.nodesRunning)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-center">
-        <ChartContainer
-          config={{
-            llama405b: {
-              label: "Llama 3.1 405B",
-              color: "hsl(var(--chart-1))",
-            },
-            llama3b: {
-              label: "Llama 3.2 3B",
-              color: "hsl(var(--chart-2))",
-            },
-            gpt4: {
-              label: "GPT-4",
-              color: "hsl(var(--chart-3))",
-            },
-            bert: {
-              label: "BERT-Large",
-              color: "hsl(var(--chart-4))",
-            },
-            t5: {
-              label: "T5-Base",
-              color: "hsl(var(--chart-5))",
-            },
-          }}
-          className="h-[300px] w-full"
-        >
-          <PieChart>
-            <Pie
-              data={modelDistribution}
-              dataKey="nodesRunning"
-              nameKey="model"
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              // label={(entry) => entry.model}
-            >
-              {modelDistribution.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={`hsl(var(--chart-${index + 1}))`}
-                />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </ChartContainer>
-      </div>
-    </div>
-  </CardContent>
-</Card>
-
+        <CardHeader>
+          <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Models Running</CardTitle>
+          <CardDescription className="text-gray-500 dark:text-gray-400">
+            Distribution of nodes across different models
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-purple-200 dark:border-purple-800/30">
+                    <TableHead className="text-purple-600 dark:text-purple-300">Model</TableHead>
+                    <TableHead className="text-purple-600 dark:text-purple-300">Nodes Running</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {modelDistribution.map((item) => (
+                    <TableRow key={item.model} className="border-purple-200 dark:border-purple-800/30">
+                      <TableCell className="font-medium text-purple-700 dark:text-purple-300">{item.model}</TableCell>
+                      <TableCell className="text-purple-600 dark:text-purple-400">
+                        {formatNumber(item.nodesRunning)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="flex items-center justify-center">
+              <ChartContainer
+                config={{
+                  llama405b: {
+                    label: "Llama 3.1 405B",
+                    color: "hsl(var(--chart-1))",
+                  },
+                  llama3b: {
+                    label: "Llama 3.2 3B",
+                    color: "hsl(var(--chart-2))",
+                  },
+                  gpt4: {
+                    label: "GPT-4",
+                    color: "hsl(var(--chart-3))",
+                  },
+                  bert: {
+                    label: "BERT-Large",
+                    color: "hsl(var(--chart-4))",
+                  },
+                  t5: {
+                    label: "T5-Base",
+                    color: "hsl(var(--chart-5))",
+                  },
+                }}
+                className="h-[300px] w-full"
+              >
+                <PieChart>
+                  <Pie
+                    data={modelDistribution}
+                    dataKey="nodesRunning"
+                    nameKey="model"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    // label={(entry) => entry.model}
+                  >
+                    {modelDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))`} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ChartContainer>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
@@ -579,22 +581,19 @@ export function NodeStatusView() {
           </CardHeader>
           <CardContent>
             <div className="w-full h-[400px] relative overflow-hidden rounded-lg">
-              <Image 
-                src="/world.svg" 
-                alt="Global node distribution map"
-                layout="fill"
-                objectFit="cover"
-              />
+              <Image src="/world.svg" alt="Global node distribution map" layout="fill" objectFit="cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
               <div className="absolute bottom-4 left-4 right-4 text-white">
                 <p className="text-sm font-medium">Node distribution across major regions</p>
                 <div className="mt-2 grid grid-cols-2 gap-2">
-                  {Object.keys(nodeDistribution).sort().map((item) => (
-                    <div key={nodeDistribution[item].name} className="flex items-center justify-between">
-                      <span className="text-xs">{nodeDistribution[item].name}</span>
-                      <span className="text-xs font-bold">{nodeDistribution[item].percentage.toFixed(1)}%</span>
-                    </div>
-                  ))}
+                  {Object.keys(nodeDistribution)
+                    .sort()
+                    .map((item) => (
+                      <div key={nodeDistribution[item].name} className="flex items-center justify-between">
+                        <span className="text-xs">{nodeDistribution[item].name}</span>
+                        <span className="text-xs font-bold">{nodeDistribution[item].percentage.toFixed(1)}%</span>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
@@ -603,7 +602,9 @@ export function NodeStatusView() {
 
         <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">Regional Distribution Details</CardTitle>
+            <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">
+              Regional Distribution Details
+            </CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
               Detailed breakdown of node distribution
             </CardDescription>
@@ -618,19 +619,26 @@ export function NodeStatusView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {Object.keys(nodeDistribution).sort().map((item) => (
-                  <TableRow key={nodeDistribution[item].name} className="border-purple-200 dark:border-purple-800/30">
-                    <TableCell className="font-medium text-purple-700 dark:text-purple-300">{nodeDistribution[item].name}</TableCell>
-                    <TableCell className="text-purple-600 dark:text-purple-400">{formatNumber(nodeDistribution[item].nodes)}</TableCell>
-                    <TableCell className="text-purple-600 dark:text-purple-400">{nodeDistribution[item].percentage.toFixed(1)}%</TableCell>
-                  </TableRow>
-                ))}
+                {Object.keys(nodeDistribution)
+                  .sort()
+                  .map((item) => (
+                    <TableRow key={nodeDistribution[item].name} className="border-purple-200 dark:border-purple-800/30">
+                      <TableCell className="font-medium text-purple-700 dark:text-purple-300">
+                        {nodeDistribution[item].name}
+                      </TableCell>
+                      <TableCell className="text-purple-600 dark:text-purple-400">
+                        {formatNumber(nodeDistribution[item].nodes)}
+                      </TableCell>
+                      <TableCell className="text-purple-600 dark:text-purple-400">
+                        {nodeDistribution[item].percentage.toFixed(1)}%
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }
-
