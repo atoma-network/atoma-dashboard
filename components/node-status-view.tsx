@@ -115,7 +115,7 @@ export function NodeStatusView() {
       setStats((prevStats) => [
         {
           ...prevStats[0],
-          value: formatNumber(totalNodes),
+          value: formatNumber(totalNodes), // Total nodes
         },
         ...prevStats.slice(1),
       ]);
@@ -193,12 +193,12 @@ export function NodeStatusView() {
           ...prevStats.slice(0, 3),
           {
             ...prevStats[3],
-            value: formatNumber(totalUnits),
+            value: formatNumber(totalUnits), // Compute units
           },
           prevStats[4],
           {
             ...prevStats[5],
-            value: totalTime ? formatNumber(totalRequests * ((1000 * 60) / totalTime)) : "-",
+            value: totalTime ? formatNumber(totalRequests * (60 / totalTime)) : "-", // Throughput
           },
           ...prevStats.slice(6),
         ]);
@@ -217,7 +217,7 @@ export function NodeStatusView() {
         ...prevStats.slice(0, 2),
         {
           ...prevStats[2],
-          value: formatNumber(Object.keys(models).length),
+          value: formatNumber(Object.keys(models).length), // Models running
         },
         ...prevStats.slice(3),
       ]);
@@ -230,7 +230,7 @@ export function NodeStatusView() {
         ...prevStats.slice(0, 4),
         {
           ...prevStats[4],
-          value: totalRequests ? `${(totalLatency / totalRequests).toFixed(2)}ms` : "- ms",
+          value: totalRequests ? `${(totalLatency / totalRequests).toFixed(2)}ms` : "- ms", // Avg Latency
         },
         ...prevStats.slice(5),
       ]);
@@ -249,7 +249,7 @@ export function NodeStatusView() {
         prevStats[0],
         {
           ...prevStats[1],
-          value: formatNumber(Object.values(nodes).filter((v) => v).length),
+          value: formatNumber(Object.values(nodes).filter((v) => v).length), // Nodes online
         },
         ...prevStats.slice(2),
       ]);
