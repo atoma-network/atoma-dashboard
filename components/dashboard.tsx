@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, Cloud } from "lucide-react";
+import { Activity, Cloud, BookOpen } from "lucide-react";
 import { NodeStatusView } from "@/components/node-status-view";
-import { MyNodeView } from "@/components/my-node-view";
+import { GuideView } from "@/components/guide-view";
 import { CloudView } from "@/components/cloud-view";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ThemeProvider, useTheme } from "next-themes";
@@ -13,11 +13,12 @@ import { UserProfileIcon } from "./user-profile-icon";
 import { useGlobalState } from "@/app/GlobalStateContext";
 import Image from "next/image";
 
-type TabType = "node-status" | "cloud" | "my-node";
+type TabType = "node-status" | "cloud" | "guide";
 
 const mainTabs = [
   { id: "node-status", icon: Activity, label: "Network Status" },
   { id: "cloud", icon: Cloud, label: "Developer Portal" },
+  { id: 'guide', icon: BookOpen, label: 'Guide' },
 ] as const;
 
 
@@ -72,7 +73,7 @@ export default function Dashboard() {
         <main className="flex-1 overflow-auto p-6 bg-gray-50 dark:bg-[#1A1C23]">
           {activeTab === "node-status" && <NodeStatusView />}
           {activeTab === "cloud" && <CloudView/>}
-          {activeTab === "my-node" && <MyNodeView />}
+          {activeTab === "guide" && <GuideView />}
         </main>
 
         {/* <AskUtopia /> */}
