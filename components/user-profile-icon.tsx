@@ -9,9 +9,10 @@ import {
 import { useGlobalState } from '@/app/GlobalStateContext';
 import { useEffect, useState } from 'react';
 import { getUserProfile } from '@/lib/atoma';
+import { LOCAL_STORAGE_MAX_EPOCH, LOCAL_STORAGE_RANDOMNESS, LOCAL_STORAGE_SECRET_KEY, LOCAL_STORAGE_ZKP } from '@/lib/zklogin';
 
 export function UserProfileIcon() {
-  const { setIsLoggedIn } = useGlobalState();
+  const { setLogState } = useGlobalState();
   const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,9 +22,14 @@ export function UserProfileIcon() {
   },[])
 
   const handleLogOut = () => {
-    setIsLoggedIn(false);
+    setLogState('loggedOut');
     window.localStorage.removeItem("access_token");
-  }
+    window.localStorage.removeItem("id_token");
+    localStorage.removeItem(LOCAL_STORAGE_SECRET_KEY);
+    localStorage.removeItem(LOCAL_STORAGE_RANDOMNESS);
+    localStorage.removeItem(LOCAL_STORAGE_MAX_EPOCH);
+    localStorage.removeItem(LOCAL_STORAGE_ZKP);
+}
 
   return (
     <DropdownMenu>

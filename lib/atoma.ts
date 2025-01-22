@@ -97,11 +97,11 @@ export interface UserProfile {
 interface RequestOptions {
   path: string;
   post?: boolean;
-  body?: object;
+  body?: object | string;
   use_auth?: boolean;
 }
 
-const request = async<T>({ path, post , body , use_auth }:RequestOptions): Promise<T> => {
+const request = async <T>({ path, post, body, use_auth }: RequestOptions): Promise<T> => {
   const options: RequestInit = {};
 
   if (post === true) {
@@ -110,7 +110,7 @@ const request = async<T>({ path, post , body , use_auth }:RequestOptions): Promi
   if (body) {
     options.headers = {
       "Content-Type": "application/json",
-      ...options.headers
+      ...options.headers,
     };
     options.body = JSON.stringify(body);
   }
@@ -128,7 +128,7 @@ const request = async<T>({ path, post , body , use_auth }:RequestOptions): Promi
       }
       throw response;
     }
-    return response.json()
+    return response.json();
   });
 };
 
@@ -155,7 +155,7 @@ export const generateApiKey = async (): Promise<string> => {
 };
 
 export const revokeApiToken = async (api_token: string): Promise<void> => {
-  return await request({path:"revoke_api_token", post: true, body: { api_token }, use_auth: true });
+  return await request({ path: "revoke_api_token", post: true, body: { api_token }, use_auth: true });
 };
 
 export const listApiKeys = async (): Promise<string[]> => {
@@ -179,38 +179,57 @@ export const getStatsStacks = async (): Promise<StatsStack[]> => {
 };
 
 export const proofRequest = async (signature: string, walletAddress: string): Promise<void> => {
-  return await request({path:"update_sui_address", post: true, body: { signature, address: walletAddress }, use_auth: true });
+  return await request({
+    path: "update_sui_address",
+    post: true,
+    body: { signature, address: walletAddress },
+    use_auth: true,
+  });
 };
 
-export const usdcPayment = async (txDigest: string): Promise<void> => {
-  return await request({path:"usdc_payment", post: true, body: { transaction_digest: txDigest }, use_auth: true });
+export const usdcPayment = async (txDigest: string, proofSignature?: string): Promise<void> => {
+  return await request({
+    path: "usdc_payment",
+    post: true,
+    body: { transaction_digest: txDigest, proof_signature: proofSignature },
+    use_auth: true,
+  });
 };
 
 export const getSuiAddress = async (): Promise<string> => {
-  return await request({path:"get_sui_address", use_auth: true });
+  return await request({ path: "get_sui_address", use_auth: true });
 };
 
 export const getBalance = async (): Promise<number> => {
-  return await request({path:"balance", use_auth: true });
+  return await request({ path: "balance", use_auth: true });
 };
 
 export const getAllStacks = async (): Promise<[Stack, string][]> => {
-  return await request({path:"all_stacks", use_auth: true });
+  return await request({ path: "all_stacks", use_auth: true });
 };
 
 export const getUserProfile = async (): Promise<UserProfile> => {
-  return await request({path:"user_profile", use_auth: true });
-}
+  return await request({ path: "user_profile", use_auth: true });
+};
+
+export const googleOAuth = async (idToken: string): Promise<AuthResponse> => {
+  return await request({ path: "google_oauth", post: true, body: idToken });
+};
+
+export const getSalt = async (): Promise<string> => {
+  return await request({ path: "salt", use_auth: true });
+};
 
 export const payUSDC = async (
   amount: number,
   client: SuiClient,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   signAndExecuteTransaction: UseMutateAsyncFunction<any, any, any, unknown>,
-  account: WalletAccount,
+  account: WalletAccount
 ): Promise<unknown> => {
+  const accountAddress = account.address;
   const { data: coins } = await client.getCoins({
-    owner: account.address,
+    owner: accountAddress,
     coinType: USDC_TYPE,
   });
   const tx = new Transaction();
@@ -219,7 +238,7 @@ export const payUSDC = async (
 
   for (const coin of coins) {
     if (parseInt(coin.balance) >= remainingAmount) {
-      console.log('add coin', coin.coinObjectId, remainingAmount);
+      console.log("add coin", coin.coinObjectId, remainingAmount);
       const [splitCoin] = tx.splitCoins(coin.coinObjectId, [tx.pure.u64(remainingAmount)]);
       selectedCoins.push(splitCoin);
       remainingAmount = 0;
@@ -237,7 +256,7 @@ export const payUSDC = async (
     throw new Error("Proxy wallet address not found");
   }
   tx.transferObjects(selectedCoins, process.env.NEXT_PUBLIC_PROXY_WALLET);
-  tx.setSender(account.address);
+  tx.setSender(accountAddress);
   return await signAndExecuteTransaction({
     transaction: tx,
     account,

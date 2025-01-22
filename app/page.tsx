@@ -23,6 +23,7 @@ export default function Home() {
       <link rel="icon" type="image/png" sizes="32x32" href="https://mintlify.s3-us-west-1.amazonaws.com/atoma/_generated/favicon/favicon-32x32.png?v=3"/>
       <link rel="icon" type="image/png" sizes="16x16" href="https://mintlify.s3-us-west-1.amazonaws.com/atoma/_generated/favicon/favicon-16x16.png?v=3"/>
       <link rel="shortcut icon" type="image/x-icon" href="https://mintlify.s3-us-west-1.amazonaws.com/atoma/_generated/favicon/favicon.ico?v=3" />
+      <script src="https://accounts.google.com/gsi/client" async defer></script>
       <QueryClientProvider client={queryClient}>
         <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
           <WalletProvider autoConnect={true}>
