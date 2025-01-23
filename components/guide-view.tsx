@@ -10,29 +10,7 @@ export function GuideView() {
             <iframe
               width="560"
               height="315"
-              src="https://www.youtube.com/embed/eZLvswmoN_M?si=sX8EP3E6XokUKyRc&rel=0&fs=1"
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            ></iframe>
-          </div>
-          <div>
-            <iframe
-              width="560"
-              height="315"
               src="https://www.youtube.com/embed/zmsgrzqPviw?si=qnTOARgdByvJ1-mn&rel=0&fs=1"
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            ></iframe>
-          </div>
-          <div>
-            <iframe
-              width="560"
-              height="315"
-              src="https://www.youtube.com/embed/I0t0Q01ageM?si=vPthq8F9OnglXDvI&rel=0&fs=1"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
