@@ -24,7 +24,7 @@ export function UserProfileIcon() {
   const { setLogState } = useGlobalState();
   const [username, setUsername] = useState<string | null>(null);
   const account = useCurrentAccount();
-  const [address, setAddress] = useState<string | null>(null);
+  const [address, setAddress] = useState<{ address: string; type: 'normal' | 'zklogin' } | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   const { isConnected } = useCurrentWallet();
   const { currentWallet } = useCurrentWallet();
@@ -68,9 +68,9 @@ export function UserProfileIcon() {
 
   useEffect(() => {
     if (zkLogin?.zkLoginUserAddressValue) {
-      setAddress(zkLogin?.zkLoginUserAddressValue);
+      setAddress({ address: zkLogin?.zkLoginUserAddressValue, type: "zklogin" });
     } else if (account?.address) {
-      setAddress(account?.address);
+      setAddress({ address: account?.address, type: "normal" });
     } else {
       setAddress(null);
     }
@@ -108,7 +108,7 @@ export function UserProfileIcon() {
                 <div className="flex flex-row gap-2">
                   <DropdownMenuTrigger asChild>
                     <p className="text-sm font-medium text-gray-900 dark:text-white font-mono cursor-pointer">
-                      {truncateAddress(address)}
+                      {truncateAddress(address.address)}
                     </p>
                   </DropdownMenuTrigger>
                   <Image
@@ -119,24 +119,26 @@ export function UserProfileIcon() {
                     width={14}
                     height={14}
                     onClick={() => {
-                      navigator.clipboard.writeText(address);
+                      navigator.clipboard.writeText(address.address);
                       setIsCopied(true);
                       setTimeout(() => setIsCopied(false), 1000);
                     }}
                   />
                 </div>
-                <DropdownMenuContent>
-                  {currentWallet?.accounts.map((acc) => (
-                    <DropdownMenuItem
-                      key={acc.address}
-                      onClick={() => switchAccount({ account: acc })}
-                      className="w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors rounded-md"
-                      title={acc.address}
-                    >
-                      {acc.label || truncateAddress(acc.address)}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
+                {address.type !== "zklogin" && (
+                  <DropdownMenuContent>
+                    {currentWallet?.accounts.map((acc) => (
+                      <DropdownMenuItem
+                        key={acc.address}
+                        onClick={() => switchAccount({ account: acc })}
+                        className="w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors rounded-md"
+                        title={acc.address}
+                      >
+                        {acc.label || truncateAddress(acc.address)}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                )}
               </DropdownMenu>
             </div>
           </div>
