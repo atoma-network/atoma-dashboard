@@ -2,6 +2,7 @@ import type { SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { WalletAccount } from "@mysten/wallet-standard";
+import { LOCAL_STORAGE_ACCESS_TOKEN } from "./local_storage_consts";
 
 const proxy_url = process.env.NEXT_PUBLIC_PROXY_URL;
 const USDC_TYPE = process.env.NEXT_PUBLIC_USDC_TYPE;
@@ -116,7 +117,7 @@ const request = async <T>({ path, post, body, use_auth }: RequestOptions): Promi
   }
   if (use_auth) {
     options.headers = {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      Authorization: `Bearer ${localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN)}`,
       ...options.headers,
     };
   }
@@ -124,7 +125,7 @@ const request = async <T>({ path, post, body, use_auth }: RequestOptions): Promi
   return await fetch(`${proxy_url}/${path}`, options).then((response) => {
     if (!response.ok) {
       if (response.status === 401) {
-        localStorage.removeItem("access_token");
+        localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
       }
       throw response;
     }
@@ -238,7 +239,6 @@ export const payUSDC = async (
 
   for (const coin of coins) {
     if (parseInt(coin.balance) >= remainingAmount) {
-      console.log("add coin", coin.coinObjectId, remainingAmount);
       const [splitCoin] = tx.splitCoins(coin.coinObjectId, [tx.pure.u64(remainingAmount)]);
       selectedCoins.push(splitCoin);
       remainingAmount = 0;

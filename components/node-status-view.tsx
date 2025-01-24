@@ -73,9 +73,6 @@ export function NodeStatusView() {
   // const [statsStack, setStatsStacks] = useState<unknown[]>([]);
   // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
   // const [latency, setLatency] = useState<LatencyResponse[]>([]);
-  // console.log('networkActivityData',networkActivityData)
-  // console.log('computeUnitsData', computeUnitsData)
-  // console.log('activityModels', activityModels)
 
   useEffect(() => {
     getNodesDistribution().then((nodes) => {

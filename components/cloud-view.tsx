@@ -42,10 +42,10 @@ import {
   useSignPersonalMessage,
   useSuiClient,
 } from "@mysten/dapp-kit";
-import { toBase64 } from "@mysten/sui/utils";
 import { GetApiSample } from "@/components/ui/GetApiSample";
 import Image from "next/image";
 import { formatNumber, simplifyModelName } from "@/lib/utils";
+import { LOCAL_STORAGE_ACCESS_TOKEN } from "@/lib/local_storage_consts";
 
 type TabType = "compute" | "models" | "api" | "billing" | "docs" | "calculator";
 
@@ -126,8 +126,6 @@ export function CloudView() {
   const [partialBalance, setPartialBalance] = useState<number | undefined>();
   const { logState, setLogState } = useGlobalState();
 
-  console.log("balance", balance);
-  console.log("partialBalance", partialBalance);
   useEffect(() => {
     getTasks()
       .then((tasks_with_modalities) => {
@@ -143,7 +141,6 @@ export function CloudView() {
         if (logState === "loggedIn") {
           getAllStacks()
             .then((stacks) => {
-              console.log("stacks", stacks);
               let partialBalance = 0;
               stacks.forEach(([stack]) => {
                 partialBalance +=
@@ -484,7 +481,6 @@ export function CloudView() {
           return;
         }
         getSuiAddress().then((suiAddress) => {
-          // console.log('suiAddress', suiAddress)
           setWalletConfirmed(suiAddress != null && suiAddress == account?.address);
         });
       }, [account]);
@@ -493,7 +489,7 @@ export function CloudView() {
         if (account == null) {
           return;
         }
-        const access_token = localStorage.getItem("access_token");
+        const access_token = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN);
         let user_id;
         if (access_token) {
           const base64Url = access_token.split(".")[1];
@@ -530,17 +526,13 @@ export function CloudView() {
 
       const handleUSDCPayment = async (amount: number) => {
         setHandlingPayment(true);
-        console.log("zklogin", zkLogin.isEnabled);
         if (zkLogin.isEnabled) {
           zkLogin
             .payUSDC(amount * 1000000, suiClient)
             .then((res) => {
-              console.log(res);
               const txDigest = res.digest;
               // const txDigest = "ASp9K5Ms1HS1sKW2H4oa4Q9q6Zz3kBqKUn3x9JbZcGsw";
-              console.log("txDigest", txDigest);
               zkLogin.signMessage(txDigest).then((proofSignature) => {
-                console.log("proofSignature", proofSignature);
                 setTimeout(() => {
                   usdcPayment(txDigest, proofSignature)
                     .then(() => {
@@ -665,7 +657,7 @@ export function CloudView() {
                     className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
                     disabled={handlingPayment}
                   >
-                    {walletConfirmed ? "Pay with USDC" : "Confirm Wallet"}
+                    {walletConfirmed ? "Pay with USDC" : "Confirm Account"}
                   </Button>
                 ) : (
                   <ConnectModal

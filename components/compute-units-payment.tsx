@@ -7,6 +7,7 @@ import { ConnectModal, useCurrentAccount, useCurrentWallet, useSignAndExecuteTra
 import {  getSuiAddress, ModelModality, payUSDC, proofRequest, usdcPayment } from "@/lib/atoma"
 import { useGlobalState } from "@/app/GlobalStateContext"
 import { GetApiSample } from "@/components/ui/GetApiSample"
+import { LOCAL_STORAGE_ACCESS_TOKEN } from "@/lib/local_storage_consts"
 
 interface ComputeUnitsPaymentProps {
   modelName: string
@@ -45,7 +46,7 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
     if (account == null) {
       return;
     }
-    const access_token = localStorage.getItem("access_token");
+    const access_token = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN);
     let user_id;
     if (access_token) {
       const base64Url = access_token.split('.')[1];
@@ -86,7 +87,6 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
         const txDigest = (res as { digest: string }).digest;
         setTimeout(() => {
           usdcPayment(txDigest).then((res) => {
-            console.log('res', res)
             handleNextStep();
           }).catch((error:Response) => {
             setError(`${error.status} : ${error.statusText}`);
@@ -148,7 +148,7 @@ export function ComputeUnitsPayment({ modelName, features, pricePer1MUnits, onCl
           <div className="space-y-4">
             {connectionStatus == "connected" ? (
               <Button onClick={() => walletConfirmed?handleUSDCPayment():handleConfirmWallet()} className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
-                {walletConfirmed?"Pay with USDC":"Confirm Wallet"}
+                {walletConfirmed?"Pay with USDC":"Confirm Account"}
               </Button>
             ) : (
               <ConnectModal

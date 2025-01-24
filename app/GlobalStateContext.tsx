@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import ModalError from "./ModalError";
 import ZkLogin from "@/lib/zklogin";
+import { LOCAL_STORAGE_ACCESS_TOKEN, LOCAL_STORAGE_ID_TOKEN } from "@/lib/local_storage_consts";
 
 
 export type LoginState = 'loggedIn' | 'loggedOut' | 'loggingIn';
@@ -21,8 +22,8 @@ export const GlobalStateProvider = ({ children }: { children: ReactNode }) => {
   const [zkLogin] = useState(new ZkLogin(setLogState));
 
   useEffect(() => {
-    if (!localStorage.getItem("id_token")) {
-      if (localStorage.getItem("access_token")) {
+    if (!localStorage.getItem(LOCAL_STORAGE_ID_TOKEN)) {
+      if (localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN)) {
         // This is when the user is logged in but not via zklogin. Zklogin will check the state of the user and set the state accordingly.
         setLogState('loggedIn');
       } else {

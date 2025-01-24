@@ -12,14 +12,8 @@ import {
 import { getSalt, googleOAuth } from "./atoma";
 import { Transaction } from "@mysten/sui/transactions";
 import type { LoginState } from "@/app/GlobalStateContext";
+import { LOCAL_STORAGE_ACCESS_TOKEN, LOCAL_STORAGE_ID_TOKEN, LOCAL_STORAGE_MAX_EPOCH, LOCAL_STORAGE_RANDOMNESS, LOCAL_STORAGE_SECRET_KEY, LOCAL_STORAGE_ZKP, PROVER_URL, SUI_RPC_URL } from "./local_storage_consts";
 
-// const LOCAL_STORAGE_NONCE = 'ZKLOGIN'-NONCE';
-export const LOCAL_STORAGE_SECRET_KEY = "ZKLOGIN-SECRET_KEY";
-export const LOCAL_STORAGE_RANDOMNESS = "ZKLOGIN-RANDOMNESS";
-export const LOCAL_STORAGE_MAX_EPOCH = "ZKLOGIN-MAX_EPOCH";
-export const LOCAL_STORAGE_ZKP = "ZKLOGIN-ZKP";
-const SUI_RPC_URL = process.env.NEXT_PUBLIC_SUI_RPC_URL;
-const PROVER_URL = process.env.NEXT_PUBLIC_PROVER_URL;
 
 type PartialZkLoginSignature = Omit<Parameters<typeof getZkLoginSignature>["0"]["inputs"], "addressSeed">;
 
@@ -35,7 +29,6 @@ export default class ZkLogin {
   private decodeJwt?: JwtPayload;
 
   constructor(setLogState: (logState: LoginState) => void) {
-    console.log("zklogin constructor");
     if (!SUI_RPC_URL) {
       throw new Error("SUI RPC URL is not set");
     }
@@ -48,32 +41,25 @@ export default class ZkLogin {
     this.suiClient = suiClient;
     this.proverUrl = PROVER_URL;
     if (typeof localStorage !== "undefined") {
-      console.log('here');
       this.getRest(setLogState)
         .then(() => {
-          console.log("Rest done");
-          console.log("ZkLogin user address", this.zkLoginUserAddress);
-          console.log("Partial zk login signature", this.partialZkLoginSignature);
-          console.log("Max epoch", this.maxEpoch);
         })
         .catch((err) => {
-          console.log('here');
           if (err.name === "TypeError") {
             /// This can happen when you reload the page before the responses from prover server
             return;
           }
-          console.log('here');
           console.error("Error type", err.name);
           console.error("Error message", err.message);
           console.error("Error getting rest", err);
           // There id a id_token but it is invalid so logout
-          localStorage.removeItem("id_token");
-          localStorage.removeItem("access_token");
+          localStorage.removeItem(LOCAL_STORAGE_ID_TOKEN);
+          localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
           localStorage.removeItem(LOCAL_STORAGE_SECRET_KEY);
           localStorage.removeItem(LOCAL_STORAGE_RANDOMNESS);
           localStorage.removeItem(LOCAL_STORAGE_MAX_EPOCH);
           localStorage.removeItem(LOCAL_STORAGE_ZKP);
-          setLogState('loggedOut');
+          setLogState("loggedOut");
         });
     }
   }
@@ -90,9 +76,23 @@ export default class ZkLogin {
     return !!this.partialZkLoginSignature;
   }
 
+  disconnect = () => {
+    localStorage.removeItem(LOCAL_STORAGE_SECRET_KEY);
+    localStorage.removeItem(LOCAL_STORAGE_RANDOMNESS);
+    localStorage.removeItem(LOCAL_STORAGE_MAX_EPOCH);
+    localStorage.removeItem(LOCAL_STORAGE_ZKP);
+    localStorage.removeItem(LOCAL_STORAGE_ID_TOKEN);
+    this.ephemeralKeyPair = undefined;
+    this.maxEpoch = undefined;
+    this.idToken = undefined;
+    this.zkLoginUserAddress = undefined;
+    this.partialZkLoginSignature = undefined;
+    this.salt = undefined;
+    this.decodeJwt = undefined;
+  };
+
   private getRest = async (setLogState: (logState: LoginState) => void) => {
     const idToken = localStorage.getItem("id_token");
-    console.log("idToken", idToken);
     if (!idToken) {
       return;
     }
@@ -110,16 +110,15 @@ export default class ZkLogin {
     }
     this.idToken = idToken;
     this.decodeJwt = jwtDecode(idToken);
-    const accessToken = localStorage.getItem("access_token");
+    const accessToken = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN);
     if (!accessToken) {
       const { access_token, refresh_token } = await googleOAuth(idToken);
-      localStorage.setItem("access_token", access_token);
+      localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN, access_token);
       document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
     }
     const salt = await getSalt();
     this.salt = BigInt(`0x${Buffer.from(salt, "base64").toString("hex")}`);
     this.zkLoginUserAddress = jwtToAddress(idToken, this.salt);
-    console.log("zkLoginUserAddress", this.zkLoginUserAddress);
     this.ephemeralKeyPair = Ed25519Keypair.fromSecretKey(local_storage_secret_key);
     const partialZkLogin = localStorage.getItem(LOCAL_STORAGE_ZKP);
     if (!partialZkLogin) {
@@ -150,7 +149,7 @@ export default class ZkLogin {
     } else {
       this.partialZkLoginSignature = JSON.parse(partialZkLogin);
     }
-    setLogState('loggedIn');
+    setLogState("loggedIn");
   };
 
   private prepare = async () => {
@@ -195,7 +194,6 @@ export default class ZkLogin {
       throw new Error("Partial zk login signature not found");
     }
     const data = new TextEncoder().encode(message);
-    console.log('data',data)
     const { signature: userSignature } = await this.ephemeralKeyPair.signPersonalMessage(data);
     const aud = Array.isArray(this.decodeJwt.aud) ? this.decodeJwt.aud[0] : this.decodeJwt.aud;
     const addressSeed = genAddressSeed(this.salt, "sub", this.decodeJwt.sub, aud).toString();
@@ -208,7 +206,7 @@ export default class ZkLogin {
       userSignature,
     });
     return zkLoginSignature;
-  }
+  };
 
   payUSDC = async (amount: number, client: SuiClient): Promise<SuiTransactionBlockResponse> => {
     const USDC_TYPE = process.env.NEXT_PUBLIC_USDC_TYPE;
@@ -245,7 +243,6 @@ export default class ZkLogin {
 
     for (const coin of coins) {
       if (parseInt(coin.balance) >= remainingAmount) {
-        console.log("add coin", coin.coinObjectId, remainingAmount);
         const [splitCoin] = tx.splitCoins(coin.coinObjectId, [tx.pure.u64(remainingAmount)]);
         selectedCoins.push(splitCoin);
         remainingAmount = 0;

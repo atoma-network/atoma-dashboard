@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { loginUser, registerUser } from "@/lib/atoma";
 import { useGlobalState } from "@/app/GlobalStateContext";
+import { LOCAL_STORAGE_ACCESS_TOKEN } from "@/lib/local_storage_consts";
 
 interface LoginRegisterModalProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export function LoginRegisterModal({ isOpen, onClose }: LoginRegisterModalProps)
   const onLogin = () => {
     loginUser(email, password)
       .then(({ access_token, refresh_token }) => {
-        localStorage.setItem("access_token", access_token);
+        localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN, access_token);
         document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
         setLogState('loggedIn');
         onClose();
@@ -48,7 +49,7 @@ export function LoginRegisterModal({ isOpen, onClose }: LoginRegisterModalProps)
   const onRegister = () => {
     registerUser(email, password)
       .then(({ access_token, refresh_token }) => {
-        localStorage.setItem("access_token", access_token);
+        localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN, access_token);
         document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
         setLogState('loggedIn');
         onClose();
