@@ -5,19 +5,6 @@ export function GuideView() {
   return (
     <div className="space-y-6">
       <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30">
-        <div className="flex flex-row flex-wrap justify-left gap-4 p-4">
-          <div>
-            <iframe
-              width="560"
-              height="315"
-              src="https://www.youtube.com/embed/zmsgrzqPviw?si=qnTOARgdByvJ1-mn&rel=0&fs=1"
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            ></iframe>
-          </div>
-        </div>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Atoma Devnet Guide</CardTitle>
           <CardDescription className="text-gray-500 dark:text-gray-400">
@@ -84,11 +71,24 @@ export function GuideView() {
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Step 5:</h3>
             <p className="text-gray-700 dark:text-gray-300">
-              Begin using Atoma! Simply plug into our API or SDK's (Visit Documentation for more information) and you
+              Begin using Atoma! Simply plug into our API or SDK&apos;s (Visit Documentation for more information) and you
               are ready to go!
             </p>
           </div>
         </CardContent>
+        <div className="flex flex-row flex-wrap justify-left gap-4 p-4">
+          <div>
+            <iframe
+              width="560"
+              height="315"
+              src="https://www.youtube.com/embed/zmsgrzqPviw?si=qnTOARgdByvJ1-mn&rel=0&fs=1"
+              title="YouTube video player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
       </Card>
     </div>
   );
