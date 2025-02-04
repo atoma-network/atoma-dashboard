@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, Cloud, BookOpen, Server } from "lucide-react";
+import { Activity, Cloud, BookOpen, Server, TicketIcon } from "lucide-react";
 import { NodeStatusView } from "@/components/node-status-view";
 import { GuideView } from "@/components/guide-view";
 import { CloudView } from "@/components/cloud-view";
@@ -13,14 +13,16 @@ import { UserProfileIcon } from "./user-profile-icon";
 import { useGlobalState } from "@/app/GlobalStateContext";
 import Image from "next/image";
 import { NodeRegistrationView } from "./node-registration-view";
+import { TicketsView } from "./tickets-view";
 
-type TabType = "node-status" | "cloud" | "guide" | "node-registration";
+type TabType = "node-status" | "cloud" | "guide" | "node-registration" | "tickets";
 
 const mainTabs = [
   { id: "node-status", icon: Activity, label: "Network Status" },
   { id: "cloud", icon: Cloud, label: "Developer Portal" },
   { id: "guide", icon: BookOpen, label: "Guide" },
   { id: "node-registration", icon: Server, label: "Node Registration" },
+  { id: "tickets", icon: TicketIcon, label: "Tickets" }
 ] as const;
 
 function Logo() {
@@ -100,6 +102,7 @@ export default function Dashboard() {
           {activeTab === "cloud" && <CloudView />}
           {activeTab === "guide" && <GuideView />}
           {activeTab === "node-registration" && <NodeRegistrationView />}
+          {activeTab === "tickets" && <TicketsView />}
         </main>
 
         {/* <AskUtopia /> */}
