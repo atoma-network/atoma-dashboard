@@ -221,6 +221,14 @@ export const getSalt = async (): Promise<string> => {
   return await request({ path: "salt", use_auth: true });
 };
 
+export const getGraphs = async (): Promise<[string, [string, string, any][]][]> => {
+  return await request({path:"get_graphs", use_auth: false});
+}
+
+export const getGraphData = async (query: any): Promise<any> => {
+  return await request({path:"get_graph_data", post: true, body: query, use_auth: false});
+}
+
 export const payUSDC = async (
   amount: number,
   client: SuiClient,

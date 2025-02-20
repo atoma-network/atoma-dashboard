@@ -8,6 +8,8 @@ import { ChartContainer } from "@/components/ui/chart";
 import { useEffect, useState } from "react";
 import {
   getComputeUnitsProcessed,
+  getGraphData,
+  getGraphs,
   getLatency,
   getNodesDistribution,
   getSubscriptions,
@@ -20,6 +22,119 @@ import {
 import Image from "next/image";
 import { formatNumber, simplifyModelName } from "@/lib/utils";
 import { countries } from "countries-list";
+
+function PanelData({ data }: { data: any }) {
+  // console.log("panel data", data);
+  const graphData: Record<string, Record<string, string>> = {};
+  let labels: Set<string> = new Set();
+  Object.keys(data["results"]).forEach((ref) => {
+    data["results"][ref]["frames"].forEach((frame:any) => {
+      const timeId = frame.schema.fields.findIndex((field:any) => field.type === "time");
+      const schema = frame.schema.fields.map((field:any) => (field.type == "time" ? "time" : field?.config?.displayNameFromDS || field.name));
+      labels = new Set([...labels, ...schema.filter((_: any, index: number) => index !== timeId)]);
+      if (frame.data.values.length === 0) {
+        return;
+      }
+      for (let i = 0; i < frame.data.values[0].length; i++) {
+        const time = new Date(frame.data.values[timeId][i]).toLocaleString();
+        if (!(time in graphData)) {
+          graphData[time] = {};
+        }
+        for (let j = 0; j < frame.data.values.length; ++j) {
+          if (j == timeId) {
+            continue;
+          }
+          graphData[time][schema[j]] = frame.data.values[j][i];
+        }
+      }
+    });
+  });
+  const series = Object.keys(graphData).map((time) => {
+    return {
+      time,
+      data: graphData[time],
+    };
+  });
+  const labelsWithColors = Array.from(labels).map((label, index) => ({
+    title: label,
+    color: `hsl(var(--chart-${index + 1}))`,
+  }));
+  if (Object.keys(graphData).length === 0) {
+    return <div className="flex justify-center items-center h-2/3">No data available</div>;
+  }
+  return (
+    <ChartContainer
+      config={labelsWithColors.reduce((acc: { [key: string]: { label: string; color: string } }, caption) => {
+        acc["deepseek-ai/DeepSeek-R1"] = {
+          label: caption.title,
+          color: caption.color,
+        };
+        return acc;
+      }, {})}
+      className="h-[300px] w-full"
+    >
+      <LineChart data={series} margin={{ top: 5, right: 0, bottom: 25, left: 20 }}>
+        <XAxis dataKey="time" tick={{ fill: "var(--purple-600)" }} scale="point" padding={{ left: 10, right: 30 }} />
+        <YAxis tick={{ fill: "var(--purple-600)" }} tickFormatter={formatNumber} />
+        <Tooltip
+          content={({ active, payload, label }) => {
+            if (active && payload && payload.length) {
+              return (
+                <div className="bg-white dark:bg-gray-800 p-2 border border-purple-200 dark:border-gray-700 rounded shadow">
+                  <p className="text-purple-700 dark:text-purple-300">{`Time: ${label}`}</p>
+                  {payload.map((entry, index) => (
+                    <p key={index} style={{ color: entry.color }}>{`${entry.name}: ${
+                      typeof entry?.value === "number" ? formatNumber(entry?.value) : ""
+                    }`}</p>
+                  ))}
+                </div>
+              );
+            }
+            return null;
+          }}
+        />
+        {Array.from(labelsWithColors).map((label) => {
+          return (
+            <Line
+              key={label.title}
+              name={label.title}
+              type="monotone"
+              dataKey={(data) => data?.data?.[label.title] || 0}
+              stroke={label.color}
+              strokeWidth={2}
+              dot={false}
+            />
+          );
+        })}
+      </LineChart>
+    </ChartContainer>
+  );
+}
+
+function Panel({ title, description, data }: { title: string; description: string; data: any }) {
+  return (
+    <Card className="bg-white dark:bg-[#1E2028] border-purple-100 dark:border-purple-800/30 shadow-sm">
+      <CardHeader>
+        <CardTitle className="text-lg font-medium text-gray-900 dark:text-white">{title}</CardTitle>
+        <CardDescription className="text-gray-500 dark:text-gray-400">
+          {description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="h-full">{data ? <PanelData data={data} /> : <div>Loading...</div>}</CardContent>
+    </Card>
+  );
+}
+
+function Dashboard({ title, panels }: { title: string; panels: { title: string; description: string; data: any }[] }) {
+  console.log("Dashboard title", title);
+  return (
+    <>
+      {panels.map(({ title, description, data }) => (
+        <Panel key={title} title={title} description={description} data={data} />
+      ))}
+    </>
+  );
+}
 
 export function NodeStatusView() {
   const [stats, setStats] = useState([
@@ -70,11 +185,36 @@ export function NodeStatusView() {
   const [nodeDistribution, setNodeDistribution] = useState<
     Record<string, { name: string; nodes: number; percentage: number }>
   >({});
+  const [graphs, setGraphs] = useState<{ title: string; panels: { title: string; description: string; query: any; data: any }[] }[]>([]);
   // const [statsStack, setStatsStacks] = useState<unknown[]>([]);
   // const [computeUnits, setComputeUnits] = useState<ComputedUnitsProcessedResponse[]>([]);
   // const [latency, setLatency] = useState<LatencyResponse[]>([]);
 
   useEffect(() => {
+    getGraphs()
+      .then((result) => {
+        setGraphs(
+          result.map(([title, dashboard]) => ({
+            title: title,
+            panels: dashboard.map(([panelTitle, panelDescription, panelData]) => ({ title: panelTitle, description:panelDescription, query: panelData, data: null })),
+          }))
+        );
+
+        result.forEach(([, dashboard], dashboardIndex) => {
+          dashboard.forEach(([, , panelQuery], panelIndex) => {
+            getGraphData(panelQuery).then((panelData) => {
+              setGraphs((graphs) => {
+                const updatedGraphs = [...graphs];
+                updatedGraphs[dashboardIndex].panels[panelIndex].data = panelData;
+                return updatedGraphs;
+              });
+            });
+          });
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
     getNodesDistribution().then((nodes) => {
       const countryToContinent: Record<string, string> = Object.fromEntries(
         Object.entries(countries).map(([, country]) => [country.name.toLowerCase(), country.continent])
@@ -311,6 +451,11 @@ export function NodeStatusView() {
         ))}
       </div>
 
+      <div className="grid md:grid-cols-2 gap-6">
+        {graphs.map(({ title, panels }) => (
+          <Dashboard key={title} title={title} panels={panels} />
+        ))}
+      </div>
       {/* Network Activity and Compute Units Section */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Compute Units Section */}
