@@ -18,15 +18,16 @@ export function ApiUsageDialog({ isOpen, onClose, modelName }: ApiUsageDialogPro
 
   // Determine the endpoint based on the model name
   const getEndpoint = () => {
-    if (modelName.toLowerCase().includes("llama") || 
-        modelName.toLowerCase().includes("deepseek") || 
-        modelName.toLowerCase().includes("qwen") ||
-        modelName.toLowerCase().includes("flux")) {
+    if (modelName.includes("meta-llama") || 
+        modelName.includes("deepseek-ai")) {
       return "/v1/chat/completions"
-    } else if (modelName.toLowerCase().includes("dall-e")) {
+    } else if (modelName.includes("black-forest-labs/FLUX")) {
       return "/v1/images/generations"
-    } else {
+    } else if (modelName.includes("intfloat/multilingual")) {
       return "/v1/embeddings"
+    } else {
+      // Default to chat completions
+      return "/v1/chat/completions"
     }
   }
 
@@ -34,7 +35,7 @@ export function ApiUsageDialog({ isOpen, onClose, modelName }: ApiUsageDialogPro
   const getRequestBody = () => {
     if (getEndpoint() === "/v1/chat/completions") {
       return `{
-  "model": "${modelName.toLowerCase()}",
+  "model": "${modelName}",
   "messages": [
     {
       "role": "system",
@@ -53,14 +54,14 @@ export function ApiUsageDialog({ isOpen, onClose, modelName }: ApiUsageDialogPro
 }`
     } else if (getEndpoint() === "/v1/images/generations") {
       return `{
-  "model": "${modelName.toLowerCase()}",
+  "model": "${modelName}",
   "prompt": "A serene landscape with mountains",
   "n": 1,
   "size": "1024x1024"
 }`
     } else {
       return `{
-  "model": "${modelName.toLowerCase()}",
+  "model": "${modelName}",
   "input": "The food was delicious and the waiter..."
 }`
     }

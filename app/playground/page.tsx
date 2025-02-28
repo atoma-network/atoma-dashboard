@@ -24,9 +24,17 @@ const API_ENDPOINTS = {
 
 // Define available models for each endpoint
 const MODELS = {
-  CHAT: ["DeepSeek-R1-Zero", "Llama 3.3 70B", "Qwen 2.5 72B", "FLUX.1 schnell"],
-  EMBEDDINGS: ["multilingual-e5-large", "text-embedding-ada-002"],
-  IMAGES: ["dall-e-3", "dall-e-2"]
+  CHAT: ["meta-llama/Llama-3.3-70B-Instruct", "deepseek-ai/DeepSeek-R1"],
+  EMBEDDINGS: ["intfloat/multilingual-e5-large-instruct"],
+  IMAGES: ["black-forest-labs/FLUX.1-schnell"]
+}
+
+// Map model IDs to display names
+const MODEL_DISPLAY_NAMES: Record<string, string> = {
+  "meta-llama/Llama-3.3-70B-Instruct": "Llama 3.3 70B",
+  "deepseek-ai/DeepSeek-R1": "DeepSeek R1",
+  "intfloat/multilingual-e5-large-instruct": "Multilingual E5 Large",
+  "black-forest-labs/FLUX.1-schnell": "FLUX.1 schnell",
 }
 
 interface Parameters {
@@ -87,7 +95,7 @@ export default function PlaygroundPage() {
     switch (activeEndpoint) {
       case "CHAT":
         return {
-          model: selectedModel.toLowerCase(),
+          model: selectedModel,
           messages: [
             ...(parameters.systemPrompt === "Custom" && parameters.customSystemPrompt 
               ? [{ role: "system", content: parameters.customSystemPrompt }] 
@@ -102,12 +110,12 @@ export default function PlaygroundPage() {
         }
       case "EMBEDDINGS":
         return {
-          model: selectedModel.toLowerCase(),
+          model: selectedModel,
           input: embeddingInput
         }
       case "IMAGES":
         return {
-          model: selectedModel.toLowerCase(),
+          model: selectedModel,
           prompt: imagePrompt,
           n: 1,
           size: "1024x1024"
@@ -341,7 +349,7 @@ export default function PlaygroundPage() {
                     className={`mr-2 ${selectedModel === model ? "bg-secondary text-secondary-foreground" : ""}`}
                     onClick={() => setSelectedModel(model)}
                   >
-                    {model}
+                    {MODEL_DISPLAY_NAMES[model] || model}
                   </Button>
                 ))}
               </div>
