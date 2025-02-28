@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 262 83.3% 57.8%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 262 59% 97%;
+    --secondary-foreground: 262 83.3% 57.8%;
+    --muted: 262 10% 95%;
+    --muted-foreground: 262 10% 40%;
+    --accent: 262 59% 97%;
+    --accent-foreground: 262 83.3% 57.8%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 262 10% 90%;
+    --input: 262 10% 90%;
+    --ring: 262 83.3% 57.8%;
+    --radius: 0.5rem;
+    --grid-color: rgb(243 244 246);
+  }
+
+  .dark {
+    --background: 215 28% 17%; /* #1A1B1E */
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%; /* #1F2937 */
+    --card-foreground: 210 40% 98%;
+    --popover: 215 28% 17%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 263 85% 65%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 215 28% 17%;
+    --muted-foreground: 217.9 10.6% 75%;
+    --accent: 215 28% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 263 85% 65%;
+    --grid-color: rgba(31, 41, 55, 0.2);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .bg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 50px);
+    grid-template-rows: repeat(auto-fill, 50px);
+    transform: translate(-1px, -1px);
+  }
+
+  .grid-item {
+    width: 51px;
+    height: 51px;
+    margin: -1px -1px 0 0;
+    border-right: 1px solid var(--grid-color);
+    border-bottom: 1px solid var(--grid-color);
+    transition: background-color 2s ease-in-out;
+  }
+
+  .grid-item:hover {
+    margin: -1px -1px 0 0;
+    background-color: rgba(139, 92, 246, 0.1);
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  .grid-item:not(:hover) {
+    transition-delay: 0.7s;
+  }
+
+  .dark .grid-item:hover {
+    background-color: rgba(139, 92, 246, 0.05);
+    transition: background-color 0.3s ease-in-out;
+  }
+}
+
