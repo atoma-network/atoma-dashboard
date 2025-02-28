@@ -50,7 +50,7 @@ export default function SettingsPage() {
                 <Input
                   id="email"
                   type="email"
-                  defaultValue="marcus@example.com"
+                  defaultValue="fishon@gmail.com"
                   onChange={(e) => updateSettings({ email: e.target.value })}
                 />
               </div>

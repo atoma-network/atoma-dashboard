@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   TrendingUp,
 } from "lucide-react"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
@@ -31,14 +32,14 @@ const navigation = [
 ]
 
 // Remove or empty the bottomNavigation array since we moved its items
-const bottomNavigation = []
+const bottomNavigation:any = []
 
 export function Sidebar() {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
 
-  const NavItem = ({ item, isBottom = false }) => (
+  const NavItem: React.FC<{item:any,isBottom?:any}> = ({ item, isBottom = false }) => (
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>
         {item.href.startsWith("http") ? (
@@ -102,7 +103,7 @@ export function Sidebar() {
             <div className={cn("flex h-16 items-center gap-2 px-4", isCollapsed && "justify-center px-2")}>
               {!isCollapsed && (
                 <Link href="/" className="flex items-center font-semibold">
-                  <span className="text-lg">Atoma Cloud</span>
+                  <Image alt="atoma logo" src="/atomaCloud.svg" height={140} width={140} />
                 </Link>
               )}
               <Button
@@ -125,7 +126,7 @@ export function Sidebar() {
           </div>
           <div className="border-t border-border p-2">
             <nav className="space-y-1">
-              {bottomNavigation.map((item) => (
+              {bottomNavigation.map((item:any) => (
                 <NavItem key={item.name} item={item} isBottom />
               ))}
             </nav>

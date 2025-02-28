@@ -1,58 +1,110 @@
+'use client'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Network, Activity, Box, Cpu, Clock, ArrowUpRight } from "lucide-react"
-
-const metrics = [
-  {
-    title: "Total Nodes",
-    value: "30",
-    description: "Across all networks",
-    icon: Network,
-    color: "text-purple-500",
-    textColor: "text-purple-500",
-  },
-  {
-    title: "Nodes Online",
-    value: "2",
-    description: "Currently active",
-    icon: Activity,
-    color: "text-purple-500",
-    textColor: "text-purple-500",
-  },
-  {
-    title: "Models",
-    value: "4",
-    description: "Different models available",
-    icon: Box,
-    color: "text-purple-500",
-    textColor: "text-purple-500",
-  },
-  {
-    title: "Tokens",
-    value: "4.7M",
-    description: "Processed on Atoma",
-    icon: Cpu,
-    color: "text-purple-500",
-    textColor: "text-purple-500",
-  },
-  {
-    title: "Performance",
-    value: "0.27ms",
-    description: "Past week",
-    icon: Clock,
-    color: "text-purple-500",
-    textColor: "text-purple-500",
-  },
-  {
-    title: "Throughput",
-    value: "4.20",
-    description: "Requests/minute",
-    icon: ArrowUpRight,
-    color: "text-purple-500",
-    textColor: "text-purple-500",
-  },
-]
+import React from "react";
+import api from "@/lib/api";
 
 export function MetricsCards() {
+  const [metricsData, setMetricsData] = React.useState({
+    totalNodes: "-",
+    nodesOnline: "-",
+    models: "-",
+    latency: "-",
+    throughPut:"_"
+  });
+
+  React.useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const tasksPromise = api.get("/tasks").catch(() => null);
+        const nodesPromise = api.get("/get_nodes_distribution").catch(() => null);
+        const latencyPromise=api.get("/latency?hours=168").catch(()=>null)
+        
+        
+        const [tasksRes, nodesRes,latencyRes] = await Promise.all([tasksPromise, nodesPromise,latencyPromise]);
+        console.log(latencyRes)
+
+        const totalNodes = nodesRes?.data?.reduce((sum:number, node:{count:number}) => sum + (+node.count || 0), 0) || "0";
+        const modelCount = tasksRes?.data?.reduce((count:number, task:[{model_name:string}]) => count + (task[0]?.model_name ? 1 : 0), 0) || "0";
+        const latency = latencyRes?.data
+        ? latencyRes.data.reduce(
+            (acc:any, item:any) => {
+              acc.totalLatency += item.latency;
+              acc.totalRequests += item.requests;
+              return acc;
+            },
+            { totalLatency: 0, totalRequests: 0 } 
+          )
+        : null;
+      
+     const averageLatency=latency?.totalLatency/latencyRes?.data.length
+     const averageThroughPut=latency?.totalRequests/168;
+        setMetricsData(prevData => ({
+          totalNodes: totalNodes.toString(),
+          nodesOnline: nodesRes?.data?.nodes_online?.toString() || prevData.nodesOnline,
+          models: modelCount.toString(),
+          latency: `${averageLatency.toFixed(2).toString()}ms`,
+          throughPut:averageThroughPut.toFixed(2).toString()
+        }));
+      } catch (err) {
+        console.error("Failed to fetch metrics", err);
+      }
+    };
+
+    fetchMetrics();
+  }, []);
+
+  const metrics = [
+    {
+      title: "Total Nodes",
+      value: metricsData.totalNodes,
+      description: "Across all networks",
+      icon: Network,
+      color: "text-purple-500",
+      textColor: "text-purple-500",
+    },
+    {
+      title: "Nodes Online",
+      value: "2",
+      description: "Currently active",
+      icon: Activity,
+      color: "text-purple-500",
+      textColor: "text-purple-500",
+    },
+    {
+      title: "Models",
+      value: metricsData.models,
+      description: "Different models available",
+      icon: Box,
+      color: "text-purple-500",
+      textColor: "text-purple-500",
+    },
+    {
+      title: "Tokens",
+      value: "4.7M",
+      description: "Processed on Atoma",
+      icon: Cpu,
+      color: "text-purple-500",
+      textColor: "text-purple-500",
+    },
+    {
+      title: "Performance",
+      value: metricsData.latency,
+      description: "Past week",
+      icon: Clock,
+      color: "text-purple-500",
+      textColor: "text-purple-500",
+    },
+    {
+      title: "Throughput",
+      value:  metricsData.throughPut,
+      description: "Requests/hour",
+      icon: ArrowUpRight,
+      color: "text-purple-500",
+      textColor: "text-purple-500",
+    },
+  ]
+
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6">
       {metrics.map((metric) => (
@@ -68,6 +120,5 @@ export function MetricsCards() {
         </Card>
       ))}
     </div>
-  )
+  );
 }
-

@@ -1,0 +1,45 @@
+services:
+  watchtower:
+    image: containrrr/watchtower
+    command:
+      - "--label-enable"
+      - "--interval"
+      - "30"
+      - "--rolling-restart"
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+  reverse-proxy:
+    image: traefik:v3.3.0-rc2
+    command:
+      - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+  atoma-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.atoma-dashboard.rule=Host(`atomacloud.com`)"
+      - "traefik.http.routers.atoma-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.atoma-dashboard.tls.certresolver=myresolver"
+      - "com.centurylinklabs.watchtower.enable=true"
+    deploy:
+      mode: replicated
+      replicas: 3
+    restart: always
+
+volumes:
+  letsencrypt:

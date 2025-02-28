@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import api from "@/lib/api"
 import {
   Dialog,
   DialogContent,
@@ -16,7 +17,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Copy, Pencil, Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
-
+const username=sessionStorage.getItem('atoma_username') || ''
 interface ApiKey {
   name: string
   key: string
@@ -25,57 +26,77 @@ interface ApiKey {
   projectAccess: string
   createdBy: string
   permissions: string
+  oe?:string;
 }
 
 export function ApiKeyCard() {
+
+  
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([
-    {
-      name: "CrewAItest4",
-      key: "sk-...hXoA",
-      created: "Dec 10, 2024",
-      lastUsed: "Dec 10, 2024",
-      projectAccess: "Default project",
-      createdBy: "Marcus Mazzocato",
-      permissions: "All",
-    },
-    {
-      name: "CrewAITest3",
-      key: "sk-...5h8A",
-      created: "Dec 10, 2024",
-      lastUsed: "Never",
-      projectAccess: "Default project",
-      createdBy: "Marcus Mazzocato",
-      permissions: "All",
-    },
+   
   ])
 
+
+  
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isSaveKeyDialogOpen, setIsSaveKeyDialogOpen] = useState(false)
   const [newKeyName, setNewKeyName] = useState("")
   const [newGeneratedKey, setNewGeneratedKey] = useState("")
   const [copied, setCopied] = useState(false)
+ 
+  useEffect(()=>{
+    (async()=>{
+      try {
+        let tokens:string[]= (await api.get('/api_tokens')).data;
+        let apiKeys:ApiKey[]=tokens.map((token,index)=>{
+            return {name:`${username}'s sk ${index+1}`,key:`sk-...${token.slice(-4)}`,created:'_',projectAccess:'all',createdBy:username,permissions:'all',lastUsed:'_',oe:token}
+        })
+        setApiKeys(apiKeys)
+      } catch (error) {
+        
+      }
+     
+    })()
+  },[newGeneratedKey])
 
-  const handleCreateKey = () => {
-    if (!newKeyName) return
 
-    const generatedKey = "sk-proj-cQcyInuLoX2jJxY7ZTeQyDAnwKzV" // In real app, this would come from API
-    setNewGeneratedKey(generatedKey)
-    setIsCreateDialogOpen(false)
-    setIsSaveKeyDialogOpen(true)
-
-    // Add new key to list
-    const newKey: ApiKey = {
-      name: newKeyName,
-      key: `sk-...${generatedKey.slice(-4)}`,
-      created: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      lastUsed: "Never",
-      projectAccess: "Default project",
-      createdBy: "Marcus Mazzocato",
-      permissions: "All",
+const handleRevokeKey=async(key:string)=>{
+    try {
+      await api.post('/revoke_api_token',{
+        api_token:key
+      })
+      
+     window.location.reload()
+    } catch (error) {
+      alert('failed to delete key')
     }
+}
 
-    setApiKeys([newKey, ...apiKeys])
-    setNewKeyName("")
+  const handleCreateKey = async() => {
+    if (!newKeyName) return
+    try {
+      const generatedKey = (await api.get('/generate_api_token')).data
+      setNewGeneratedKey(generatedKey)
+      setIsCreateDialogOpen(false)
+      setIsSaveKeyDialogOpen(true)
+    } catch (error) {
+      alert('error in creating key, ensure login and try again')
+    }
+   
+    // // Add new key to list
+    // const newKey: ApiKey = {
+    //   name: newKeyName,
+    //   key: `sk-...${generatedKey.slice(-4)}`,
+    //   created: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    //   lastUsed: "Never",
+    //   projectAccess: "Default project",
+    //   createdBy: sessionStorage.getItem('atoma_username')|| '',
+    //   permissions: "All",
+    // }
+
+    // setApiKeys([newKey, ...apiKeys])
+    // setNewKeyName("")
+    
   }
 
   const copyToClipboard = () => {
@@ -126,9 +147,14 @@ export function ApiKeyCard() {
                           <Button variant="ghost" size="icon">
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive"
+                          onClick={() => {console.log('click'); return handleRevokeKey(key?.oe || "")}} 
+                          >
+  <Trash2 className="h-4 w-4" />
+</Button>
                         </div>
                       </TableCell>
                     </TableRow>
