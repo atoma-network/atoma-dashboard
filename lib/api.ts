@@ -1,5 +1,5 @@
 import axios from "axios";
-import config from "../config";
+import config from "../config/config";
 
 // Create an API client for the credentials API
 const credentialsApi = axios.create({

@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Flowers&Saints Dashboard",
+  title: "AtomCloud Dashboard",
   description: "A modern, responsive financial dashboard",
     generator: 'v0.dev'
 }

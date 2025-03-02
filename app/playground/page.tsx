@@ -1,52 +1,36 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Send, Loader2 } from "lucide-react"
-import { BackgroundGrid } from "@/components/background-grid"
-import { ApiUsageDialog } from "@/components/api-usage-dialog"
-import { ParametersSidebar } from "@/components/parameters-sidebar"
-import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
-import api from "@/lib/api"
-import { toast } from "sonner"
+import type React from "react";
 
-// Define the available API endpoints
-const API_ENDPOINTS = {
-  CHAT: "/v1/chat/completions",
-  EMBEDDINGS: "/v1/embeddings",
-  IMAGES: "/v1/images/generations"
-}
-
-// Define available models for each endpoint
-const MODELS = {
-  CHAT: ["meta-llama/Llama-3.3-70B-Instruct", "deepseek-ai/DeepSeek-R1"],
-  EMBEDDINGS: ["intfloat/multilingual-e5-large-instruct"],
-  IMAGES: ["black-forest-labs/FLUX.1-schnell"]
-}
-
-// Map model IDs to display names
-const MODEL_DISPLAY_NAMES: Record<string, string> = {
-  "meta-llama/Llama-3.3-70B-Instruct": "Llama 3.3 70B",
-  "deepseek-ai/DeepSeek-R1": "DeepSeek R1",
-  "intfloat/multilingual-e5-large-instruct": "Multilingual E5 Large",
-  "black-forest-labs/FLUX.1-schnell": "FLUX.1 schnell",
-}
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Send } from "lucide-react";
+import { BackgroundGrid } from "@/components/background-grid";
+import { ApiUsageDialog } from "@/components/api-usage-dialog";
+import { ParametersSidebar } from "@/components/parameters-sidebar";
+import { Separator } from "@/components/ui/separator";
+import axios from "axios";
+import { Loader2 } from "lucide-react";
+import {
+  renderModelListBasedOnTabs,
+  RenderRequestBodyBasedOnEndPoint,
+  parseOutputBasedOnEndpoint,
+} from "../../utils/utils";
+import config from "@/config/config";
+export type ModelCategories = "chat" | "embeddings" | "images";
 
 interface Parameters {
-  apiKey: string
-  systemPrompt: string
-  customSystemPrompt: string
-  autoSetLength: boolean
-  outputLength: number
-  temperature: number
-  topP: number
-  topK: number
-  repetitionPenalty: number
+  apiKey: string;
+  systemPrompt: string;
+  customSystemPrompt: string;
+  autoSetLength: boolean;
+  outputLength: number;
+  temperature: number;
+  topP: number;
+  topK: number;
+  repetitionPenalty: number;
 }
 
 const defaultParameters: Parameters = {
@@ -59,257 +43,82 @@ const defaultParameters: Parameters = {
   topP: 0.7,
   topK: 50,
   repetitionPenalty: 1,
-}
+};
 
 export default function PlaygroundPage() {
-  // State for the active endpoint and model
-  const [activeEndpoint, setActiveEndpoint] = useState<string>("CHAT")
-  const [selectedModel, setSelectedModel] = useState<string>(MODELS.CHAT[0])
-  
-  // Input states for different endpoints
-  const [chatInput, setChatInput] = useState<string>("")
-  const [embeddingInput, setEmbeddingInput] = useState<string>("The food was delicious and the waiter...")
-  const [imagePrompt, setImagePrompt] = useState<string>("A serene landscape with mountains")
-  
-  // Response state
-  const [response, setResponse] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
-  
-  // UI state
-  const [isApiDialogOpen, setIsApiDialogOpen] = useState<boolean>(false)
-  const [parameters, setParameters] = useState<Parameters>(defaultParameters)
-  
-  // Update selected model when endpoint changes
-  useEffect(() => {
-    setSelectedModel(MODELS[activeEndpoint as keyof typeof MODELS][0])
-  }, [activeEndpoint])
-  
-  // Handle parameter changes
-  const handleParameterChange = (key: keyof Parameters, value: number | boolean | string) => {
-    setParameters((prev) => ({ ...prev, [key]: value }))
-  }
-  
-  // Format the request based on the active endpoint
-  const formatRequest = () => {
-    switch (activeEndpoint) {
-      case "CHAT":
-        return {
-          model: selectedModel,
-          messages: [
-            ...(parameters.systemPrompt === "Custom" && parameters.customSystemPrompt 
-              ? [{ role: "system", content: parameters.customSystemPrompt }] 
-              : []),
-            { role: "user", content: chatInput }
-          ],
-          max_tokens: parameters.outputLength,
-          temperature: parameters.temperature,
-          top_p: parameters.topP,
-          top_k: parameters.topK,
-          repetition_penalty: parameters.repetitionPenalty
-        }
-      case "EMBEDDINGS":
-        return {
-          model: selectedModel,
-          input: embeddingInput
-        }
-      case "IMAGES":
-        return {
-          model: selectedModel,
-          prompt: imagePrompt,
-          n: 1,
-          size: "1024x1024"
-        }
-      default:
-        return {}
-    }
-  }
-  
-  // Handle form submission
+  const [selectedModel, setSelectedModel] = useState(
+    "meta-llama/Llama-3.3-70B-Instruct"
+  );
+  const [selectedTab, setSelectedTab] = useState<ModelCategories>("chat");
+
+  const [message, setMessage] = useState("");
+  const [isApiDialogOpen, setIsApiDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  // const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [response, setResponse] = useState<{
+    response: string;
+    error: boolean;
+  }>({ response: "", error: false });
+  // const [isPopoverOpen, setIsPopoverOpen] = useState(false)
+
+  const [parameters, setParameters] = useState<Parameters>(defaultParameters);
+  const endpoints = {
+    chat: "chat/completions",
+    embeddings: "embeddings",
+    images: "images/generations",
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-    
+    e.preventDefault();
+    setMessage("");
+    console.log(parameters);
     try {
-      // Get the request data
-      const requestData = formatRequest()
-      
-      // Get the endpoint URL
-      const endpointUrl = API_ENDPOINTS[activeEndpoint as keyof typeof API_ENDPOINTS]
-      
-      // Use custom API key if provided
-      const headers: Record<string, string> = {}
-      if (parameters.apiKey) {
-        headers["Authorization"] = `Bearer ${parameters.apiKey}`
+      setIsLoading(true);
+
+      const response = await axios.post(
+        `${config.ATOMA_API_URL}${endpoints[selectedTab]}`,
+        RenderRequestBodyBasedOnEndPoint(selectedTab, selectedModel, message),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${parameters.apiKey}`,
+          },
+        }
+      );
+      console.log(response);
+
+      setResponse({
+        response: parseOutputBasedOnEndpoint(selectedTab, response),
+        error: false,
+      });
+    } catch (error: unknown) {
+      console.log(error);
+      if (axios.isAxiosError(error)) {
+        error.status === 401
+          ? setResponse({
+              response: "there was a problem with your api key",
+              error: true,
+            })
+          : setResponse({
+              response: error.response?.data?.error?.message
+                ? error.response.data.error.message
+                : "failed to query.",
+              error: true,
+            });
+      } else {
+        setResponse({ response: "An unexpected error occurred.", error: true });
       }
-      
-      // Make the API call
-      const response = await api.post(endpointUrl, requestData, { headers })
-      
-      // Set the response
-      setResponse(response.data)
-      
-      // Show success toast
-      toast.success("API request successful")
-    } catch (err: any) {
-      console.error("API request failed:", err)
-      setError(err.response?.data?.error?.message || err.message || "An unknown error occurred")
-      toast.error("API request failed")
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
-  
-  // Render the response based on the active endpoint
-  const renderResponse = () => {
-    if (isLoading) {
-      return (
-        <div className="flex items-center justify-center h-full">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-        </div>
-      )
-    }
-    
-    if (error) {
-      return (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-red-800 dark:text-red-300">
-          <h3 className="font-semibold mb-2">Error</h3>
-          <p>{error}</p>
-        </div>
-      )
-    }
-    
-    if (!response) {
-      return (
-        <div className="flex items-center justify-center h-full">
-          {/* Empty State with Animated Ring */}
-          <div className="relative w-32 h-32">
-            <div className="absolute inset-0 rounded-full border-2 border-purple-400" />
-            <div
-              className="absolute inset-0 rounded-full border-t-2 border-purple-600"
-              style={{ animation: "spin 3s linear infinite" }}
-            />
-            <div className="absolute inset-0 rounded-full border-2 border-purple-300 blur-md animate-pulse" />
-          </div>
-        </div>
-      )
-    }
-    
-    switch (activeEndpoint) {
-      case "CHAT":
-        return (
-          <div className="p-4 bg-muted/50 rounded-md font-mono text-sm overflow-auto max-h-[calc(100%-2rem)]">
-            <pre>{response.choices?.[0]?.message?.content || JSON.stringify(response, null, 2)}</pre>
-          </div>
-        )
-      case "EMBEDDINGS":
-        return (
-          <div className="p-4 bg-muted/50 rounded-md font-mono text-sm overflow-auto max-h-[calc(100%-2rem)]">
-            <p className="mb-2 text-muted-foreground">Embedding vector (first 10 values):</p>
-            <pre>{JSON.stringify(response.data?.[0]?.embedding?.slice(0, 10), null, 2)}</pre>
-            <p className="mt-4 mb-2 text-muted-foreground">Full response:</p>
-            <pre>{JSON.stringify(response, null, 2)}</pre>
-          </div>
-        )
-      case "IMAGES":
-        return (
-          <div className="flex flex-col items-center justify-center p-4">
-            {response.data?.[0]?.url ? (
-              <>
-                <img 
-                  src={response.data[0].url} 
-                  alt="Generated image" 
-                  className="max-w-full max-h-[400px] rounded-md shadow-md mb-4" 
-                />
-                <div className="p-4 bg-muted/50 rounded-md font-mono text-sm w-full">
-                  <pre>{JSON.stringify(response, null, 2)}</pre>
-                </div>
-              </>
-            ) : (
-              <div className="p-4 bg-muted/50 rounded-md font-mono text-sm w-full">
-                <pre>{JSON.stringify(response, null, 2)}</pre>
-              </div>
-            )}
-          </div>
-        )
-      default:
-        return (
-          <div className="p-4 bg-muted/50 rounded-md font-mono text-sm overflow-auto max-h-[calc(100%-2rem)]">
-            <pre>{JSON.stringify(response, null, 2)}</pre>
-          </div>
-        )
-    }
-  }
-  
-  // Render the input form based on the active endpoint
-  const renderInputForm = () => {
-    switch (activeEndpoint) {
-      case "CHAT":
-        return (
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <Input
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              placeholder="Type your message..."
-              className="flex-1"
-              disabled={isLoading}
-            />
-            <Button 
-              type="submit" 
-              size="icon" 
-              className="bg-purple-600 hover:bg-purple-700"
-              disabled={isLoading || !chatInput.trim()}
-            >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              <span className="sr-only">Send message</span>
-            </Button>
-          </form>
-        )
-      case "EMBEDDINGS":
-        return (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-            <Textarea
-              value={embeddingInput}
-              onChange={(e) => setEmbeddingInput(e.target.value)}
-              placeholder="Enter text to embed..."
-              className="flex-1 min-h-[100px]"
-              disabled={isLoading}
-            />
-            <Button 
-              type="submit" 
-              className="bg-purple-600 hover:bg-purple-700 self-end"
-              disabled={isLoading || !embeddingInput.trim()}
-            >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
-              Generate Embeddings
-            </Button>
-          </form>
-        )
-      case "IMAGES":
-        return (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-            <Textarea
-              value={imagePrompt}
-              onChange={(e) => setImagePrompt(e.target.value)}
-              placeholder="Describe the image you want to generate..."
-              className="flex-1 min-h-[100px]"
-              disabled={isLoading}
-            />
-            <Button 
-              type="submit" 
-              className="bg-purple-600 hover:bg-purple-700 self-end"
-              disabled={isLoading || !imagePrompt.trim()}
-            >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
-              Generate Image
-            </Button>
-          </form>
-        )
-      default:
-        return null
-    }
-  }
+  };
+
+  const handleParameterChange = (
+    key: keyof Parameters,
+    value: number | boolean | string
+  ) => {
+    setParameters((prev) => ({ ...prev, [key]: value }));
+  };
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
@@ -322,62 +131,117 @@ export default function PlaygroundPage() {
           >
             {/* Header Section */}
             <div className="p-4 space-y-4">
-              <div className="flex items-center justify-between w-full">
-                <Tabs 
-                  defaultValue="CHAT" 
-                  value={activeEndpoint} 
-                  onValueChange={(value) => setActiveEndpoint(value)}
-                  className="w-full"
-                >
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="CHAT">Chat</TabsTrigger>
-                    <TabsTrigger value="EMBEDDINGS">Embeddings</TabsTrigger>
-                    <TabsTrigger value="IMAGES">Images</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-                <div className="flex gap-2 ml-4">
-                  <Button variant="outline" onClick={() => setIsApiDialogOpen(true)}>
+              <div className="flex w-full justify-between p-2">
+                {/* Tabs Section */}
+                <div className="flex gap-x-4">
+                  {["chat", "embeddings", "images"].map((tab) => (
+                    <Button
+                      key={tab}
+                      variant="ghost"
+                      className={`px-4 py-2 text-sm font-medium ${
+                        selectedTab === tab
+                          ? "bg-purple-100 text-purple-700"
+                          : "text-gray-500"
+                      }`}
+                      onClick={() => {
+                        setSelectedTab(tab as ModelCategories);
+                        setSelectedModel(
+                          renderModelListBasedOnTabs(tab as ModelCategories)[0]
+                            .model
+                        );
+                      }}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </Button>
+                  ))}
+                </div>
+
+                <div>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsApiDialogOpen(true)}
+                  >
                     API
                   </Button>
                 </div>
               </div>
+
+              {/* Model Selection */}
               <div className="flex items-center">
-                {MODELS[activeEndpoint as keyof typeof MODELS].map((model) => (
+                {renderModelListBasedOnTabs(selectedTab).map((model) => (
                   <Button
-                    key={model}
+                    key={model.modelName}
                     variant="ghost"
-                    className={`mr-2 ${selectedModel === model ? "bg-secondary text-secondary-foreground" : ""}`}
-                    onClick={() => setSelectedModel(model)}
+                    className={`mr-2 px-3 py-1 rounded-lg ${
+                      selectedModel === model.model
+                        ? "bg-purple-100 text-purple-700"
+                        : "text-gray-700"
+                    }`}
+                    onClick={() => setSelectedModel(model.model.trim())}
                   >
-                    {MODEL_DISPLAY_NAMES[model] || model}
+                    {model.modelName}
                   </Button>
                 ))}
               </div>
               <Separator />
             </div>
 
-            {/* Response Section */}
-            <div className="flex-1 p-4 overflow-auto">
-              {renderResponse()}
-            </div>
-            
-            {/* Input Section */}
-            <div className="border-t p-4 bg-background/50">
-              {renderInputForm()}
+            {/* Chat Section */}
+            <div className="flex-1 flex flex-col overflow-auto">
+              <div
+                className={`flex-1 p-4 flex ${
+                  isLoading
+                    ? "items-center justify-center"
+                    : "items-start justify-start"
+                }`}
+              >
+                {isLoading ? (
+                  <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
+                ) : response.error ? (
+                  <div className="w-full max-w-md p-4 border border-red-200 bg-red-50 text-red-400 rounded-md">
+                    <p className="font-semibold uppercase">Error</p>
+                    <p>{response.response}</p>
+                  </div>
+                ) : (
+                  <p className="   break-words self-start w-[90%] ">
+                    {response.response}
+                  </p>
+                )}
+              </div>
+              <div className="border-t p-4 bg-background/50 backdrop-blur-md shadow-md rounded-b-lg">
+                <form onSubmit={handleSubmit} className="flex gap-3">
+                  <Input
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Type your message..."
+                    className="flex-1 px-4 py-2 rounded-lg bg-background/80 border border-purple-500 focus:ring-2 focus:ring-purple-600 transition"
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className="bg-purple-600 hover:bg-purple-700 transition-all duration-200 rounded-lg shadow-md"
+                  >
+                    <Send className="h-5 w-5" />
+                    <span className="sr-only">Send message</span>
+                  </Button>
+                </form>
+              </div>
             </div>
           </Card>
 
           <Card className="overflow-hidden" hideInfo>
-            <ParametersSidebar parameters={parameters} onChange={handleParameterChange} />
+            <ParametersSidebar
+              parameters={parameters}
+              onChange={handleParameterChange}
+            />
           </Card>
         </div>
       </div>
-      <ApiUsageDialog 
-        isOpen={isApiDialogOpen} 
-        onClose={() => setIsApiDialogOpen(false)} 
-        modelName={selectedModel} 
+      <ApiUsageDialog
+        isOpen={isApiDialogOpen}
+        onClose={() => setIsApiDialogOpen(false)}
+        modelName={selectedModel}
       />
     </div>
-  )
+  );
 }
-
