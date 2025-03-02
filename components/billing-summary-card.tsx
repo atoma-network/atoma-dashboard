@@ -16,12 +16,12 @@ export function BillingSummaryCard() {
           <Separator />
           <div className="flex justify-between items-center">
             <div className="text-sm font-medium">Total API Calls</div>
-            <div className="text-lg font-semibold">1,234,567</div>
+            <div className="text-lg font-semibold">0</div>
           </div>
           <Separator />
           <div className="flex justify-between items-center">
             <div className="text-sm font-medium">Billing Period</div>
-            <div className="text-lg font-semibold text-foreground">Feb 1 - Feb 28</div>
+            <div className="text-lg font-semibold text-foreground">March 1 - March 31</div>
           </div>
         </div>
       </CardContent>

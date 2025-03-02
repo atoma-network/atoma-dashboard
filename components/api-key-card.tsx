@@ -112,7 +112,7 @@ const handleRevokeKey=async(key:string)=>{
           <h2 className="text-lg font-semibold text-purple-600">API keys</h2>
           <Button onClick={() => setIsCreateDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Create new secret key
+            Create new API key
           </Button>
         </CardHeader>
         <CardContent>

@@ -9,7 +9,7 @@ export function CreditBalanceCard() {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col justify-between">
         <div className="flex flex-col items-center justify-center flex-1">
-          <div className="text-5xl font-bold text-foreground">$26.09</div>
+          <div className="text-5xl font-bold text-foreground">$0.00</div>
           <div className="text-sm text-muted-foreground mt-2">Available Credits</div>
         </div>
         <Button className="w-full bg-purple-600 hover:bg-purple-700 text-base">Add Funds</Button>
