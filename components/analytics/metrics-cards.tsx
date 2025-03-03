@@ -61,8 +61,15 @@ export function MetricsCards() {
         ).size;
 
         // Tokens
-        const totalUnits =
-          computeUnitsRes?.data.reduce((sum: number, data: { amount: number }) => sum + data.amount, 0) || 0;
+        const totalComputeUnits = computeUnitsRes?.data.reduce(
+          (acc: any, item: any) => {
+            acc.totalUnits += item.amount;
+            acc.totalRequests += item.requests;
+            acc.totalTime += item.time;
+            return acc;
+          },
+          { totalUnits: 0, totalRequests: 0, totalTime: 0 }
+        );
 
         // Performance
         const latency = latencyRes?.data
@@ -79,14 +86,15 @@ export function MetricsCards() {
         const averageLatency = latency?.totalLatency / latency?.totalRequests;
 
         // Throughput
-        const averageThroughPut = latency?.totalRequests / 168;
+        const averageThroughPut = totalComputeUnits?.totalRequests * (60 / totalComputeUnits?.totalTime);
+
         setMetricsData((prevData) => ({
           totalNodes: formatNumber(totalNodes),
           nodesOnline: formatNumber(nodesOnline),
           models: formatNumber(modelCount),
-          tokens: formatNumber(totalUnits),
-          latency: `${isFinite(averageLatency) ? averageLatency.toFixed(2).toString() : "-"}ms`,
-          throughPut: averageThroughPut.toFixed(2).toString(),
+          tokens: formatNumber(totalComputeUnits.totalUnits),
+          latency: (isFinite(averageLatency) ? averageLatency.toFixed(2) : "-") + "ms",
+          throughPut: isFinite(averageThroughPut) ? formatNumber(averageThroughPut) : "-",
         }));
       } catch (err) {
         console.error("Failed to fetch metrics", err);

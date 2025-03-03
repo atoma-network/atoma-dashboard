@@ -16,5 +16,8 @@ export function formatNumber(num?: number): string {
   if (num >= 1_000) {
     return (num / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
   }
+  if (num % 1 !== 0) {
+    return num.toFixed(2);
+  }
   return num.toString();
 }
