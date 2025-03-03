@@ -5,6 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function simplifyModelName(model: string): string {
+  return model.replace(/^.*\//, "").replaceAll(/-/g, " ");
+}
+
 export function formatNumber(num?: number): string {
   if (num === undefined) return "";
   if (num >= 1_000_000_000) {

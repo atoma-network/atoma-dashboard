@@ -1,48 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BackgroundGrid } from "@/components/background-grid";
 import { ApiUsageDialog } from "@/components/api-usage-dialog";
 import Link from "next/link";
-
-type ModelCategory = "chat" | "image" | "embedding";
+import api, { ModelModality, SUBSCRIPTIONS, TASKS, type NodeSubscription, type Task } from "@/lib/api";
+import { simplifyModelName } from "@/lib/utils";
 
 interface ModelSection {
-  type: ModelCategory;
-  title: string;
+  type: ModelModality;
+  title: ModelModality;
   models: {
     name: string;
     price: string;
-    type: ModelCategory;
+    modalities: ModelModality[];
   }[];
 }
 
-const modelSections: ModelSection[] = [
-  {
-    type: "chat",
-    title: "Chat Completion",
-    models: [
-      { name: "Llama 3.3 70B", price: "$0.80", type: "chat" },
-      { name: "DeepSeek R1", price: "$0.70", type: "chat" },
-      { name: "Qwen 2.5 72B", price: "$0.90", type: "chat" },
-    ],
-  },
-  {
-    type: "image",
-    title: "Image Generation",
-    models: [{ name: "FLUX.1 schnell", price: "$1.20", type: "image" }],
-  },
-  {
-    type: "embedding",
-    title: "Embedding",
-    models: [{ name: "Multilingual e5 large", price: "$0.30", type: "embedding" }],
-  },
-];
+const ModalityToCategory = {
+  [ModelModality.ChatCompletions]: "chat",
+  [ModelModality.ImagesGenerations]: "image",
+  [ModelModality.Embeddings]: "embedding",
+};
 
-function ModelCard({ name, price, type }: { name: string; price: string; type: ModelCategory }) {
+function ModelCard({ name, price, modalities }: { name: string; price: string; modalities: ModelModality[] }) {
   const [showApiDialog, setShowApiDialog] = useState(false);
 
   return (
@@ -54,9 +38,14 @@ function ModelCard({ name, price, type }: { name: string; price: string; type: M
               <h3 className="text-base font-medium">{name}</h3>
               <p className="text-sm text-muted-foreground">{price} per 1M tokens</p>
             </div>
-            <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
-              {type}
-            </span>
+            {modalities.map((modality) => (
+              <span
+                className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20"
+                key={modality}
+              >
+                {ModalityToCategory[modality]}
+              </span>
+            ))}
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Link href="/playground" className="w-full">
@@ -76,7 +65,96 @@ function ModelCard({ name, price, type }: { name: string; price: string; type: M
 }
 
 export default function ModelsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<ModelCategory>("chat");
+  const [selectedCategory, setSelectedCategory] = useState<ModelModality>(ModelModality.ChatCompletions);
+  const [modelsData, setModelsData] = useState<
+    Record<
+      ModelModality,
+      {
+        name: string;
+        price: string;
+        modalities: ModelModality[];
+      }[]
+    >
+  >({
+    [ModelModality.ChatCompletions]: [],
+    [ModelModality.ImagesGenerations]: [],
+    [ModelModality.Embeddings]: [],
+  });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const tasksPromise = api.get(TASKS).catch(() => null);
+        const subscriptionsPromise = api.get(SUBSCRIPTIONS).catch(() => null);
+
+        const [tasksRes, subscriptionsRes] = await Promise.all([tasksPromise, subscriptionsPromise]);
+        const cheapestSubscription = new Map<string, NodeSubscription>();
+        const modelModalities = new Map<string, ModelModality[]>();
+        const tasks = tasksRes?.data
+          .map(([task, modality]: [Task, ModelModality]) => ({
+            task: task,
+            modality: modality,
+          }))
+          .filter(
+            ({ task, modality }: { task: Task; modality: ModelModality }) =>
+              task.model_name && !task.is_deprecated && modality.length > 0
+          );
+        for (const { task, modality } of tasks) {
+          modelModalities.set(task.model_name, modality);
+          const subs_for_this_task = subscriptionsRes?.data.filter(
+            (subscription: NodeSubscription) => subscription.task_small_id === task.task_small_id && subscription.valid
+          );
+          if (subs_for_this_task.length === 0) {
+            // No valid subscriptions for this task
+            continue;
+          }
+          cheapestSubscription.set(
+            task.model_name,
+            subs_for_this_task.reduce(
+              (min: NodeSubscription, item: NodeSubscription) =>
+                item.price_per_one_million_compute_units < min.price_per_one_million_compute_units ? item : min,
+              cheapestSubscription.get(task.model_name) || subs_for_this_task[0]
+            )
+          );
+        }
+        setModelsData(
+          Object.values(ModelModality).reduce((acc: any, modality: ModelModality) => {
+            acc[modality] = [...modelModalities]
+              .filter(([_, modalities]) => modalities.includes(modality))
+              .map(([modelName, modalities]) => {
+                const model = cheapestSubscription.get(modelName);
+                return {
+                  name: simplifyModelName(modelName),
+                  price: model!.price_per_one_million_compute_units,
+                  modalities,
+                };
+              });
+            return acc;
+          }, {})
+        );
+      } catch (error) {
+        console.error("Failed to fetch models", error);
+      }
+    })();
+  }, []);
+
+  const modelSections: ModelSection[] = [
+    {
+      type: ModelModality.ChatCompletions,
+      title: ModelModality.ChatCompletions,
+      models: modelsData[ModelModality.ChatCompletions],
+    },
+    {
+      type: ModelModality.ImagesGenerations,
+      title: ModelModality.ImagesGenerations,
+      models: modelsData[ModelModality.ImagesGenerations],
+    },
+    {
+      type: ModelModality.Embeddings,
+      title: ModelModality.Embeddings,
+      models: modelsData[ModelModality.Embeddings],
+    },
+  ];
 
   // Reorder sections based on selected category
   const orderedSections = [
@@ -97,15 +175,15 @@ export default function ModelsPage() {
             <Select
               defaultValue="chat"
               value={selectedCategory}
-              onValueChange={(value: ModelCategory) => setSelectedCategory(value)}
+              onValueChange={(value: ModelModality) => setSelectedCategory(value)}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select completion type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="chat">Chat Completion</SelectItem>
-                <SelectItem value="image">Image Generation</SelectItem>
-                <SelectItem value="embedding">Embedding</SelectItem>
+                <SelectItem value={ModelModality.ChatCompletions}>{ModelModality.ChatCompletions}</SelectItem>
+                <SelectItem value={ModelModality.ImagesGenerations}>{ModelModality.ImagesGenerations}</SelectItem>
+                <SelectItem value={ModelModality.Embeddings}>{ModelModality.Embeddings}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -115,7 +193,7 @@ export default function ModelsPage() {
               <h2 className="text-lg font-medium text-primary">{section.title}</h2>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {section.models.map((model) => (
-                  <ModelCard key={model.name} name={model.name} price={model.price} type={model.type} />
+                  <ModelCard key={model.name} name={model.name} price={model.price} modalities={model.modalities} />
                 ))}
               </div>
             </div>

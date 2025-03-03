@@ -18,6 +18,26 @@ export enum ModelModality {
   Embeddings = "Embeddings",
 }
 
+export interface NodeSubscription {
+  node_small_id: number; // Unique small integer identifier for the node subscription
+  task_small_id: number; // Unique small integer identifier for the task
+  price_per_one_million_compute_units: number; // Price per 1M compute units for the subscription
+  max_num_compute_units: number; // Maximum number of compute units for the subscription
+  valid: boolean; // Indicates whether the subscription is valid
+}
+
+export interface Task {
+  task_small_id: number; // Unique small integer identifier for the task
+  task_id: string; // Unique string identifier for the task
+  role: number; // Role associated with the task (encoded as an integer)
+  model_name?: string; // Optional name of the model used for the task
+  is_deprecated: boolean; // Indicates whether the task is deprecated
+  valid_until_epoch?: number; // Optional epoch timestamp until which the task is valid
+  deprecated_at_epoch?: number; // Optional epoch timestamp when the task was deprecated
+  security_level: number; // Security level of the task (encoded as an integer)
+  minimum_reputation_score?: number; // Optional minimum reputation score required for the task
+}
+
 // Create an API client for the credentials API
 const credentialsApi = axios.create({
   baseURL: config.ATOMA_CREDENTIALS_URL,
