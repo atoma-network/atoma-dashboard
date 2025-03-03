@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Network, Activity, Box, Cpu, Clock, ArrowUpRight } from "lucide-react";
 import React from "react";
-import api, { GET_NODES_DISTRIBUTION, LATENCY_168, TASKS, type ModelModality } from "@/lib/api";
+import api, { GET_NODES_DISTRIBUTION, LATENCY_168, SUBSCRIPTIONS, TASKS, type ModelModality } from "@/lib/api";
 
 export function MetricsCards() {
   const [metricsData, setMetricsData] = React.useState({
@@ -19,8 +19,14 @@ export function MetricsCards() {
         const tasksPromise = api.get(TASKS).catch(() => null);
         const nodesPromise = api.get(GET_NODES_DISTRIBUTION).catch(() => null);
         const latencyPromise = api.get(LATENCY_168).catch(() => null);
+        const subscriptionsPromise = api.get(SUBSCRIPTIONS).catch(() => null);
 
-        const [tasksRes, nodesRes, latencyRes] = await Promise.all([tasksPromise, nodesPromise, latencyPromise]);
+        const [tasksRes, nodesRes, latencyRes, subscriptionsRes] = await Promise.all([
+          tasksPromise,
+          nodesPromise,
+          latencyPromise,
+          subscriptionsPromise,
+        ]);
 
         const totalNodes =
           nodesRes?.data?.reduce((sum: number, node: { count: number }) => sum + (+node.count || 0), 0) || "0";
@@ -47,9 +53,14 @@ export function MetricsCards() {
 
         const averageLatency = latency?.totalLatency / latencyRes?.data.length;
         const averageThroughPut = latency?.totalRequests / 168;
+        const nodesOnline = new Set<string>(
+          subscriptionsRes?.data
+            ?.filter(({ valid }: { valid: boolean }) => valid)
+            .map(({ node_small_id }: { node_small_id: number }) => node_small_id)
+        ).size;
         setMetricsData((prevData) => ({
           totalNodes: totalNodes.toString(),
-          nodesOnline: nodesRes?.data?.nodes_online?.toString() || prevData.nodesOnline,
+          nodesOnline: nodesOnline.toString(),
           models: modelCount.toString(),
           latency: `${averageLatency.toFixed(2).toString()}ms`,
           throughPut: averageThroughPut.toFixed(2).toString(),

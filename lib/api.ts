@@ -4,6 +4,7 @@ import config from "../config/config";
 export const TASKS = "/tasks";
 export const GET_NODES_DISTRIBUTION = "/get_nodes_distribution";
 export const LATENCY_168 = "/latency?hours=168";
+export const SUBSCRIPTIONS = "/subscriptions";
 
 export enum ModelModality {
   ChatCompletions = "Chat Completions",
