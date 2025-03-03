@@ -85,7 +85,7 @@ export function ApiDocumentation() {
               </TabsTrigger>
             </TabsList>
           </div>
-          <ScrollArea className="h-[168px]">
+          <ScrollArea>
             <TabsContent value="endpoints" className="p-4 m-0">
               <div className="space-y-4">
                 {endpoints.map((endpoint) => (
