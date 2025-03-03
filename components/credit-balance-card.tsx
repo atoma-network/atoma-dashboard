@@ -1,9 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export function CreditBalanceCard() {
   return (
-    <Card className="h-[280px] flex flex-col" hideInfo>
+    <Card className="h-[280px] flex flex-col">
       <CardHeader>
         <CardTitle className="text-purple-600">Credit Balance</CardTitle>
       </CardHeader>
@@ -15,6 +15,5 @@ export function CreditBalanceCard() {
         <Button className="w-full bg-purple-600 hover:bg-purple-700 text-base">Add Funds</Button>
       </CardContent>
     </Card>
-  )
+  );
 }
-

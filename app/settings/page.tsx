@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { useSettings } from "@/contexts/settings-context"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
-import { BackgroundGrid } from "@/components/background-grid"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { useSettings } from "@/contexts/settings-context";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { BackgroundGrid } from "@/components/background-grid";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function SettingsPage() {
-  const { settings, updateSettings } = useSettings()
+  const { settings, updateSettings } = useSettings();
 
   const handleSaveAccount = () => {
     updateSettings({
@@ -18,9 +18,9 @@ export default function SettingsPage() {
       email: settings.email,
       phone: settings.phone,
       timezone: settings.timezone,
-    })
-    toast.success("Account settings saved successfully")
-  }
+    });
+    toast.success("Account settings saved successfully");
+  };
 
   return (
     <div className="relative min-h-screen w-full">
@@ -31,7 +31,7 @@ export default function SettingsPage() {
           <h1 className="text-3xl font-bold mb-6">Settings</h1>
 
           {/* Account Settings Card */}
-          <Card hideInfo>
+          <Card>
             <CardHeader>
               <CardTitle>Account Settings</CardTitle>
               <CardDescription>Manage your account information</CardDescription>
@@ -71,6 +71,5 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

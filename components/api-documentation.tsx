@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useState } from "react"
-import { ApiUsageDialog } from "@/components/api-usage-dialog"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState } from "react";
+import { ApiUsageDialog } from "@/components/api-usage-dialog";
 
 const endpoints = [
   {
@@ -22,7 +22,7 @@ const endpoints = [
     endpoint: "/v1/embeddings",
     method: "POST",
   },
-]
+];
 
 const exampleCode = `# Chat Completion Example
 curl https://api.atoma.network/v1/chat/completions \\
@@ -62,14 +62,14 @@ curl https://api.atoma.network/v1/chat/completions \\
       "index": 0
     }
   ]
-}`
+}`;
 
 export function ApiDocumentation() {
-  const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null)
-  const [isApiDialogOpen, setIsApiDialogOpen] = useState(false)
+  const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null);
+  const [isApiDialogOpen, setIsApiDialogOpen] = useState(false);
 
   return (
-    <Card className="h-[280px]" hideInfo>
+    <Card className="h-[280px]">
       <CardHeader className="pb-2">
         <CardTitle className="text-purple-600">Quick Reference</CardTitle>
       </CardHeader>
@@ -93,8 +93,8 @@ export function ApiDocumentation() {
                     key={endpoint.endpoint}
                     className="group space-y-1.5 rounded-lg bg-muted/50 p-3 cursor-pointer transition-all duration-200 hover:bg-muted/70 active:bg-muted/90"
                     onClick={() => {
-                      setSelectedEndpoint(endpoint.name)
-                      setIsApiDialogOpen(true)
+                      setSelectedEndpoint(endpoint.name);
+                      setIsApiDialogOpen(true);
                     }}
                   >
                     <div className="flex items-center justify-between">
@@ -128,6 +128,5 @@ export function ApiDocumentation() {
         modelName={selectedEndpoint || ""}
       />
     </Card>
-  )
+  );
 }
-

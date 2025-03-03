@@ -46,9 +46,7 @@ const defaultParameters: Parameters = {
 };
 
 export default function PlaygroundPage() {
-  const [selectedModel, setSelectedModel] = useState(
-    "meta-llama/Llama-3.3-70B-Instruct"
-  );
+  const [selectedModel, setSelectedModel] = useState("meta-llama/Llama-3.3-70B-Instruct");
   const [selectedTab, setSelectedTab] = useState<ModelCategories>("chat");
 
   const [message, setMessage] = useState("");
@@ -100,9 +98,7 @@ export default function PlaygroundPage() {
               error: true,
             })
           : setResponse({
-              response: error.response?.data?.error?.message
-                ? error.response.data.error.message
-                : "failed to query.",
+              response: error.response?.data?.error?.message ? error.response.data.error.message : "failed to query.",
               error: true,
             });
       } else {
@@ -113,10 +109,7 @@ export default function PlaygroundPage() {
     }
   };
 
-  const handleParameterChange = (
-    key: keyof Parameters,
-    value: number | boolean | string
-  ) => {
+  const handleParameterChange = (key: keyof Parameters, value: number | boolean | string) => {
     setParameters((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -125,10 +118,7 @@ export default function PlaygroundPage() {
       <BackgroundGrid />
       <div className="relative z-10 h-[calc(100vh-6rem)] overflow-hidden">
         <div className="h-full p-4 grid grid-cols-[1fr,400px] gap-4">
-          <Card
-            className="flex flex-col overflow-hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-            hideInfo
-          >
+          <Card className="flex flex-col overflow-hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             {/* Header Section */}
             <div className="p-4 space-y-4">
               <div className="flex w-full justify-between p-2">
@@ -139,16 +129,11 @@ export default function PlaygroundPage() {
                       key={tab}
                       variant="ghost"
                       className={`px-4 py-2 text-sm font-medium ${
-                        selectedTab === tab
-                          ? "bg-purple-100 text-purple-700"
-                          : "text-gray-500"
+                        selectedTab === tab ? "bg-purple-100 text-purple-700" : "text-gray-500"
                       }`}
                       onClick={() => {
                         setSelectedTab(tab as ModelCategories);
-                        setSelectedModel(
-                          renderModelListBasedOnTabs(tab as ModelCategories)[0]
-                            .model
-                        );
+                        setSelectedModel(renderModelListBasedOnTabs(tab as ModelCategories)[0].model);
                       }}
                     >
                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -157,10 +142,7 @@ export default function PlaygroundPage() {
                 </div>
 
                 <div>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsApiDialogOpen(true)}
-                  >
+                  <Button variant="outline" onClick={() => setIsApiDialogOpen(true)}>
                     API
                   </Button>
                 </div>
@@ -173,9 +155,7 @@ export default function PlaygroundPage() {
                     key={model.modelName}
                     variant="ghost"
                     className={`mr-2 px-3 py-1 rounded-lg ${
-                      selectedModel === model.model
-                        ? "bg-purple-100 text-purple-700"
-                        : "text-gray-700"
+                      selectedModel === model.model ? "bg-purple-100 text-purple-700" : "text-gray-700"
                     }`}
                     onClick={() => setSelectedModel(model.model.trim())}
                   >
@@ -189,11 +169,7 @@ export default function PlaygroundPage() {
             {/* Chat Section */}
             <div className="flex-1 flex flex-col overflow-auto">
               <div
-                className={`flex-1 p-4 flex ${
-                  isLoading
-                    ? "items-center justify-center"
-                    : "items-start justify-start"
-                }`}
+                className={`flex-1 p-4 flex ${isLoading ? "items-center justify-center" : "items-start justify-start"}`}
               >
                 {isLoading ? (
                   <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
@@ -203,9 +179,7 @@ export default function PlaygroundPage() {
                     <p>{response.response}</p>
                   </div>
                 ) : (
-                  <p className="   break-words self-start w-[90%] ">
-                    {response.response}
-                  </p>
+                  <p className="   break-words self-start w-[90%] ">{response.response}</p>
                 )}
               </div>
               <div className="border-t p-4 bg-background/50 backdrop-blur-md shadow-md rounded-b-lg">
@@ -229,19 +203,12 @@ export default function PlaygroundPage() {
             </div>
           </Card>
 
-          <Card className="overflow-hidden" hideInfo>
-            <ParametersSidebar
-              parameters={parameters}
-              onChange={handleParameterChange}
-            />
+          <Card className="overflow-hidden">
+            <ParametersSidebar parameters={parameters} onChange={handleParameterChange} />
           </Card>
         </div>
       </div>
-      <ApiUsageDialog
-        isOpen={isApiDialogOpen}
-        onClose={() => setIsApiDialogOpen(false)}
-        modelName={selectedModel}
-      />
+      <ApiUsageDialog isOpen={isApiDialogOpen} onClose={() => setIsApiDialogOpen(false)} modelName={selectedModel} />
     </div>
   );
 }

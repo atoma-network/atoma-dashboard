@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Copy } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Copy } from "lucide-react";
 
 const endpoints = [
   {
@@ -21,10 +21,10 @@ const endpoints = [
     endpoint: "/v1/embeddings",
     method: "POST",
   },
-]
+];
 
 export function ApiAccessCard() {
-  const apiKey = "sk-..."
+  const apiKey = "sk-...";
   const exampleCode = `curl https://api.atoma.network/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $YOUR_API_KEY" \\
@@ -36,10 +36,10 @@ export function ApiAccessCard() {
       "content": "What is the capital of France?"
     }],
     "max_tokens": 128
-  }'`
+  }'`;
 
   return (
-    <Card hideInfo>
+    <Card>
       <CardHeader>
         <CardTitle className="text-purple-600">API Access</CardTitle>
         <CardDescription>Integrate our AI models into your applications using our RESTful API</CardDescription>
@@ -87,6 +87,5 @@ export function ApiAccessCard() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
-

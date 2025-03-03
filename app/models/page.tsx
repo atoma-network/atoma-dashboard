@@ -1,23 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { BackgroundGrid } from "@/components/background-grid"
-import { ApiUsageDialog } from "@/components/api-usage-dialog"
-import Link from "next/link"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BackgroundGrid } from "@/components/background-grid";
+import { ApiUsageDialog } from "@/components/api-usage-dialog";
+import Link from "next/link";
 
-type ModelCategory = "chat" | "image" | "embedding"
+type ModelCategory = "chat" | "image" | "embedding";
 
 interface ModelSection {
-  type: ModelCategory
-  title: string
+  type: ModelCategory;
+  title: string;
   models: {
-    name: string
-    price: string
-    type: ModelCategory
-  }[]
+    name: string;
+    price: string;
+    type: ModelCategory;
+  }[];
 }
 
 const modelSections: ModelSection[] = [
@@ -40,14 +40,14 @@ const modelSections: ModelSection[] = [
     title: "Embedding",
     models: [{ name: "Multilingual e5 large", price: "$0.30", type: "embedding" }],
   },
-]
+];
 
 function ModelCard({ name, price, type }: { name: string; price: string; type: ModelCategory }) {
-  const [showApiDialog, setShowApiDialog] = useState(false)
+  const [showApiDialog, setShowApiDialog] = useState(false);
 
   return (
     <>
-      <Card className="overflow-hidden" hideInfo>
+      <Card className="overflow-hidden">
         <CardContent className="p-6">
           <div className="flex justify-between items-start mb-4">
             <div>
@@ -72,11 +72,11 @@ function ModelCard({ name, price, type }: { name: string; price: string; type: M
       </Card>
       <ApiUsageDialog isOpen={showApiDialog} onClose={() => setShowApiDialog(false)} modelName={name} />
     </>
-  )
+  );
 }
 
 export default function ModelsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<ModelCategory>("chat")
+  const [selectedCategory, setSelectedCategory] = useState<ModelCategory>("chat");
 
   // Reorder sections based on selected category
   const orderedSections = [
@@ -84,7 +84,7 @@ export default function ModelsPage() {
     ...modelSections.filter((section) => section.type === selectedCategory),
     // Other categories after
     ...modelSections.filter((section) => section.type !== selectedCategory),
-  ]
+  ];
 
   return (
     <div className="relative min-h-screen w-full">
@@ -123,6 +123,5 @@ export default function ModelsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

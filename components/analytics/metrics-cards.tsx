@@ -1,6 +1,6 @@
-'use client'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Network, Activity, Box, Cpu, Clock, ArrowUpRight } from "lucide-react"
+"use client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Network, Activity, Box, Cpu, Clock, ArrowUpRight } from "lucide-react";
 import React from "react";
 import api from "@/lib/api";
 
@@ -10,7 +10,7 @@ export function MetricsCards() {
     nodesOnline: "-",
     models: "-",
     latency: "-",
-    throughPut:"_"
+    throughPut: "_",
   });
 
   React.useEffect(() => {
@@ -18,33 +18,37 @@ export function MetricsCards() {
       try {
         const tasksPromise = api.get("/tasks").catch(() => null);
         const nodesPromise = api.get("/get_nodes_distribution").catch(() => null);
-        const latencyPromise=api.get("/latency?hours=168").catch(()=>null)
-        
-        
-        const [tasksRes, nodesRes,latencyRes] = await Promise.all([tasksPromise, nodesPromise,latencyPromise]);
-        console.log(latencyRes)
+        const latencyPromise = api.get("/latency?hours=168").catch(() => null);
 
-        const totalNodes = nodesRes?.data?.reduce((sum:number, node:{count:number}) => sum + (+node.count || 0), 0) || "0";
-        const modelCount = tasksRes?.data?.reduce((count:number, task:[{model_name:string}]) => count + (task[0]?.model_name ? 1 : 0), 0) || "0";
+        const [tasksRes, nodesRes, latencyRes] = await Promise.all([tasksPromise, nodesPromise, latencyPromise]);
+        console.log(latencyRes);
+
+        const totalNodes =
+          nodesRes?.data?.reduce((sum: number, node: { count: number }) => sum + (+node.count || 0), 0) || "0";
+        const modelCount =
+          tasksRes?.data?.reduce(
+            (count: number, task: [{ model_name: string }]) => count + (task[0]?.model_name ? 1 : 0),
+            0
+          ) || "0";
         const latency = latencyRes?.data
-        ? latencyRes.data.reduce(
-            (acc:any, item:any) => {
-              acc.totalLatency += item.latency;
-              acc.totalRequests += item.requests;
-              return acc;
-            },
-            { totalLatency: 0, totalRequests: 0 } 
-          )
-        : null;
-      
-     const averageLatency=latency?.totalLatency/latencyRes?.data.length
-     const averageThroughPut=latency?.totalRequests/168;
-        setMetricsData(prevData => ({
+          ? latencyRes.data.reduce(
+              (acc: any, item: any) => {
+                acc.totalLatency += item.latency;
+                acc.totalRequests += item.requests;
+                return acc;
+              },
+              { totalLatency: 0, totalRequests: 0 }
+            )
+          : null;
+
+        const averageLatency = latency?.totalLatency / latencyRes?.data.length;
+        const averageThroughPut = latency?.totalRequests / 168;
+        setMetricsData((prevData) => ({
           totalNodes: totalNodes.toString(),
           nodesOnline: nodesRes?.data?.nodes_online?.toString() || prevData.nodesOnline,
           models: modelCount.toString(),
           latency: `${averageLatency.toFixed(2).toString()}ms`,
-          throughPut:averageThroughPut.toFixed(2).toString()
+          throughPut: averageThroughPut.toFixed(2).toString(),
         }));
       } catch (err) {
         console.error("Failed to fetch metrics", err);
@@ -97,18 +101,18 @@ export function MetricsCards() {
     },
     {
       title: "Throughput",
-      value:  metricsData.throughPut,
+      value: metricsData.throughPut,
       description: "Requests/hour",
       icon: ArrowUpRight,
       color: "text-purple-500",
       textColor: "text-purple-500",
     },
-  ]
+  ];
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6">
       {metrics.map((metric) => (
-        <Card key={metric.title} className="overflow-hidden" hideInfo>
+        <Card key={metric.title} className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{metric.title}</CardTitle>
             <metric.icon className={`h-4 w-4 ${metric.color}`} />

@@ -1,9 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 export function BillingSummaryCard() {
   return (
-    <Card className="h-[280px] flex flex-col" hideInfo>
+    <Card className="h-[280px] flex flex-col">
       <CardHeader>
         <CardTitle className="text-purple-600">Billing Summary</CardTitle>
       </CardHeader>
@@ -26,6 +26,5 @@ export function BillingSummaryCard() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
-
