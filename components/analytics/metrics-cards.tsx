@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Network, Activity, Box, Cpu, Clock, ArrowUpRight } from "lucide-react";
 import React from "react";
-import api from "@/lib/api";
+import api, { GET_NODES_DISTRIBUTION, LATENCY_168, TASKS, type ModelModality } from "@/lib/api";
 
 export function MetricsCards() {
   const [metricsData, setMetricsData] = React.useState({
@@ -10,26 +10,30 @@ export function MetricsCards() {
     nodesOnline: "-",
     models: "-",
     latency: "-",
-    throughPut: "_",
+    throughPut: "-",
   });
 
   React.useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const tasksPromise = api.get("/tasks").catch(() => null);
-        const nodesPromise = api.get("/get_nodes_distribution").catch(() => null);
-        const latencyPromise = api.get("/latency?hours=168").catch(() => null);
+        const tasksPromise = api.get(TASKS).catch(() => null);
+        const nodesPromise = api.get(GET_NODES_DISTRIBUTION).catch(() => null);
+        const latencyPromise = api.get(LATENCY_168).catch(() => null);
 
         const [tasksRes, nodesRes, latencyRes] = await Promise.all([tasksPromise, nodesPromise, latencyPromise]);
-        console.log(latencyRes);
 
         const totalNodes =
           nodesRes?.data?.reduce((sum: number, node: { count: number }) => sum + (+node.count || 0), 0) || "0";
-        const modelCount =
-          tasksRes?.data?.reduce(
-            (count: number, task: [{ model_name: string }]) => count + (task[0]?.model_name ? 1 : 0),
-            0
-          ) || "0";
+
+        const modelCount = new Set<string>(
+          tasksRes?.data
+            .filter(
+              (task: [{ model_name: string; is_deprecated: boolean }, ModelModality[]]) =>
+                task[0].model_name && !task[0].is_deprecated && task[1].length !== 0
+            )
+            .map((task: { model_name: string }[]) => task[0].model_name)
+        ).size;
+
         const latency = latencyRes?.data
           ? latencyRes.data.reduce(
               (acc: any, item: any) => {
@@ -69,7 +73,7 @@ export function MetricsCards() {
     },
     {
       title: "Nodes Online",
-      value: "2",
+      value: metricsData.nodesOnline,
       description: "Currently active",
       icon: Activity,
       color: "text-purple-500",

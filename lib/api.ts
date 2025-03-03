@@ -1,6 +1,16 @@
 import axios from "axios";
 import config from "../config/config";
 
+export const TASKS = "/tasks";
+export const GET_NODES_DISTRIBUTION = "/get_nodes_distribution";
+export const LATENCY_168 = "/latency?hours=168";
+
+export enum ModelModality {
+  ChatCompletions = "Chat Completions",
+  ImagesGenerations = "Images Generations",
+  Embeddings = "Embeddings",
+}
+
 // Create an API client for the credentials API
 const credentialsApi = axios.create({
   baseURL: config.ATOMA_CREDENTIALS_URL,
