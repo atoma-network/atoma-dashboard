@@ -1,10 +1,14 @@
 import axios from "axios";
 import config from "../config/config";
 
-export const TASKS = "/tasks";
+const LATENCY = (hours: number) => `/latency?hours=${hours}`;
+const COMPUTE_UNITS_PROCESSED = (hours: number) => `/compute_units_processed?hours=${hours}`;
+
+export const COMPUTE_UNITS_PROCESSED_168 = COMPUTE_UNITS_PROCESSED(168);
 export const GET_NODES_DISTRIBUTION = "/get_nodes_distribution";
-export const LATENCY_168 = "/latency?hours=168";
+export const LATENCY_168 = LATENCY(168);
 export const SUBSCRIPTIONS = "/subscriptions";
+export const TASKS = "/tasks";
 
 export enum ModelModality {
   ChatCompletions = "Chat Completions",

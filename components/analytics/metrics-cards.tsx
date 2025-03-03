@@ -2,13 +2,22 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Network, Activity, Box, Cpu, Clock, ArrowUpRight } from "lucide-react";
 import React from "react";
-import api, { GET_NODES_DISTRIBUTION, LATENCY_168, SUBSCRIPTIONS, TASKS, type ModelModality } from "@/lib/api";
+import api, {
+  COMPUTE_UNITS_PROCESSED_168,
+  GET_NODES_DISTRIBUTION,
+  LATENCY_168,
+  SUBSCRIPTIONS,
+  TASKS,
+  type ModelModality,
+} from "@/lib/api";
+import { formatNumber } from "@/lib/utils";
 
 export function MetricsCards() {
   const [metricsData, setMetricsData] = React.useState({
     totalNodes: "-",
     nodesOnline: "-",
     models: "-",
+    tokens: "-",
     latency: "-",
     throughPut: "-",
   });
@@ -20,17 +29,28 @@ export function MetricsCards() {
         const nodesPromise = api.get(GET_NODES_DISTRIBUTION).catch(() => null);
         const latencyPromise = api.get(LATENCY_168).catch(() => null);
         const subscriptionsPromise = api.get(SUBSCRIPTIONS).catch(() => null);
+        const computeUnitsPromise = await api.get(COMPUTE_UNITS_PROCESSED_168).catch(() => null);
 
-        const [tasksRes, nodesRes, latencyRes, subscriptionsRes] = await Promise.all([
+        const [tasksRes, nodesRes, latencyRes, subscriptionsRes, computeUnitsRes] = await Promise.all([
           tasksPromise,
           nodesPromise,
           latencyPromise,
           subscriptionsPromise,
+          computeUnitsPromise,
         ]);
 
+        // Total nodes
         const totalNodes =
-          nodesRes?.data?.reduce((sum: number, node: { count: number }) => sum + (+node.count || 0), 0) || "0";
+          nodesRes?.data?.reduce((sum: number, node: { count: number }) => sum + (+node.count || 0), 0) || 0;
 
+        // Nodes online
+        const nodesOnline = new Set<string>(
+          subscriptionsRes?.data
+            ?.filter(({ valid }: { valid: boolean }) => valid)
+            .map(({ node_small_id }: { node_small_id: number }) => node_small_id)
+        ).size;
+
+        // Models
         const modelCount = new Set<string>(
           tasksRes?.data
             .filter(
@@ -40,6 +60,11 @@ export function MetricsCards() {
             .map((task: { model_name: string }[]) => task[0].model_name)
         ).size;
 
+        // Tokens
+        const totalUnits =
+          computeUnitsRes?.data.reduce((sum: number, data: { amount: number }) => sum + data.amount, 0) || 0;
+
+        // Performance
         const latency = latencyRes?.data
           ? latencyRes.data.reduce(
               (acc: any, item: any) => {
@@ -51,18 +76,16 @@ export function MetricsCards() {
             )
           : null;
 
-        const averageLatency = latency?.totalLatency / latencyRes?.data.length;
+        const averageLatency = latency?.totalLatency / latency?.totalRequests;
+
+        // Throughput
         const averageThroughPut = latency?.totalRequests / 168;
-        const nodesOnline = new Set<string>(
-          subscriptionsRes?.data
-            ?.filter(({ valid }: { valid: boolean }) => valid)
-            .map(({ node_small_id }: { node_small_id: number }) => node_small_id)
-        ).size;
         setMetricsData((prevData) => ({
-          totalNodes: totalNodes.toString(),
-          nodesOnline: nodesOnline.toString(),
-          models: modelCount.toString(),
-          latency: `${averageLatency.toFixed(2).toString()}ms`,
+          totalNodes: formatNumber(totalNodes),
+          nodesOnline: formatNumber(nodesOnline),
+          models: formatNumber(modelCount),
+          tokens: formatNumber(totalUnits),
+          latency: `${isFinite(averageLatency) ? averageLatency.toFixed(2).toString() : "-"}ms`,
           throughPut: averageThroughPut.toFixed(2).toString(),
         }));
       } catch (err) {
@@ -100,7 +123,7 @@ export function MetricsCards() {
     },
     {
       title: "Tokens",
-      value: "4.7M",
+      value: metricsData.tokens,
       description: "Processed on Atoma",
       icon: Cpu,
       color: "text-purple-500",
