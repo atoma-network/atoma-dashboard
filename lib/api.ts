@@ -4,6 +4,8 @@ import config from "../config/config";
 const LATENCY = (hours: number) => `/latency?hours=${hours}`;
 const COMPUTE_UNITS_PROCESSED = (hours: number) => `/compute_units_processed?hours=${hours}`;
 
+export const ALL_STACKS = "/all_stacks";
+export const BALANCE = "/balance";
 export const COMPUTE_UNITS_PROCESSED_168 = COMPUTE_UNITS_PROCESSED(168);
 export const GET_NODES_DISTRIBUTION = "/get_nodes_distribution";
 export const LATENCY_168 = LATENCY(168);

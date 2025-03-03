@@ -1,8 +1,10 @@
-import { CreditBalanceCard } from "@/components/credit-balance-card"
-import { BillingSummaryCard } from "@/components/billing-summary-card"
-import { ApiKeyCard } from "@/components/api-key-card"
-import { ApiDocumentation } from "@/components/api-documentation"
-import { BackgroundGrid } from "@/components/background-grid"
+"use client";
+
+import { CreditBalanceCard } from "@/components/credit-balance-card";
+import { BillingSummaryCard } from "@/components/billing-summary-card";
+import { ApiKeyCard } from "@/components/api-key-card";
+import { ApiDocumentation } from "@/components/api-documentation";
+import { BackgroundGrid } from "@/components/background-grid";
 
 export default function DashboardPage() {
   return (
@@ -25,6 +27,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
