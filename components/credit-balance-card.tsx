@@ -11,12 +11,11 @@ export function CreditBalanceCard() {
         const balancePromise = api.get(BALANCE).catch(() => null);
         const allStacksPromise = api.get(ALL_STACKS).catch(() => null);
         const [balanceRes, allStacksRes] = await Promise.all([balancePromise, allStacksPromise]);
-        let partialBalance = allStacksRes?.data.reduce((acc: number, [stack]: any) => {
-          console.log(stack);
-          return (
-            acc + (stack.already_computed_units / stack.num_compute_units) * stack.price_per_one_million_compute_units
-          );
-        }, 0);
+        let partialBalance = allStacksRes?.data.reduce(
+          (acc: number, [stack]: any) =>
+            acc + (stack.already_computed_units / stack.num_compute_units) * stack.price_per_one_million_compute_units,
+          0
+        );
         setBalance(((balanceRes?.data + partialBalance) / 1000000).toFixed(2));
       } catch (error) {
         console.error("Failed to fetch balance", error);
