@@ -3,6 +3,7 @@ import api from "@/lib/api";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
+import { store } from "@/lib/store";
 
 interface AuthFormProps {
   type: "login" | "register";
@@ -12,7 +13,7 @@ interface AuthFormProps {
 const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading,setIsLoading]=useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const toastRef = useRef<Toast>(null);
 
   const [loginType, setLoginType] = useState<"login" | "register">(type);
@@ -21,16 +22,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
     const endpoint = loginType === "login" ? "/login" : "/register";
 
     try {
-      setIsLoading(true)
+      setIsLoading(true);
       const response = await api.post(endpoint, { username, password });
       console.log(response.status, response.data);
 
       // Save access token and refresh token to session storage
       sessionStorage.setItem("atoma_access_token", response.data.access_token);
-      sessionStorage.setItem(
-        "atoma_refresh_token",
-        response.data.refresh_token
-      );
+      sessionStorage.setItem("atoma_refresh_token", response.data.refresh_token);
+      store.setState({ loggedIn: true });
 
       toastRef.current?.show({
         severity: "success",
@@ -58,8 +57,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
           life: 3000,
         });
       }
-    }
-    finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -69,9 +67,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
       <Toast ref={toastRef} />
 
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-50">
-        {loginType === "login"
-          ? "Enter your credentials to access your account."
-          : "Create Account"}
+        {loginType === "login" ? "Enter your credentials to access your account." : "Create Account"}
       </h2>
 
       <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
@@ -100,10 +96,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
 
         {loginType === "login" && (
           <div className="flex justify-end">
-            <a
-              href="#"
-              className="text-sm text-purple-600 hover:text-purple-800"
-            >
+            <a href="#" className="text-sm text-purple-600 hover:text-purple-800">
               Forgot password?
             </a>
           </div>
@@ -111,13 +104,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
 
         <Button
           type="submit"
-          label={
-            isLoading
-              ? "please wait ..."
-              : loginType === "login"
-              ? "Sign In"
-              : "Create Account"
-          }
+          label={isLoading ? "please wait ..." : loginType === "login" ? "Sign In" : "Create Account"}
           className="p-button-lg p-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md transition-colors duration-200"
         />
 
@@ -125,22 +112,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
           {loginType === "login" ? (
             <p>
               Don't have an account?{" "}
-              <a
-                href="#"
-                className="text-purple-600 hover:underline"
-                onClick={() => setLoginType("register")}
-              >
+              <a href="#" className="text-purple-600 hover:underline" onClick={() => setLoginType("register")}>
                 Sign up
               </a>
             </p>
           ) : (
             <p>
               Already have an account?{" "}
-              <a
-                href="#"
-                className="text-purple-600 hover:underline"
-                onClick={() => setLoginType("login")}
-              >
+              <a href="#" className="text-purple-600 hover:underline" onClick={() => setLoginType("login")}>
                 Sign in
               </a>
             </p>

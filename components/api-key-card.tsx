@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import api from "@/lib/api"
+import api, { GENERATE_API_TOKEN } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -13,76 +13,86 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Copy, Pencil, Plus, Trash2 } from "lucide-react"
-import Link from "next/link"
-const username=sessionStorage.getItem('atoma_username') || ''
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { store } from "@/lib/store";
+
+const username = sessionStorage.getItem("atoma_username") || "";
 interface ApiKey {
-  name: string
-  key: string
-  created: string
-  lastUsed: string
-  projectAccess: string
-  createdBy: string
-  permissions: string
-  oe?:string;
+  name: string;
+  key: string;
+  created: string;
+  lastUsed: string;
+  projectAccess: string;
+  createdBy: string;
+  permissions: string;
+  oe?: string;
 }
 
 export function ApiKeyCard() {
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
 
-  
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([
-   
-  ])
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isSaveKeyDialogOpen, setIsSaveKeyDialogOpen] = useState(false);
+  const [newKeyName, setNewKeyName] = useState("");
+  const [newGeneratedKey, setNewGeneratedKey] = useState("");
+  const [copied, setCopied] = useState(false);
 
-
-  
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [isSaveKeyDialogOpen, setIsSaveKeyDialogOpen] = useState(false)
-  const [newKeyName, setNewKeyName] = useState("")
-  const [newGeneratedKey, setNewGeneratedKey] = useState("")
-  const [copied, setCopied] = useState(false)
- 
-  useEffect(()=>{
-    (async()=>{
-      try {
-        let tokens:string[]= (await api.get('/api_tokens')).data;
-        let apiKeys:ApiKey[]=tokens.map((token,index)=>{
-            return {name:`${username}'s sk ${index+1}`,key:`sk-...${token.slice(-4)}`,created:'_',projectAccess:'all',createdBy:username,permissions:'all',lastUsed:'_',oe:token}
-        })
-        setApiKeys(apiKeys)
-      } catch (error) {
-        
+  useEffect(() => {
+    const updateApiTokens = async () => {
+      if (!store.getState().loggedIn) {
+        setApiKeys([]);
+        return;
       }
-     
-    })()
-  },[newGeneratedKey])
+      try {
+        let tokens: string[] = (await api.get("/api_tokens")).data;
+        let apiKeys: ApiKey[] = tokens.map((token, index) => {
+          return {
+            name: `${username}'s sk ${index + 1}`,
+            key: `sk-...${token.slice(-4)}`,
+            created: "_",
+            projectAccess: "all",
+            createdBy: username,
+            permissions: "all",
+            lastUsed: "_",
+            oe: token,
+          };
+        });
+        setApiKeys(apiKeys);
+      } catch (error) {}
+    };
+    updateApiTokens();
+    store.on("change", updateApiTokens);
+    return () => {
+      store.off("change", updateApiTokens);
+    };
+  }, [newGeneratedKey]);
 
-
-const handleRevokeKey=async(key:string)=>{
+  const handleRevokeKey = async (key: string) => {
     try {
-      await api.post('/revoke_api_token',{
-        api_token:key
-      })
-      
-     window.location.reload()
-    } catch (error) {
-      alert('failed to delete key')
-    }
-}
+      await api.post("/revoke_api_token", {
+        api_token: key,
+      });
 
-  const handleCreateKey = async() => {
-    if (!newKeyName) return
-    try {
-      const generatedKey = (await api.get('/generate_api_token')).data
-      setNewGeneratedKey(generatedKey)
-      setIsCreateDialogOpen(false)
-      setIsSaveKeyDialogOpen(true)
+      window.location.reload();
     } catch (error) {
-      alert('error in creating key, ensure login and try again')
+      alert("failed to delete key");
     }
-   
+  };
+
+  const handleCreateKey = async () => {
+    if (!newKeyName) return;
+    try {
+      const generatedKey = (await api.get(GENERATE_API_TOKEN)).data;
+      setNewGeneratedKey(generatedKey);
+      setIsCreateDialogOpen(false);
+      setIsSaveKeyDialogOpen(true);
+    } catch (error) {
+      alert("error in creating key, ensure login and try again");
+    }
+
     // // Add new key to list
     // const newKey: ApiKey = {
     //   name: newKeyName,
@@ -96,21 +106,20 @@ const handleRevokeKey=async(key:string)=>{
 
     // setApiKeys([newKey, ...apiKeys])
     // setNewKeyName("")
-    
-  }
+  };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(newGeneratedKey)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    navigator.clipboard.writeText(newGeneratedKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between p-6">
           <h2 className="text-lg font-semibold text-purple-600">API keys</h2>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Button onClick={() => setIsCreateDialogOpen(true)} disabled={!store.getState().loggedIn}>
             <Plus className="mr-2 h-4 w-4" />
             Create new API key
           </Button>
@@ -148,13 +157,16 @@ const handleRevokeKey=async(key:string)=>{
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive"
-                          onClick={() => {console.log('click'); return handleRevokeKey(key?.oe || "")}} 
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive"
+                            onClick={() => {
+                              console.log("click");
+                              return handleRevokeKey(key?.oe || "");
+                            }}
                           >
-  <Trash2 className="h-4 w-4" />
-</Button>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -244,6 +256,6 @@ const handleRevokeKey=async(key:string)=>{
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
 

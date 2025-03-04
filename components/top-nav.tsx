@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import AuthForm from "@/components/AuthForm"
 import Modal from "@/components/Modal"
+import { store } from "@/lib/store";
 
 export function TopNav() { 
   const pathname = usePathname()
@@ -102,9 +103,10 @@ export function TopNav() {
                   </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {
-                  sessionStorage.removeItem('atoma_access_token') // Clear token on logout
-                  sessionStorage.removeItem('atoma_refresh_token')
-                  setIsAuthenticated(false) // Update authentication state
+                  sessionStorage.removeItem("atoma_access_token"); // Clear token on logout
+                  sessionStorage.removeItem("atoma_refresh_token");
+                  store.setState({ loggedIn: false });
+                  setIsAuthenticated(false); // Update authentication state
                 }}>
                   Log out
                 </DropdownMenuItem>

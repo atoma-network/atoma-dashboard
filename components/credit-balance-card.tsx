@@ -2,11 +2,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import api, { ALL_STACKS, BALANCE } from "@/lib/api";
+import { store } from "@/lib/store";
 
 export function CreditBalanceCard() {
   const [balance, setBalance] = useState("-");
   useEffect(() => {
-    (async () => {
+    const updateBalance = async () => {
+      if (!store.getState().loggedIn) {
+        setBalance("-");
+        return;
+      }
       try {
         const balancePromise = api.get(BALANCE).catch(() => null);
         const allStacksPromise = api.get(ALL_STACKS).catch(() => null);
@@ -16,11 +21,17 @@ export function CreditBalanceCard() {
             acc + (stack.already_computed_units / stack.num_compute_units) * stack.price_per_one_million_compute_units,
           0
         );
-        setBalance(((balanceRes?.data + partialBalance) / 1000000).toFixed(2));
+        let balance = (balanceRes?.data + partialBalance) / 1000000;
+        setBalance(isNaN(balance) ? "0" : balance.toFixed(2));
       } catch (error) {
         console.error("Failed to fetch balance", error);
       }
-    })();
+    };
+    updateBalance();
+    store.on("change", updateBalance);
+    return () => {
+      store.off("change", updateBalance);
+    };
   }, []);
   return (
     <Card className="h-[280px] flex flex-col">
@@ -32,7 +43,9 @@ export function CreditBalanceCard() {
           <div className="text-5xl font-bold text-foreground">${balance}</div>
           <div className="text-sm text-muted-foreground mt-2">Available Credits</div>
         </div>
-        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-base">Add Funds</Button>
+        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-base" disabled={!store.getState().loggedIn}>
+          Add Funds
+        </Button>
       </CardContent>
     </Card>
   );

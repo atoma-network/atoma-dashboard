@@ -92,7 +92,7 @@ export function MetricsCards() {
           totalNodes: formatNumber(totalNodes),
           nodesOnline: formatNumber(nodesOnline),
           models: formatNumber(modelCount),
-          tokens: formatNumber(totalComputeUnits.totalUnits),
+          tokens: formatNumber(totalComputeUnits?.totalUnits),
           latency: (isFinite(averageLatency) ? averageLatency.toFixed(2) : "-") + "ms",
           throughPut: isFinite(averageThroughPut) ? formatNumber(averageThroughPut) : "-",
         }));

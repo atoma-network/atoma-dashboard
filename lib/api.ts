@@ -7,6 +7,7 @@ const COMPUTE_UNITS_PROCESSED = (hours: number) => `/compute_units_processed?hou
 export const ALL_STACKS = "/all_stacks";
 export const BALANCE = "/balance";
 export const COMPUTE_UNITS_PROCESSED_168 = COMPUTE_UNITS_PROCESSED(168);
+export const GENERATE_API_TOKEN = "/generate_api_token";
 export const GET_NODES_DISTRIBUTION = "/get_nodes_distribution";
 export const LATENCY_168 = LATENCY(168);
 export const SUBSCRIPTIONS = "/subscriptions";
