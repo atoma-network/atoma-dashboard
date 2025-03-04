@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import api, { GENERATE_API_TOKEN } from "@/lib/api";
+import api, { GENERATE_API_TOKEN, type Token } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +28,7 @@ interface ApiKey {
   projectAccess: string;
   createdBy: string;
   permissions: string;
-  oe?: string;
+  id: number;
 }
 
 export function ApiKeyCard() {
@@ -40,29 +40,30 @@ export function ApiKeyCard() {
   const [newGeneratedKey, setNewGeneratedKey] = useState("");
   const [copied, setCopied] = useState(false);
 
+  const updateApiTokens = async () => {
+    if (!store.getState().loggedIn) {
+      setApiKeys([]);
+      return;
+    }
+    try {
+      let tokens: Token[] = (await api.get("/api_tokens")).data;
+      let apiKeys: ApiKey[] = tokens.map((token) => {
+        return {
+          name: token.name,
+          key: `sk-...${token.token_last_4}`,
+          created: new Date(token.created_at).toLocaleDateString(),
+          projectAccess: "all",
+          createdBy: username,
+          permissions: "all",
+          lastUsed: "_",
+          id: token.id,
+        };
+      });
+      setApiKeys(apiKeys);
+    } catch (error) {}
+  };
+
   useEffect(() => {
-    const updateApiTokens = async () => {
-      if (!store.getState().loggedIn) {
-        setApiKeys([]);
-        return;
-      }
-      try {
-        let tokens: string[] = (await api.get("/api_tokens")).data;
-        let apiKeys: ApiKey[] = tokens.map((token, index) => {
-          return {
-            name: `${username}'s sk ${index + 1}`,
-            key: `sk-...${token.slice(-4)}`,
-            created: "_",
-            projectAccess: "all",
-            createdBy: username,
-            permissions: "all",
-            lastUsed: "_",
-            oe: token,
-          };
-        });
-        setApiKeys(apiKeys);
-      } catch (error) {}
-    };
     updateApiTokens();
     store.on("change", updateApiTokens);
     return () => {
@@ -70,13 +71,12 @@ export function ApiKeyCard() {
     };
   }, [newGeneratedKey]);
 
-  const handleRevokeKey = async (key: string) => {
+  const handleRevokeKey = async (key: number) => {
     try {
       await api.post("/revoke_api_token", {
-        api_token: key,
+        api_token_id: key,
       });
-
-      window.location.reload();
+      await updateApiTokens();
     } catch (error) {
       alert("failed to delete key");
     }
@@ -85,7 +85,7 @@ export function ApiKeyCard() {
   const handleCreateKey = async () => {
     if (!newKeyName) return;
     try {
-      const generatedKey = (await api.get(GENERATE_API_TOKEN)).data;
+      const generatedKey = (await api.post(GENERATE_API_TOKEN, { name: newKeyName })).data;
       setNewGeneratedKey(generatedKey);
       setIsCreateDialogOpen(false);
       setIsSaveKeyDialogOpen(true);
@@ -162,7 +162,7 @@ export function ApiKeyCard() {
                             className="text-destructive"
                             onClick={() => {
                               console.log("click");
-                              return handleRevokeKey(key?.oe || "");
+                              return handleRevokeKey(key.id);
                             }}
                           >
                             <Trash2 className="h-4 w-4" />
