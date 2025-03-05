@@ -42,13 +42,6 @@ export interface Task {
   minimum_reputation_score?: number; // Optional minimum reputation score required for the task
 }
 
-export interface Token {
-  created_at: string; // Creation date of the token
-  name: string; // Name of the token
-  token_last_4: string; // Last 4 characters of the token
-  id: number; // Unique identifier of the token
-}
-
 // Create an API client for the credentials API
 const credentialsApi = axios.create({
   baseURL: config.ATOMA_CREDENTIALS_URL,

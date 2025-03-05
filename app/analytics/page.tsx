@@ -1,28 +1,37 @@
 "use client"
 
-import { useState } from "react"
-import { AreaCharts } from "@/components/analytics/area-charts"
-import { ModelCharts } from "@/components/analytics/model-charts"
-import { UsageHistory } from "@/components/analytics/usage-history"
-import { BackgroundGrid } from "@/components/background-grid"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { useEffect, useState } from "react";
+import { AreaCharts } from "@/components/analytics/area-charts";
+import { ModelCharts } from "@/components/analytics/model-charts";
+import { UsageHistory } from "@/components/analytics/usage-history";
+import { BackgroundGrid } from "@/components/background-grid";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { listApiKeys, Token } from "@/lib/atoma";
 
 const timeFrames = [
   { value: "24h", label: "24 hours" },
   { value: "7d", label: "7 days" },
   { value: "30d", label: "30 days" },
-]
+];
 
 const apiKeys = [
   { value: "key1", label: "API Key 1 - Production" },
   { value: "key2", label: "API Key 2 - Development" },
   { value: "key3", label: "API Key 3 - Testing" },
-]
+];
 
 export default function AnalyticsPage() {
-  const [selectedTimeFrame, setSelectedTimeFrame] = useState("24h")
-  const [selectedApiKey, setSelectedApiKey] = useState("key1")
+  const [selectedTimeFrame, setSelectedTimeFrame] = useState("24h");
+  const [selectedApiKey, setSelectedApiKey] = useState("key1");
+  const [apiKeys, setApiKeys] = useState<Token[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const keys = await listApiKeys();
+      setApiKeys(keys);
+    })();
+  }, []);
 
   return (
     <div className="relative min-h-screen w-full">
@@ -44,8 +53,8 @@ export default function AnalyticsPage() {
               </SelectTrigger>
               <SelectContent>
                 {apiKeys.map((key) => (
-                  <SelectItem key={key.value} value={key.value}>
-                    {key.label}
+                  <SelectItem key={key.id} value={`${key.id}`}>
+                    {key.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -55,7 +64,7 @@ export default function AnalyticsPage() {
               type="single"
               value={selectedTimeFrame}
               onValueChange={(value) => {
-                if (value) setSelectedTimeFrame(value)
+                if (value) setSelectedTimeFrame(value);
               }}
               className="justify-start"
             >
@@ -78,6 +87,6 @@ export default function AnalyticsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 

@@ -3,6 +3,7 @@ import { Transaction } from "@mysten/sui/transactions";
 import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { WalletAccount } from "@mysten/wallet-standard";
 import { LOCAL_STORAGE_ACCESS_TOKEN } from "./local_storage_consts";
+import type { Token } from "./api";
 
 const proxy_url = process.env.NEXT_PUBLIC_PROXY_URL;
 const USDC_TYPE = process.env.NEXT_PUBLIC_USDC_TYPE;
@@ -19,6 +20,13 @@ export enum ModelModality {
   ChatCompletions = "Chat Completions",
   ImagesGenerations = "Images Generations",
   Embeddings = "Embeddings",
+}
+
+export interface Token {
+  created_at: string; // Creation date of the token
+  name: string; // Name of the token
+  token_last_4: string; // Last 4 characters of the token
+  id: number; // Unique identifier of the token
 }
 
 export interface Task {
@@ -166,7 +174,7 @@ export const revokeApiToken = async (api_token: string): Promise<void> => {
   return await request({ path: "revoke_api_token", post: true, body: { api_token }, use_auth: true });
 };
 
-export const listApiKeys = async (): Promise<string[]> => {
+export const listApiKeys = async (): Promise<Token[]> => {
   return await request({ path: "api_tokens", use_auth: true });
 };
 
