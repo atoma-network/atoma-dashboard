@@ -1,5 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useState } from "react";
+import { getAllStacks, getAllTastks as getAllTasks, getTasks } from "@/lib/atoma";
 
 const usageData = [
   {
@@ -50,9 +52,43 @@ const usageData = [
     tokens: "0",
     cost: "$0.00",
   },
-]
+];
+
+interface IUsageHistory {
+  id: string;
+  date: string;
+  tokens: number;
+  used_tokens: number;
+  cost: number;
+  model: string;
+}
 
 export function UsageHistory() {
+  const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      let stacksPromise = getAllStacks();
+      let tasksPromise = getAllTasks();
+      let [stacks, tasks] = await Promise.all([stacksPromise, tasksPromise]);
+      console.log("stacks", stacks);
+      console.log("tasks", tasks);
+      setUsageHistory(
+        stacks
+          .sort(([, timestamp0], [, timestamp1]) => (timestamp0 < timestamp1 ? 1 : timestamp0 > timestamp1 ? -1 : 0))
+          .map(([stack, timestamp]) => {
+            return {
+              id: stack.stack_id,
+              date: new Date(timestamp).toLocaleDateString(),
+              tokens: stack.num_compute_units,
+              used_tokens: stack.already_computed_units,
+              cost: (stack.num_compute_units / 1000000) * (stack.price_per_one_million_compute_units / 1000000),
+              model: tasks.find((task) => task[0].task_small_id === stack.task_small_id)?.[0].model_name || "Unknown",
+            };
+          })
+      );
+    })();
+  }, []);
   return (
     <Card>
       <CardHeader>
@@ -69,7 +105,7 @@ export function UsageHistory() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {usageData.map((row, index) => (
+            {usageHistory.map((row, index) => (
               <TableRow key={index}>
                 <TableCell>{row.date}</TableCell>
                 <TableCell className="font-mono text-sm">{row.model}</TableCell>
@@ -81,6 +117,6 @@ export function UsageHistory() {
         </Table>
       </CardContent>
     </Card>
-  )
+  );
 }
 
