@@ -17,47 +17,43 @@ import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import AuthForm from "@/components/AuthForm"
-import Modal from "@/components/Modal"
-import { store } from "@/lib/store";
+import Modal from "@/components/Modal";
+import { loggedIn } from "@/lib/atoma";
+import { LOCAL_STORAGE_ACCESS_TOKEN } from "@/lib/local_storage_consts";
 
-export function TopNav() { 
-  const pathname = usePathname()
-  const pathSegments = pathname.split("/").filter(Boolean)
-  const { settings } = useSettings()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [showAuthForm, setShowAuthForm] = useState(false)
-  const [authType, setAuthType] = useState("login")
-  const [username,setUsername]= useState('user')
+export function TopNav() {
+  const pathname = usePathname();
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const { settings } = useSettings();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuthForm, setShowAuthForm] = useState(false);
+  const [authType, setAuthType] = useState("login");
+  const [username, setUsername] = useState("user");
   useEffect(() => {
-
-    const token = sessionStorage.getItem('atoma_access_token')
-    setIsAuthenticated(!!token) 
- 
-  }, [])
+    setIsAuthenticated(loggedIn());
+  }, []);
 
   const handleAuth = (type: string) => {
-    setAuthType(type)
-    setShowAuthForm(true)
-  }
+    setAuthType(type);
+    setShowAuthForm(true);
+  };
 
   const closeAuthForm = () => {
-    setShowAuthForm(false)
-  }
+    setShowAuthForm(false);
+  };
 
- useEffect(()=>{
-  let accessToken = sessionStorage.getItem('atoma_access_token')
-   if(accessToken){
-    (async()=>{
-    try {
-      let res = await api.get('/user_profile')
-      sessionStorage.setItem('atoma_username',res.data.username);
-      setUsername(res.data.username)
-    } catch (error) {
-      console.log(error)
+  useEffect(() => {
+    if (loggedIn()) {
+      (async () => {
+        try {
+          let res = await api.get("/user_profile");
+          setUsername(res.data.username);
+        } catch (error) {
+          console.log(error);
+        }
+      })();
     }
-    })()
-   }
- },[])
+  }, []);
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
       <div className="container flex h-16 items-center justify-end pl-1 pr-4">
@@ -89,7 +85,6 @@ export function TopNav() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{username.toUpperCase()}</p>
-                   
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -102,12 +97,12 @@ export function TopNav() {
                     <ThemeToggle />
                   </div>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {
-                  sessionStorage.removeItem("atoma_access_token"); // Clear token on logout
-                  sessionStorage.removeItem("atoma_refresh_token");
-                  store.setState({ loggedIn: false });
-                  setIsAuthenticated(false); // Update authentication state
-                }}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
+                    setIsAuthenticated(false); // Update authentication state
+                  }}
+                >
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -119,6 +114,6 @@ export function TopNav() {
         <AuthForm type={authType} onClose={closeAuthForm} />
       </Modal>
     </header>
-  )
+  );
 }
 

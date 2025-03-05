@@ -17,9 +17,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { store } from "@/lib/store";
+import { loggedIn } from "@/lib/atoma";
 
-const username = sessionStorage.getItem("atoma_username") || "";
 interface ApiKey {
   name: string;
   key: string;
@@ -41,7 +40,7 @@ export function ApiKeyCard() {
   const [copied, setCopied] = useState(false);
 
   const updateApiTokens = async () => {
-    if (!store.getState().loggedIn) {
+    if (!loggedIn()) {
       setApiKeys([]);
       return;
     }
@@ -53,7 +52,7 @@ export function ApiKeyCard() {
           key: `sk-...${token.token_last_4}`,
           created: new Date(token.created_at).toLocaleDateString(),
           projectAccess: "all",
-          createdBy: username,
+          createdBy: "-",
           permissions: "all",
           lastUsed: "_",
           id: token.id,
@@ -65,10 +64,6 @@ export function ApiKeyCard() {
 
   useEffect(() => {
     updateApiTokens();
-    store.on("change", updateApiTokens);
-    return () => {
-      store.off("change", updateApiTokens);
-    };
   }, [newGeneratedKey]);
 
   const handleRevokeKey = async (key: number) => {
@@ -92,20 +87,6 @@ export function ApiKeyCard() {
     } catch (error) {
       alert("error in creating key, ensure login and try again");
     }
-
-    // // Add new key to list
-    // const newKey: ApiKey = {
-    //   name: newKeyName,
-    //   key: `sk-...${generatedKey.slice(-4)}`,
-    //   created: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    //   lastUsed: "Never",
-    //   projectAccess: "Default project",
-    //   createdBy: sessionStorage.getItem('atoma_username')|| '',
-    //   permissions: "All",
-    // }
-
-    // setApiKeys([newKey, ...apiKeys])
-    // setNewKeyName("")
   };
 
   const copyToClipboard = () => {
@@ -119,7 +100,7 @@ export function ApiKeyCard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between p-6">
           <h2 className="text-lg font-semibold text-purple-600">API keys</h2>
-          <Button onClick={() => setIsCreateDialogOpen(true)} disabled={!store.getState().loggedIn}>
+          <Button onClick={() => setIsCreateDialogOpen(true)} disabled={!loggedIn()}>
             <Plus className="mr-2 h-4 w-4" />
             Create new API key
           </Button>

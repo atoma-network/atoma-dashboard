@@ -2,13 +2,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import api, { ALL_STACKS, BALANCE } from "@/lib/api";
-import { store } from "@/lib/store";
+import { loggedIn } from "@/lib/atoma";
 
-export function CreditBalanceCard() {
+export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => void }) {
   const [balance, setBalance] = useState("-");
+
   useEffect(() => {
     const updateBalance = async () => {
-      if (!store.getState().loggedIn) {
+      if (!loggedIn()) {
         setBalance("-");
         return;
       }
@@ -22,16 +23,14 @@ export function CreditBalanceCard() {
           0
         );
         let balance = (balanceRes?.data + partialBalance) / 1000000;
+        console.log("balance", balanceRes?.data);
+        console.log("partialBalance", partialBalance);
         setBalance(isNaN(balance) ? "0" : balance.toFixed(2));
       } catch (error) {
         console.error("Failed to fetch balance", error);
       }
     };
     updateBalance();
-    store.on("change", updateBalance);
-    return () => {
-      store.off("change", updateBalance);
-    };
   }, []);
   return (
     <Card className="h-[280px] flex flex-col">
@@ -43,7 +42,11 @@ export function CreditBalanceCard() {
           <div className="text-5xl font-bold text-foreground">${balance}</div>
           <div className="text-sm text-muted-foreground mt-2">Available Credits</div>
         </div>
-        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-base" disabled={!store.getState().loggedIn}>
+        <Button
+          className="w-full bg-purple-600 hover:bg-purple-700 text-base"
+          disabled={!loggedIn()}
+          onClick={handleAddFunds}
+        >
           Add Funds
         </Button>
       </CardContent>

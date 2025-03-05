@@ -3,7 +3,7 @@ import api from "@/lib/api";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { store } from "@/lib/store";
+import { LOCAL_STORAGE_ACCESS_TOKEN } from "@/lib/local_storage_consts";
 
 interface AuthFormProps {
   type: "login" | "register";
@@ -27,9 +27,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
       console.log(response.status, response.data);
 
       // Save access token and refresh token to session storage
-      sessionStorage.setItem("atoma_access_token", response.data.access_token);
-      sessionStorage.setItem("atoma_refresh_token", response.data.refresh_token);
-      store.setState({ loggedIn: true });
+      localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN, response.data.access_token);
 
       toastRef.current?.show({
         severity: "success",

@@ -1,5 +1,6 @@
 import axios from "axios";
 import config from "../config/config";
+import { LOCAL_STORAGE_ACCESS_TOKEN } from "./local_storage_consts";
 
 const LATENCY = (hours: number) => `/latency?hours=${hours}`;
 const COMPUTE_UNITS_PROCESSED = (hours: number) => `/compute_units_processed?hours=${hours}`;
@@ -9,9 +10,11 @@ export const BALANCE = "/balance";
 export const COMPUTE_UNITS_PROCESSED_168 = COMPUTE_UNITS_PROCESSED(168);
 export const GENERATE_API_TOKEN = "/generate_api_token";
 export const GET_NODES_DISTRIBUTION = "/get_nodes_distribution";
+export const GET_SUI_ADDRESS = "/get_sui_address";
 export const LATENCY_168 = LATENCY(168);
 export const SUBSCRIPTIONS = "/subscriptions";
 export const TASKS = "/tasks";
+export const USDC_PAYMENT = "/usdc_payment";
 
 export enum ModelModality {
   ChatCompletions = "Chat Completions",
@@ -68,7 +71,7 @@ const atomaApi = axios.create({
 const addAuthInterceptor = (apiClient: any) => {
   apiClient.interceptors.request.use(
     (config: any) => {
-      const token = sessionStorage.getItem("atoma_access_token");
+      const token = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN);
       if (token) {
         config.headers["Authorization"] = `Bearer ${token}`;
       }
@@ -120,4 +123,8 @@ export default {
       return credentialsApi.delete(url, config);
     }
   },
+};
+
+export const proofRequest = async (signature: string, walletAddress: string): Promise<void> => {
+  return await credentialsApi.post("/update_sui_address", { signature, address: walletAddress });
 };
