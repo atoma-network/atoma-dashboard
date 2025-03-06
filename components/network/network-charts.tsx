@@ -122,7 +122,7 @@ const chartConfigs = [
     tooltip: "Tokens generated across models",
   },
   {
-    title: "TTFT",
+    title: "Time To First Token (TTFT)",
     special: "latency",
     data: ttftData,
     id: "ttft",
@@ -131,7 +131,7 @@ const chartConfigs = [
     valueFormatter: (value: number) => `${value}ms`,
   },
   {
-    title: "ITL",
+    title: "Inter Token Latency (ITL)",
     special: "latency",
     data: itlData,
     id: "itl",
