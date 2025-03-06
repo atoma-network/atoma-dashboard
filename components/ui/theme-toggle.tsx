@@ -36,13 +36,12 @@ export function ThemeToggle() {
       onClick={handleToggle}
       className={cn(
         "relative h-8 w-14 rounded-full transition-colors duration-300",
-        "bg-white dark:bg-slate-800",
-        "shadow-sm dark:shadow-slate-700/30",
-        "border border-slate-200 dark:border-slate-700",
-        "hover:bg-slate-50 dark:hover:bg-slate-700",
+        "bg-white dark:bg-darkMode",
+        "shadow-sm dark:shadow-darkMode",
+        "border border-slate-200 dark:border-darkMode",
+        "hover:bg-slate-50 dark:hover:bg-darkMode",
       )}
     >
-      {/* Sliding Circle */}
       <div
         className={cn(
           "absolute top-1 left-1 h-6 w-6 rounded-full bg-white shadow-sm transition-transform duration-300",

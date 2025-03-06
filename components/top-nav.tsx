@@ -55,15 +55,15 @@ export function TopNav() {
     }
   }, []);
   return (
-    <header className="sticky top-0 z-40 border-b bg-background">
+    <header className="sticky top-0 z-40 border-b bg-background dark:bg-darkMode">
       <div className="container flex h-16 items-center justify-end pl-1 pr-4">
         <div className="flex items-center gap-4">
           {!isAuthenticated ? (
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => handleAuth("login")} className="w-24">
+              <Button variant="outline" onClick={() => handleAuth("login")} className="w-24 dark:bg-darkMode dark:border-gray-300">
                 Login
               </Button>
-              <Button onClick={() => handleAuth("register")} className="w-24">
+              <Button onClick={() => handleAuth("register")} className="w-24 dark:text-darkMode dark:bg-white">
                 Register
               </Button>
             </div>
@@ -111,7 +111,7 @@ export function TopNav() {
         </div>
       </div>
       <Modal isOpen={showAuthForm} onClose={closeAuthForm}>
-        <AuthForm type={authType} onClose={closeAuthForm} />
+        <AuthForm type={authType as 'login'| 'register'} onClose={closeAuthForm} />
       </Modal>
     </header>
   );

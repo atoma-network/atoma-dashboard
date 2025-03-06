@@ -12,13 +12,15 @@ import { ApiUsageDialog } from "@/components/api-usage-dialog";
 import { ParametersSidebar } from "@/components/parameters-sidebar";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
-import { Loader2 } from "lucide-react";
+import {Loader2 } from "lucide-react";
 import {
   renderModelListBasedOnTabs,
   RenderRequestBodyBasedOnEndPoint,
   parseOutputBasedOnEndpoint,
 } from "../../utils/utils";
 import config from "@/config/config";
+import LoadingCircle from "../../components/LoadingCircle";
+
 export type ModelCategories = "chat" | "embeddings" | "images";
 
 interface Parameters {
@@ -124,12 +126,12 @@ export default function PlaygroundPage() {
               <div className="flex w-full justify-between p-2">
                 {/* Tabs Section */}
                 <div className="flex gap-x-4">
-                  {["chat", "embeddings", "images"].map((tab) => (
+                  {["chat"].map((tab) => (
                     <Button
                       key={tab}
                       variant="ghost"
                       className={`px-4 py-2 text-sm font-medium ${
-                        selectedTab === tab ? "bg-purple-100 text-purple-700" : "text-gray-500"
+                        selectedTab === tab ? "bg-secondary text-secondary-foreground" : "text-gray-500"
                       }`}
                       onClick={() => {
                         setSelectedTab(tab as ModelCategories);
@@ -155,7 +157,7 @@ export default function PlaygroundPage() {
                     key={model.modelName}
                     variant="ghost"
                     className={`mr-2 px-3 py-1 rounded-lg ${
-                      selectedModel === model.model ? "bg-purple-100 text-purple-700" : "text-gray-700"
+                      selectedModel === model.model ? "bg-secondary text-secondary-foreground" : "text-gray-700"
                     }`}
                     onClick={() => setSelectedModel(model.model.trim())}
                   >
@@ -168,18 +170,18 @@ export default function PlaygroundPage() {
 
             {/* Chat Section */}
             <div className="flex-1 flex flex-col overflow-auto">
-              <div
-                className={`flex-1 p-4 flex ${isLoading ? "items-center justify-center" : "items-start justify-start"}`}
-              >
-                {isLoading ? (
-                  <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
+              <div className="flex-1 p-4">
+                {(!response.response && !isLoading) || isLoading ? (
+                  <div className="h-full flex items-center justify-center">
+                    <LoadingCircle isSpinning={isLoading} />
+                  </div>
                 ) : response.error ? (
                   <div className="w-full max-w-md p-4 border border-red-200 bg-red-50 text-red-400 rounded-md">
                     <p className="font-semibold uppercase">Error</p>
                     <p>{response.response}</p>
                   </div>
                 ) : (
-                  <p className="   break-words self-start w-[90%] ">{response.response}</p>
+                  <p className="break-words w-[90%]">{response.response}</p>
                 )}
               </div>
               <div className="border-t p-4 bg-background/50 backdrop-blur-md shadow-md rounded-b-lg">
@@ -188,12 +190,12 @@ export default function PlaygroundPage() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type your message..."
-                    className="flex-1 px-4 py-2 rounded-lg bg-background/80 border border-purple-500 focus:ring-2 focus:ring-purple-600 transition"
+                    className="flex-1 px-4 py-2 rounded-lg bg-background/80 border border-primary focus:ring-2 focus:ring-primary transition"
                   />
                   <Button
                     type="submit"
                     size="icon"
-                    className="bg-purple-600 hover:bg-purple-700 transition-all duration-200 rounded-lg shadow-md"
+                    className="bg-primary hover:bg-primary transition-all duration-200 rounded-lg shadow-md"
                   >
                     <Send className="h-5 w-5" />
                     <span className="sr-only">Send message</span>

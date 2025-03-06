@@ -61,7 +61,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
   };
 
   return (
-    <div className="p-8  w-full max-w-md mx-auto dark:bg-gray-950">
+    <div className="p-8  w-full max-w-md mx-auto dark:bg-darkMode">
       <Toast ref={toastRef} />
 
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-50">
@@ -76,7 +76,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-inherit"
+            className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
           />
         </div>
 
@@ -88,13 +88,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="p-inputtext-lg w-full border border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-inherit"
+            className="p-inputtext-lg w-full border border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
           />
         </div>
 
         {loginType === "login" && (
           <div className="flex justify-end">
-            <a href="#" className="text-sm text-purple-600 hover:text-purple-800">
+            <a href="#" className="text-sm text-primary hover:text-primary">
               Forgot password?
             </a>
           </div>
@@ -103,21 +103,21 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
         <Button
           type="submit"
           label={isLoading ? "please wait ..." : loginType === "login" ? "Sign In" : "Create Account"}
-          className="p-button-lg p-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md transition-colors duration-200"
+          className="p-button-lg p-4 bg-primary hover:bg-primary text-white font-medium rounded-md transition-colors duration-200"
         />
 
         <div className="text-center text-sm text-gray-600 mt-4">
           {loginType === "login" ? (
             <p>
               Don't have an account?{" "}
-              <a href="#" className="text-purple-600 hover:underline" onClick={() => setLoginType("register")}>
+              <a href="#" className="text-primary hover:underline" onClick={() => setLoginType("register")}>
                 Sign up
               </a>
             </p>
           ) : (
             <p>
               Already have an account?{" "}
-              <a href="#" className="text-purple-600 hover:underline" onClick={() => setLoginType("login")}>
+              <a href="#" className="text-primary hover:underline" onClick={() => setLoginType("login")}>
                 Sign in
               </a>
             </p>

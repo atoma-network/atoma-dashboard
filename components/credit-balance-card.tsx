@@ -35,7 +35,7 @@ export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => vo
   return (
     <Card className="h-[280px] flex flex-col">
       <CardHeader>
-        <CardTitle className="text-purple-600">Credit Balance</CardTitle>
+        <CardTitle className="bg-primary-foreground dark:bg-darkMode">Credit Balance</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col justify-between">
         <div className="flex flex-col items-center justify-center flex-1">
@@ -43,7 +43,7 @@ export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => vo
           <div className="text-sm text-muted-foreground mt-2">Available Credits</div>
         </div>
         <Button
-          className="w-full bg-purple-600 hover:bg-purple-700 text-base"
+          className="w-full bg-primary hover:bg-secondary-foreground text-base"
           disabled={!loggedIn()}
           onClick={handleAddFunds}
         >

@@ -31,7 +31,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-      <div ref={modalRef} className="bg-white dark:bg-gray-950 dark:border-white border rounded-lg shadow-lg p-6 relative">
+      <div ref={modalRef} className="bg-white dark:bg-darkMode dark:border-white border rounded-lg shadow-lg p-6 relative">
         <button className="absolute top-2 right-2" onClick={onClose}>
           &times;
         </button>

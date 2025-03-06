@@ -188,7 +188,7 @@ function InnerDashboardPage() {
         return (
           <Button
             onClick={() => setFundsStep("amount")}
-            className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+            className="w-full justify-start bg-white dark:bg-darkMode text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-darkMode"
           >
             <Image src="/usdc.svg" alt="USDC" width={24} height={24} className="mr-2" />
             Pay with USDC
@@ -230,7 +230,7 @@ function InnerDashboardPage() {
           return (
             <Button
               onClick={() => (walletConfirmed ? handleUSDCPayment(amount) : handleConfirmWallet())}
-              className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+              className="w-full justify-start bg-white dark:bg-darkMode text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
               disabled={false}
             >
               {walletConfirmed ? "Pay with USDC" : "Confirm Account"}
@@ -240,7 +240,7 @@ function InnerDashboardPage() {
           return (
             <ConnectModal
               trigger={
-                <Button className="w-full justify-start bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
+                <Button className="w-full justify-start bg-white dark:bg-darkMode text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
                   Connect sui wallet
                 </Button>
               }

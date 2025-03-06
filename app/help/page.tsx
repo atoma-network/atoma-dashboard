@@ -5,7 +5,7 @@ const Page = () => {
   const [showTicketForm, setShowTicketForm] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-gray-800 text-neutral-900 dark:text-white">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-darkMode text-neutral-900 dark:text-white">
       {/* Header */}
       <header className="w-full max-w-5xl mx-auto px-6 py-8">
         <h1 className="text-3xl font-light tracking-tight">Atoma Help</h1>
@@ -26,19 +26,19 @@ const Page = () => {
           <div className="flex flex-wrap gap-4 mb-16">
             <button
               onClick={() => setShowTicketForm(!showTicketForm)}
-              className="px-8 py-3 bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors"
+              className="px-8 py-3 bg-neutral-100 dark:bg-darkMode hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors"
             >
               {showTicketForm ? "Hide Ticket Form" : "Open a Ticket"}
             </button>
             <a
               href="#faq"
-              className="px-8 py-3 bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors"
+              className="px-8 py-3 bg-neutral-100 dark:bg-darkMode hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors"
             >
               Browse FAQ
             </a>
             <a
               href="#contact"
-              className="px-8 py-3 bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors"
+              className="px-8 py-3 bg-neutral-100 dark:bg-darkMode hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors"
             >
               Contact Support
             </a>
@@ -46,7 +46,7 @@ const Page = () => {
 
           {/* Ticket Form - Conditionally Rendered */}
           {showTicketForm && (
-            <div className="w-full p-6 bg-neutral-50 dark:bg-neutral-900 rounded-xl mb-16">
+            <div className="w-full p-6 bg-neutral-50 dark:bg-darkMode rounded-xl mb-16">
               <h3 className="text-xl font-medium mb-6">
                 Create Support Ticket
               </h3>
@@ -61,7 +61,7 @@ const Page = () => {
                   <input
                     type="text"
                     id="subject"
-                    className="w-full p-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+                    className="w-full p-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-darkMode"
                     placeholder="Brief description of your issue"
                   />
                 </div>
@@ -74,7 +74,7 @@ const Page = () => {
                   </label>
                   <select
                     id="category"
-                    className="w-full p-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+                    className="w-full p-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-darkMode"
                   >
                     <option>Technical Issue</option>
                     <option>Billing Question</option>
@@ -92,7 +92,7 @@ const Page = () => {
                   <textarea
                     id="description"
                     rows={4}
-                    className="w-full p-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+                    className="w-full p-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-darkMode"
                     placeholder="Please provide details about your issue"
                   />
                 </div>

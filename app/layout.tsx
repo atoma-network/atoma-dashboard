@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SettingsProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitions={false}>
             <TooltipProvider delayDuration={0}>
-              <div className="min-h-screen flex bg-background">
+              <div className="min-h-screen flex bg-background dark:bg-darkMode">
                 <Sidebar />
                 <div className="flex-1">
                   <TopNav />

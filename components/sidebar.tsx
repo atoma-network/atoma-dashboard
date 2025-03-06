@@ -28,7 +28,7 @@ const navigation = [
   { name: "Analytics", href: "/analytics", icon: TrendingUp },
   { name: "Docs", href: "https://docs.atoma.network/cloud-api-reference/get-started", icon: FileText },
   { name: "Settings", href: "/settings", icon: Settings },
-  { name: "Help", href: "/help", icon: HelpCircle },
+  { name: "Help", href: "https://docs.google.com/forms/d/e/1FAIpQLSeE-AV0oEfo6YGtzo0Ts_vvnm8Crtf1kVhdBtANulH11c0OTA/viewform", icon: HelpCircle },
 ]
 
 // Remove or empty the bottomNavigation array since we moved its items
@@ -50,8 +50,8 @@ export function Sidebar() {
             className={cn(
               "flex items-center rounded-md px-4 py-3 text-base font-medium transition-colors",
               pathname === item.href
-                ? "bg-secondary text-secondary-foreground"
-                : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground",
+                ? "bg-secondary dark:bg-[#27272a] text-secondary-foreground"
+                : "text-muted-foreground hover:bg-secondary hover:dark:bg-[#27272a] hover:text-secondary-foreground",
               isCollapsed && "justify-center px-3",
             )}
           >
@@ -64,8 +64,8 @@ export function Sidebar() {
             className={cn(
               "flex items-center rounded-md px-4 py-3 text-base font-medium transition-colors",
               pathname === item.href
-                ? "bg-secondary text-secondary-foreground"
-                : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground",
+                ? "bg-secondary dark:bg-[#27272a] text-secondary-foreground"
+                : "text-muted-foreground hover:bg-secondary hover:dark:bg-[#27272a] hover:text-secondary-foreground",
               isCollapsed && "justify-center px-3",
             )}
           >
@@ -99,11 +99,11 @@ export function Sidebar() {
             isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           )}
         >
-          <div className="border-b border-border">
-            <div className={cn("flex h-16 items-center gap-2 px-4", isCollapsed && "justify-center px-2")}>
+          <div className="border-b border-border dark:bg-darkMode">
+            <div className={cn("flex h-16 items-center gap-2 px-4 dark:bg-darkMode", isCollapsed && "justify-center px-2")}>
               {!isCollapsed && (
                 <Link href="/" className="flex items-center font-semibold">
-                  <Image alt="atoma logo" src="/atomaCloud.svg" height={140} width={140} />
+                  <Image alt="atoma logo" src="/atomaCloud.svg" height={140} width={140}  className="b"/>
                 </Link>
               )}
               <Button
@@ -117,8 +117,8 @@ export function Sidebar() {
               </Button>
             </div>
           </div>
-          <div className="flex-1 overflow-auto">
-            <nav className="flex-1 space-y-2 px-2 py-4">
+          <div className="flex-1 overflow-auto dark:bg-darkMode ">
+            <nav className="flex-1 space-y-2 px-2 py-4 dark:text-[#8f8f98]">
               {navigation.map((item) => (
                 <NavItem key={item.name} item={item} />
               ))}
