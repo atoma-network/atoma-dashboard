@@ -11,7 +11,8 @@ interface AuthFormProps {
 }
 
 const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const toastRef = useRef<Toast>(null);
@@ -23,9 +24,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
       setIsLoading(true);
       let response;
       if (loginType === "login") {
-        response = await api.post("/login", { email: username, password });
+        response = await api.post("/login", { email: email, password });
       } else {
-        response = await api.post("/register", { user_profile: { email: username, name: username }, password });
+        response = await api.post("/register", { user_profile: { email, name }, password });
       }
       console.log(response.status, response.data);
 
@@ -73,15 +74,27 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
 
       <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Username</label>
+          <label className="text-sm font-medium text-gray-700">Email</label>
           <InputText
-            placeholder="Enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
             className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
           />
         </div>
+        {loginType === "register" && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Name</label>
+            <InputText
+              placeholder="Enter your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
+            />
+          </div>
+        )}
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">Password</label>
