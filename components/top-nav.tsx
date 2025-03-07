@@ -47,7 +47,7 @@ export function TopNav() {
       (async () => {
         try {
           let res = await api.get("/user_profile");
-          setUsername(res.data.username);
+          setUsername(res.data.name);
         } catch (error) {
           console.log(error);
         }

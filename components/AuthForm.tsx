@@ -19,11 +19,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
   const [loginType, setLoginType] = useState<"login" | "register">(type);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const endpoint = loginType === "login" ? "/login" : "/register";
-
     try {
       setIsLoading(true);
-      const response = await api.post(endpoint, { username, password });
+      let response;
+      if (loginType === "login") {
+        response = await api.post("/login", { email: username, password });
+      } else {
+        response = await api.post("/register", { user_profile: { email: username, name: username }, password });
+      }
       console.log(response.status, response.data);
 
       // Save access token and refresh token to session storage

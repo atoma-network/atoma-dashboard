@@ -8,17 +8,21 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { BackgroundGrid } from "@/components/background-grid";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useEffect, useState } from "react";
+import { getUserProfile, saveUserProfile } from "@/lib/atoma";
 
 export default function SettingsPage() {
-  const { settings, updateSettings } = useSettings();
+  const [userProfile, setUserProfile] = useState({ name: "", email: "" });
 
-  const handleSaveAccount = () => {
-    updateSettings({
-      fullName: settings.fullName,
-      email: settings.email,
-      phone: settings.phone,
-      timezone: settings.timezone,
-    });
+  useEffect(() => {
+    (async () => {
+      let profile = await getUserProfile();
+      setUserProfile(profile);
+    })();
+  }, []);
+
+  const handleSaveAccount = async () => {
+    await saveUserProfile(userProfile);
     toast.success("Account settings saved successfully");
   };
 
@@ -41,8 +45,8 @@ export default function SettingsPage() {
                 <Label htmlFor="full-name">Name</Label>
                 <Input
                   id="full-name"
-                  defaultValue="Marcus"
-                  onChange={(e) => updateSettings({ fullName: e.target.value })}
+                  defaultValue={userProfile.name}
+                  onChange={(e) => setUserProfile({ ...userProfile, name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -50,8 +54,8 @@ export default function SettingsPage() {
                 <Input
                   id="email"
                   type="email"
-                  defaultValue="fishon@gmail.com"
-                  onChange={(e) => updateSettings({ email: e.target.value })}
+                  defaultValue={userProfile.email}
+                  onChange={(e) => setUserProfile({ ...userProfile, email: e.target.value })}
                 />
               </div>
               <div className="space-y-2">

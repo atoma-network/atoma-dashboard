@@ -100,7 +100,8 @@ export interface LatencyResponse {
 }
 
 export interface UserProfile {
-  username: string;
+  email: string;
+  name: string;
 }
 
 interface RequestOptions {
@@ -226,6 +227,10 @@ export const getAllStacks = async (): Promise<[Stack, string][]> => {
 
 export const getUserProfile = async (): Promise<UserProfile> => {
   return await request({ path: "user_profile", use_auth: true });
+};
+
+export const saveUserProfile = async (profile: UserProfile): Promise<void> => {
+  return await request({ path: "set_user_profile", post: true, use_auth: true, body: profile });
 };
 
 export const googleOAuth = async (idToken: string): Promise<AuthResponse> => {
