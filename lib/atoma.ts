@@ -2,7 +2,6 @@ import type { SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { WalletAccount } from "@mysten/wallet-standard";
-import { LOCAL_STORAGE_ACCESS_TOKEN } from "./local_storage_consts";
 import type { Token } from "./api";
 
 const proxy_url = process.env.NEXT_PUBLIC_PROXY_URL;
@@ -125,8 +124,16 @@ const request = async <T>({ path, post, body, use_auth }: RequestOptions): Promi
     options.body = JSON.stringify(body);
   }
   if (use_auth) {
+    let userSettings = localStorage.getItem("userSettings");
+    if (userSettings == null) {
+      throw new Error("No user settings");
+    }
+    let token = JSON.parse(userSettings).accessToken;
+    if (token == null) {
+      throw new Error("No access token");
+    }
     options.headers = {
-      Authorization: `Bearer ${localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN)}`,
+      Authorization: `Bearer ${token}`,
       ...options.headers,
     };
   }
@@ -137,7 +144,8 @@ const request = async <T>({ path, post, body, use_auth }: RequestOptions): Promi
   return await fetch(`${proxy_url}/${path}`, options).then((response) => {
     if (!response.ok) {
       if (response.status === 401) {
-        localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
+        // TODO: add automatic logout when the user is unauthorized
+        // localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
       }
       throw response;
     }
@@ -289,8 +297,4 @@ export const payUSDC = async (
     transaction: tx,
     account,
   });
-};
-
-export const loggedIn = (): boolean => {
-  return !!localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN);
 };

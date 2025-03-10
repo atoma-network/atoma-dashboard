@@ -29,12 +29,11 @@ import {
   WalletProvider,
 } from "@mysten/dapp-kit";
 import { getFullnodeUrl } from "@mysten/sui/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import "@mysten/dapp-kit/dist/index.css";
 import { payUSDC } from "@/lib/utils";
-import { getSuiAddress, loggedIn, proofRequest, usdcPayment } from "@/lib/atoma";
-import { LOCAL_STORAGE_ACCESS_TOKEN } from "@/lib/local_storage_consts";
+import { getSuiAddress, proofRequest, usdcPayment } from "@/lib/atoma";
+import { useSettings } from "@/contexts/settings-context";
 
 const { networkConfig } = createNetworkConfig({
   testnet: { url: getFullnodeUrl("testnet") },
@@ -43,7 +42,7 @@ const { networkConfig } = createNetworkConfig({
 
 const zkLogin = { isEnabled: false }; // TODO: Enable zkLogin
 
-function InnerDashboardPage() {
+export default function DashboardPage() {
   const [showAddFunds, setShowAddFunds] = useState(false);
   const [fundsStep, setFundsStep] = useState("choose");
   const [amount, setAmount] = useState<number>(10);
@@ -54,10 +53,11 @@ function InnerDashboardPage() {
   const suiClient = useSuiClient();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
+  const { settings } = useSettings();
 
   useEffect(() => {
     (async () => {
-      if (!loggedIn()) {
+      if (!settings.loggedIn) {
         return;
       }
       const suiAddress = await getSuiAddress();
@@ -146,7 +146,7 @@ function InnerDashboardPage() {
     if (account == null) {
       return;
     }
-    const access_token = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN);
+    const access_token = settings.accessToken;
     let user_id;
     if (access_token) {
       const base64Url = access_token.split(".")[1];
@@ -284,19 +284,5 @@ function InnerDashboardPage() {
         </DialogContent>
       </Dialog>
     </div>
-  );
-}
-
-const queryClient = new QueryClient();
-
-export default function DashboardPage() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
-        <WalletProvider autoConnect={true}>
-          <InnerDashboardPage />
-        </WalletProvider>
-      </SuiClientProvider>
-    </QueryClientProvider>
   );
 }

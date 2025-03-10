@@ -17,7 +17,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { loggedIn } from "@/lib/atoma";
+import { useSettings } from "@/contexts/settings-context";
 
 interface ApiKey {
   name: string;
@@ -38,9 +38,10 @@ export function ApiKeyCard() {
   const [newKeyName, setNewKeyName] = useState("");
   const [newGeneratedKey, setNewGeneratedKey] = useState("");
   const [copied, setCopied] = useState(false);
+  const { settings } = useSettings();
 
   const updateApiTokens = async () => {
-    if (!loggedIn()) {
+    if (!settings.loggedIn) {
       setApiKeys([]);
       return;
     }
@@ -100,7 +101,7 @@ export function ApiKeyCard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between p-6">
           <h2 className="text-lg font-semibold text-purple-600">API keys</h2>
-          <Button onClick={() => setIsCreateDialogOpen(true)} disabled={!loggedIn()}>
+          <Button onClick={() => setIsCreateDialogOpen(true)} disabled={!settings.loggedIn}>
             <Plus className="mr-2 h-4 w-4" />
             Create new API key
           </Button>

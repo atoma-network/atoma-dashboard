@@ -5,4 +5,4 @@ export const LOCAL_STORAGE_ZKP = "ZKLOGIN-ZKP";
 export const LOCAL_STORAGE_ID_TOKEN = "id_token";
 export const SUI_RPC_URL = process.env.NEXT_PUBLIC_SUI_RPC_URL;
 export const PROVER_URL = process.env.NEXT_PUBLIC_PROVER_URL;
-export const LOCAL_STORAGE_ACCESS_TOKEN = "access_token";
+// export const LOCAL_STORAGE_ACCESS_TOKEN = "access_token";

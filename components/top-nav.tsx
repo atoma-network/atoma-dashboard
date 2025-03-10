@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useSettings } from "@/contexts/settings-context"
-import api from "@/lib/api"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useSettings } from "@/contexts/settings-context";
+import api from "@/lib/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,26 +12,20 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
-import AuthForm from "@/components/AuthForm"
+} from "@/components/ui/dropdown-menu";
+import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import AuthForm from "@/components/AuthForm";
 import Modal from "@/components/Modal";
-import { loggedIn } from "@/lib/atoma";
-import { LOCAL_STORAGE_ACCESS_TOKEN } from "@/lib/local_storage_consts";
 
 export function TopNav() {
   const pathname = usePathname();
   const pathSegments = pathname.split("/").filter(Boolean);
-  const { settings } = useSettings();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { settings, updateSettings } = useSettings();
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authType, setAuthType] = useState("login");
   const [username, setUsername] = useState("user");
-  useEffect(() => {
-    setIsAuthenticated(loggedIn());
-  }, []);
 
   const handleAuth = (type: string) => {
     setAuthType(type);
@@ -43,7 +37,7 @@ export function TopNav() {
   };
 
   useEffect(() => {
-    if (loggedIn()) {
+    if (settings.loggedIn) {
       (async () => {
         try {
           let res = await api.get("/user_profile");
@@ -58,9 +52,13 @@ export function TopNav() {
     <header className="sticky top-0 z-40 border-b bg-background dark:bg-darkMode">
       <div className="container flex h-16 items-center justify-end pl-1 pr-4">
         <div className="flex items-center gap-4">
-          {!isAuthenticated ? (
+          {!settings.loggedIn ? (
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => handleAuth("login")} className="w-24 dark:bg-darkMode dark:border-gray-300">
+              <Button
+                variant="outline"
+                onClick={() => handleAuth("login")}
+                className="w-24 dark:bg-darkMode dark:border-gray-300"
+              >
                 Login
               </Button>
               <Button onClick={() => handleAuth("register")} className="w-24 dark:text-darkMode dark:bg-white">
@@ -99,8 +97,7 @@ export function TopNav() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN);
-                    setIsAuthenticated(false); // Update authentication state
+                    updateSettings({ accessToken: null, loggedIn: false });
                   }}
                 >
                   Log out
@@ -111,9 +108,8 @@ export function TopNav() {
         </div>
       </div>
       <Modal isOpen={showAuthForm} onClose={closeAuthForm}>
-        <AuthForm type={authType as 'login'| 'register'} onClose={closeAuthForm} />
+        <AuthForm type={authType as "login" | "register"} onClose={closeAuthForm} />
       </Modal>
     </header>
   );
 }
-

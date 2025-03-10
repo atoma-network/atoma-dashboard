@@ -1,6 +1,5 @@
 import axios from "axios";
 import config from "../config/config";
-import { LOCAL_STORAGE_ACCESS_TOKEN } from "./local_storage_consts";
 
 const LATENCY = (hours: number) => `/latency?hours=${hours}`;
 const COMPUTE_UNITS_PROCESSED = (hours: number) => `/compute_units_processed?hours=${hours}`;
@@ -64,7 +63,7 @@ const atomaApi = axios.create({
 const addAuthInterceptor = (apiClient: any) => {
   apiClient.interceptors.request.use(
     (config: any) => {
-      const token = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN);
+      const token = JSON.parse(localStorage.getItem("userSettings")).accessToken;
       if (token) {
         config.headers["Authorization"] = `Bearer ${token}`;
       }

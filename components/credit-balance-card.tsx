@@ -2,14 +2,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import api, { ALL_STACKS, BALANCE } from "@/lib/api";
-import { loggedIn } from "@/lib/atoma";
+import { useSettings } from "@/contexts/settings-context";
 
 export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => void }) {
   const [balance, setBalance] = useState("-");
+  const { settings } = useSettings();
 
   useEffect(() => {
     const updateBalance = async () => {
-      if (!loggedIn()) {
+      if (!settings.loggedIn) {
         setBalance("-");
         return;
       }
@@ -44,7 +45,7 @@ export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => vo
         </div>
         <Button
           className="w-full bg-primary hover:bg-secondary-foreground text-base"
-          disabled={!loggedIn()}
+          disabled={!settings.loggedIn}
           onClick={handleAddFunds}
         >
           Add Funds
