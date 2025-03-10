@@ -6,8 +6,16 @@ import { createContext, useContext, useEffect, useState } from "react"
 
 export interface UserSettings {
   loggedIn: boolean;
-  accessToken: string | null;
+  accessToken?: string;
   avatar: string;
+  zkLogin: {
+    isEnabled: boolean;
+    idToken?: string;
+    secretKey?: string;
+    randomness?: string;
+    maxEpoch?: number;
+    zkp?: string;
+  };
   // fullName: string
   // email: string
   // phone: string
@@ -39,7 +47,9 @@ export interface UserSettings {
 
 const defaultSettings: UserSettings = {
   loggedIn: false,
-  accessToken: null,
+  zkLogin: {
+    isEnabled: false,
+  },
   avatar: "/placeholder.svg?height=400&width=400&background=8B5CF6", // Purple
   // fullName: "Dollar Singh",
   // email: "dollar.singh@example.com",
@@ -71,61 +81,70 @@ const defaultSettings: UserSettings = {
 };
 
 interface SettingsContextType {
-  settings: UserSettings
-  updateSettings: (newSettings: Partial<UserSettings>) => void
-  updateNotificationSettings: (settings: Partial<UserSettings["notifications"]>) => void
-  updatePrivacySettings: (settings: Partial<UserSettings["privacy"]>) => void
+  settings: UserSettings;
+  updateSettings: (newSettings: Partial<UserSettings>) => void;
+  updateZkLoginSettings: (newSettings: Partial<UserSettings["zkLogin"]>) => void;
+  updateNotificationSettings: (settings: Partial<UserSettings["notifications"]>) => void;
+  updatePrivacySettings: (settings: Partial<UserSettings["privacy"]>) => void;
 }
 
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<UserSettings>(() => {
     // Try to load settings from localStorage during initialization
     if (typeof window !== "undefined") {
-      const savedSettings = localStorage.getItem("userSettings")
+      const savedSettings = localStorage.getItem("userSettings");
       if (savedSettings) {
-        return JSON.parse(savedSettings)
+        return { ...defaultSettings, ...JSON.parse(savedSettings) };
       }
     }
-    return defaultSettings
-  })
+    return defaultSettings;
+  });
 
   // Save settings to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem("userSettings", JSON.stringify(settings))
-  }, [settings])
+    localStorage.setItem("userSettings", JSON.stringify(settings));
+  }, [settings]);
 
   const updateSettings = (newSettings: Partial<UserSettings>) => {
-    setSettings((prev) => ({ ...prev, ...newSettings }))
-  }
+    setSettings((prev) => ({ ...prev, ...newSettings }));
+  };
+
+  const updateZkLoginSettings = (zkLoginSettings: Partial<UserSettings["zkLogin"]>) => {
+    setSettings((prev) => ({
+      ...prev,
+      zkLogin: { ...prev.zkLogin, ...zkLoginSettings },
+    }));
+  };
 
   const updateNotificationSettings = (notificationSettings: Partial<UserSettings["notifications"]>) => {
     setSettings((prev) => ({
       ...prev,
       notifications: { ...prev.notifications, ...notificationSettings },
-    }))
-  }
+    }));
+  };
 
   const updatePrivacySettings = (privacySettings: Partial<UserSettings["privacy"]>) => {
     setSettings((prev) => ({
       ...prev,
       privacy: { ...prev.privacy, ...privacySettings },
-    }))
-  }
+    }));
+  };
 
   return (
     <SettingsContext.Provider
       value={{
         settings,
         updateSettings,
+        updateZkLoginSettings,
         updateNotificationSettings,
         updatePrivacySettings,
       }}
     >
       {children}
     </SettingsContext.Provider>
-  )
+  );
 }
 
 export function useSettings() {

@@ -10,9 +10,11 @@ import { BackgroundGrid } from "@/components/background-grid";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useEffect, useState } from "react";
 import { getUserProfile, saveUserProfile } from "@/lib/atoma";
+import { useCurrentAccount } from "@mysten/dapp-kit";
 
 export default function SettingsPage() {
   const [userProfile, setUserProfile] = useState({ name: "", email: "" });
+  const account = useCurrentAccount();
 
   useEffect(() => {
     (async () => {
@@ -60,7 +62,7 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="wallet">Wallet Address</Label>
-                <Input id="wallet" value="0x71C7656EC7ab88b098defB751B7401B5f6d8976F" readOnly className="bg-muted" />
+                <Input id="wallet" value={account?.address} readOnly className="bg-muted" />
               </div>
               <div className="space-y-2 pt-4 border-t">
                 <Label>Interface Preferences</Label>

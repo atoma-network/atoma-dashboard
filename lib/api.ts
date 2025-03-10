@@ -63,7 +63,11 @@ const atomaApi = axios.create({
 const addAuthInterceptor = (apiClient: any) => {
   apiClient.interceptors.request.use(
     (config: any) => {
-      const token = JSON.parse(localStorage.getItem("userSettings")).accessToken;
+      let userSettings = localStorage.getItem("userSettings");
+      if (!userSettings) {
+        throw new Error("User settings not found in local storage");
+      }
+      const token = JSON.parse(userSettings).accessToken;
       if (token) {
         config.headers["Authorization"] = `Bearer ${token}`;
       }

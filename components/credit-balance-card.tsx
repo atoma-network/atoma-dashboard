@@ -24,8 +24,6 @@ export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => vo
           0
         );
         let balance = (balanceRes?.data + partialBalance) / 1000000;
-        console.log("balance", balanceRes?.data);
-        console.log("partialBalance", partialBalance);
         setBalance(isNaN(balance) ? "0" : balance.toFixed(2));
       } catch (error) {
         console.error("Failed to fetch balance", error);

@@ -22,7 +22,7 @@ import Modal from "@/components/Modal";
 export function TopNav() {
   const pathname = usePathname();
   const pathSegments = pathname.split("/").filter(Boolean);
-  const { settings, updateSettings } = useSettings();
+  const { settings, updateSettings, updateZkLoginSettings } = useSettings();
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authType, setAuthType] = useState("login");
   const [username, setUsername] = useState("user");
@@ -97,7 +97,15 @@ export function TopNav() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    updateSettings({ accessToken: null, loggedIn: false });
+                      updateSettings({ accessToken: undefined, loggedIn: false });
+                      updateZkLoginSettings({
+                        idToken: undefined,
+                        isEnabled: false,
+                        secretKey: undefined,
+                        randomness: undefined,
+                        maxEpoch: undefined,
+                        zkp: undefined,
+                      });
                   }}
                 >
                   Log out

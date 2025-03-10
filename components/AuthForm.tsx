@@ -17,7 +17,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const toastRef = useRef<Toast>(null);
-  const { settings, updateSettings } = useSettings();
+  const { settings, updateSettings, updateZkLoginSettings } = useSettings();
 
   const [loginType, setLoginType] = useState<"login" | "register">(type);
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,16 +66,17 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
     }
   };
 
-  // const handleGoogleOauth = () => {
-  //   zkLogin
-  //     .getURL()
-  //     .then((url) => {
-  //       window.location.href = url;
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // };
+  const handleGoogleOauth = () => {
+    const zkLogin = new ZkLogin(settings, updateSettings, updateZkLoginSettings);
+    zkLogin
+      .getURL(settings.zkLogin, updateZkLoginSettings)
+      .then((url) => {
+        window.location.href = url;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
   return (
     <div className="p-8  w-full max-w-md mx-auto dark:bg-darkMode">
@@ -135,7 +136,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
           className="p-button-lg p-4 bg-primary hover:bg-primary text-white font-medium rounded-md transition-colors duration-200"
         />
 
-        {/* {process.env.NEXT_PUBLIC_ENABLE_ZK_LOGIN_GOOGLE === "true" && (
+        {process.env.NEXT_PUBLIC_ENABLE_ZK_LOGIN_GOOGLE === "true" && (
           <Button
             className="p-button p-4 font-medium rounded-md transition-colors duration-200 bg-white dark:bg-black hover:bg-gray-200 dark:hover:bg-gray-800 text-black dark:text-white border border-gray-400 dark:border-gray-600"
             onClick={handleGoogleOauth}
@@ -161,7 +162,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
             </svg>
             <span>Continue with Google</span>
           </Button>
-        )} */}
+        )}
 
         <div className="text-center text-sm text-gray-600 mt-4">
           {loginType === "login" ? (

@@ -143,7 +143,6 @@ export function ApiKeyCard() {
                             size="icon"
                             className="text-destructive"
                             onClick={() => {
-                              console.log("click");
                               return handleRevokeKey(key.id);
                             }}
                           >

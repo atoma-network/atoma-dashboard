@@ -108,9 +108,10 @@ interface RequestOptions {
   post?: boolean;
   body?: object | string;
   use_auth?: boolean;
+  accessToken?: string;
 }
 
-const request = async <T>({ path, post, body, use_auth }: RequestOptions): Promise<T> => {
+const request = async <T>({ path, post, body, use_auth, accessToken }: RequestOptions): Promise<T> => {
   const options: RequestInit = {};
 
   if (post === true) {
@@ -128,7 +129,7 @@ const request = async <T>({ path, post, body, use_auth }: RequestOptions): Promi
     if (userSettings == null) {
       throw new Error("No user settings");
     }
-    let token = JSON.parse(userSettings).accessToken;
+    let token = accessToken || JSON.parse(userSettings).accessToken;
     if (token == null) {
       throw new Error("No access token");
     }
@@ -137,9 +138,6 @@ const request = async <T>({ path, post, body, use_auth }: RequestOptions): Promi
       ...options.headers,
     };
   }
-
-  console.log("proxy_url", proxy_url);
-  console.log("path", path);
 
   return await fetch(`${proxy_url}/${path}`, options).then((response) => {
     if (!response.ok) {
@@ -245,8 +243,8 @@ export const googleOAuth = async (idToken: string): Promise<AuthResponse> => {
   return await request({ path: "google_oauth", post: true, body: idToken });
 };
 
-export const getSalt = async (): Promise<string> => {
-  return await request({ path: "salt", use_auth: true });
+export const getSalt = async (accessToken?: string): Promise<string> => {
+  return await request({ path: "salt", use_auth: true, accessToken });
 };
 
 export const getGraphs = async (): Promise<[string, [string, string, any][]][]> => {

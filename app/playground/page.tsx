@@ -71,7 +71,6 @@ export default function PlaygroundPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("");
-    console.log(parameters);
     try {
       setIsLoading(true);
 

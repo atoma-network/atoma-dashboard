@@ -71,8 +71,6 @@ export function UsageHistory() {
       let stacksPromise = getAllStacks();
       let tasksPromise = getAllTasks();
       let [stacks, tasks] = await Promise.all([stacksPromise, tasksPromise]);
-      console.log("stacks", stacks);
-      console.log("tasks", tasks);
       setUsageHistory(
         stacks
           .sort(([, timestamp0], [, timestamp1]) => (timestamp0 < timestamp1 ? 1 : timestamp0 > timestamp1 ? -1 : 0))
