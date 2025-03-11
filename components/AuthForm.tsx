@@ -1,10 +1,10 @@
 import { useState, useRef } from "react";
-import api from "@/lib/api";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import ZkLogin from "@/lib/zklogin";
 import { useSettings } from "@/contexts/settings-context";
+import { loginUser, registerUser } from "@/lib/api";
 
 interface AuthFormProps {
   type: "login" | "register";
@@ -26,11 +26,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
       setIsLoading(true);
       let response;
       if (loginType === "login") {
-        response = await api.post("/login", { email: email, password });
+        response = await loginUser(email, password);
       } else {
-        response = await api.post("/register", { user_profile: { email, name }, password });
+        response = await registerUser({ email, name }, password);
       }
-      console.log(response.status, response.data);
 
       // Save access token and refresh token to session storage
       updateSettings({ accessToken: response.data.access_token, loggedIn: true });

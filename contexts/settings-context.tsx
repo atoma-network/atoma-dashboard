@@ -102,34 +102,46 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     return defaultSettings;
   });
 
-  // Save settings to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem("userSettings", JSON.stringify(settings));
-  }, [settings]);
-
   const updateSettings = (newSettings: Partial<UserSettings>) => {
-    setSettings((prev) => ({ ...prev, ...newSettings }));
+    setSettings((prev) => {
+      const updatedSettings = { ...prev, ...newSettings };
+      localStorage.setItem("userSettings", JSON.stringify(updatedSettings)); // update here, to take effect immediately
+      return updatedSettings;
+    });
   };
 
   const updateZkLoginSettings = (zkLoginSettings: Partial<UserSettings["zkLogin"]>) => {
-    setSettings((prev) => ({
-      ...prev,
-      zkLogin: { ...prev.zkLogin, ...zkLoginSettings },
-    }));
+    setSettings((prev) => {
+      const updatedSettings = {
+        ...prev,
+        zkLogin: { ...prev.zkLogin, ...zkLoginSettings },
+      };
+      localStorage.setItem("userSettings", JSON.stringify(updatedSettings)); // update here, to take effect immediately
+      return updatedSettings;
+    });
   };
 
   const updateNotificationSettings = (notificationSettings: Partial<UserSettings["notifications"]>) => {
-    setSettings((prev) => ({
-      ...prev,
-      notifications: { ...prev.notifications, ...notificationSettings },
-    }));
+    setSettings((prev) => {
+      const updatedSettings = {
+        ...prev,
+        notifications: { ...prev.notifications, ...notificationSettings },
+      };
+      localStorage.setItem("userSettings", JSON.stringify(updatedSettings)); // update here, to take effect immediately
+      return updatedSettings;
+    });
+    localStorage.setItem("userSettings", JSON.stringify(settings)); // update here, to take effect immediately
   };
 
   const updatePrivacySettings = (privacySettings: Partial<UserSettings["privacy"]>) => {
-    setSettings((prev) => ({
-      ...prev,
-      privacy: { ...prev.privacy, ...privacySettings },
-    }));
+    setSettings((prev) => {
+      const updatedSettings = {
+        ...prev,
+        privacy: { ...prev.privacy, ...privacySettings },
+      };
+      localStorage.setItem("userSettings", JSON.stringify(updatedSettings)); // update here, to take effect immediately
+      return updatedSettings;
+    });
   };
 
   return (

@@ -1,45 +1,17 @@
 import axios from "axios";
 import config from "../config/config";
-
-const LATENCY = (hours: number) => `/latency?hours=${hours}`;
-const COMPUTE_UNITS_PROCESSED = (hours: number) => `/compute_units_processed?hours=${hours}`;
-
-export const ALL_STACKS = "/all_stacks";
-export const BALANCE = "/balance";
-export const COMPUTE_UNITS_PROCESSED_168 = COMPUTE_UNITS_PROCESSED(168);
-export const GENERATE_API_TOKEN = "/generate_api_token";
-export const GET_NODES_DISTRIBUTION = "/get_nodes_distribution";
-export const GET_SUI_ADDRESS = "/get_sui_address";
-export const LATENCY_168 = LATENCY(168);
-export const SUBSCRIPTIONS = "/subscriptions";
-export const TASKS = "/tasks";
-export const USDC_PAYMENT = "/usdc_payment";
-
-export enum ModelModality {
-  ChatCompletions = "Chat Completions",
-  ImagesGenerations = "Images Generations",
-  Embeddings = "Embeddings",
-}
-
-export interface NodeSubscription {
-  node_small_id: number; // Unique small integer identifier for the node subscription
-  task_small_id: number; // Unique small integer identifier for the task
-  price_per_one_million_compute_units: number; // Price per 1M compute units for the subscription
-  max_num_compute_units: number; // Maximum number of compute units for the subscription
-  valid: boolean; // Indicates whether the subscription is valid
-}
-
-export interface Task {
-  task_small_id: number; // Unique small integer identifier for the task
-  task_id: string; // Unique string identifier for the task
-  role: number; // Role associated with the task (encoded as an integer)
-  model_name?: string; // Optional name of the model used for the task
-  is_deprecated: boolean; // Indicates whether the task is deprecated
-  valid_until_epoch?: number; // Optional epoch timestamp until which the task is valid
-  deprecated_at_epoch?: number; // Optional epoch timestamp when the task was deprecated
-  security_level: number; // Security level of the task (encoded as an integer)
-  minimum_reputation_score?: number; // Optional minimum reputation score required for the task
-}
+import type {
+  AuthResponse,
+  ComputedUnitsProcessedResponse,
+  LatencyResponse,
+  ModelModality,
+  NodeSubscription,
+  Stack,
+  StatsStack,
+  Task,
+  Token,
+  UserProfile,
+} from "./atoma";
 
 // Create an API client for the credentials API
 const credentialsApi = axios.create({
@@ -83,44 +55,140 @@ addAuthInterceptor(credentialsApi);
 addAuthInterceptor(atomaApi);
 
 // Export a default API object with both clients
-export default {
-  credentials: credentialsApi,
-  atoma: atomaApi,
+// export default {
+//   credentials: credentialsApi,
+//   atoma: atomaApi,
 
-  // Helper method to determine which API to use based on the URL
-  post: (url: string, data: any, config?: any) => {
-    if (url.startsWith("/v1/")) {
-      return atomaApi.post(url, data, config);
-    } else {
-      return credentialsApi.post(url, data, config);
-    }
-  },
+//   // Helper method to determine which API to use based on the URL
+//   post: (url: string, data: any, config?: any) => {
+//     if (url.startsWith("/v1/")) {
+//       return atomaApi.post(url, data, config);
+//     } else {
+//       return credentialsApi.post(url, data, config);
+//     }
+//   },
 
-  get: (url: string, config?: any) => {
-    if (url.startsWith("/v1/")) {
-      return atomaApi.get(url, config);
-    } else {
-      return credentialsApi.get(url, config);
-    }
-  },
+//   get: (url: string, config?: any) => {
+//     if (url.startsWith("/v1/")) {
+//       return atomaApi.get(url, config);
+//     } else {
+//       return credentialsApi.get(url, config);
+//     }
+//   },
 
-  put: (url: string, data: any, config?: any) => {
-    if (url.startsWith("/v1/")) {
-      return atomaApi.put(url, data, config);
-    } else {
-      return credentialsApi.put(url, data, config);
-    }
-  },
+//   put: (url: string, data: any, config?: any) => {
+//     if (url.startsWith("/v1/")) {
+//       return atomaApi.put(url, data, config);
+//     } else {
+//       return credentialsApi.put(url, data, config);
+//     }
+//   },
 
-  delete: (url: string, config?: any) => {
-    if (url.startsWith("/v1/")) {
-      return atomaApi.delete(url, config);
-    } else {
-      return credentialsApi.delete(url, config);
-    }
-  },
+//   delete: (url: string, config?: any) => {
+//     if (url.startsWith("/v1/")) {
+//       return atomaApi.delete(url, config);
+//     } else {
+//       return credentialsApi.delete(url, config);
+//     }
+//   },
+// };
+
+export const getSubscriptions = async () => {
+  return await credentialsApi.get<NodeSubscription[]>("/subscriptions");
 };
 
-export const proofRequest = async (signature: string, walletAddress: string): Promise<void> => {
-  return await credentialsApi.post("/update_sui_address", { signature, address: walletAddress });
+export const getAllTasks = async () => {
+  return await credentialsApi.get<[Task, ModelModality[]][]>("/tasks");
+};
+
+export const getTasks = async () => {
+  const tasks_with_modalities = await getAllTasks();
+  // Filter out deprecated tasks and tasks without model names and modalities (no modalities means the proxy doesn't support the task)
+  tasks_with_modalities.data = tasks_with_modalities.data.filter(
+    ([task, modalities]) => !task.is_deprecated && !!task.model_name && modalities.length > 0
+  );
+  return tasks_with_modalities;
+};
+
+export const registerUser = async (profile: UserProfile, password: string) => {
+  return await credentialsApi.post<AuthResponse>("/register", { user_profile: profile, password });
+};
+
+export const loginUser = async (email: string, password: string) => {
+  return await credentialsApi.post<AuthResponse>("/login", { email, password });
+};
+
+export const generateApiKey = async (name: string) => {
+  return await credentialsApi.post<string>("/generate_api_token", name);
+};
+
+export const revokeApiToken = async (api_token_id: number) => {
+  return await credentialsApi.post<void>("/revoke_api_token", api_token_id);
+};
+
+export const listApiKeys = async () => {
+  return await credentialsApi.get<Token[]>("/api_tokens");
+};
+
+export const getComputeUnitsProcessed = async () => {
+  return await credentialsApi.get<ComputedUnitsProcessedResponse[]>("/compute_units_processed?hours=168");
+};
+
+export const getLatency = async () => {
+  return await credentialsApi.get<LatencyResponse[]>("/latency?hours=168");
+};
+
+export const getNodesDistribution = async () => {
+  return await credentialsApi.get<{ country: string; count: number }[]>("/get_nodes_distribution");
+};
+
+export const getStatsStacks = async () => {
+  return await credentialsApi.get<StatsStack[]>("/get_stats_stacks?hours=168");
+};
+
+export const proofRequest = async (signature: string, walletAddress: string) => {
+  return await credentialsApi.post<void>("/update_sui_address", { signature, address: walletAddress });
+};
+
+export const usdcPayment = async (txDigest: string, proofSignature?: string) => {
+  return await credentialsApi.post<void>("/usdc_payment", {
+    transaction_digest: txDigest,
+    proof_signature: proofSignature,
+  });
+};
+
+export const getSuiAddress = async () => {
+  return await credentialsApi.get<string>("/get_sui_address");
+};
+
+export const getBalance = async () => {
+  return await credentialsApi.get<number>("/balance");
+};
+
+export const getAllStacks = async () => {
+  return await credentialsApi.get<[Stack, string][]>("/all_stacks");
+};
+
+export const getUserProfile = async () => {
+  return await credentialsApi.get<UserProfile>("/user_profile");
+};
+
+export const saveUserProfile = async (profile: UserProfile) => {
+  return await credentialsApi.post<void>("/set_user_profile", profile);
+};
+
+export const googleOAuth = async (idToken: string) => {
+  return await credentialsApi.post<AuthResponse>("/google_oauth", idToken);
+};
+
+export const getSalt = async () => {
+  return await credentialsApi.get<string>("/salt");
+};
+
+export const getGraphs = async () => {
+  return await credentialsApi.get<[string, [string, string, any][]][]>("/get_graphs");
+};
+
+export const getGraphData = async (query: any) => {
+  return await credentialsApi.post<any>("/get_graph_data", query);
 };

@@ -32,9 +32,9 @@ import { getFullnodeUrl } from "@mysten/sui/client";
 import { ArrowRight } from "lucide-react";
 import "@mysten/dapp-kit/dist/index.css";
 import { payUSDC } from "@/lib/utils";
-import { getSuiAddress, proofRequest, usdcPayment } from "@/lib/atoma";
 import { useSettings } from "@/contexts/settings-context";
 import ZkLogin from "@/lib/zklogin";
+import { getSuiAddress, proofRequest, usdcPayment } from "@/lib/api";
 
 const { networkConfig } = createNetworkConfig({
   testnet: { url: getFullnodeUrl("testnet") },
@@ -62,11 +62,7 @@ export default function DashboardPage() {
         return;
       }
       const suiAddress = await getSuiAddress();
-      setWalletConfirmed(suiAddress != null && suiAddress == account?.address);
-
-      // getSuiAddress().then((suiAddress) => {
-      //   setWalletConfirmed(suiAddress != null && suiAddress == account?.address);
-      // });
+      setWalletConfirmed(suiAddress.data != null && suiAddress.data == account?.address);
     })();
   }, [account]);
 
@@ -126,7 +122,7 @@ export default function DashboardPage() {
     try {
       setShowAddFunds(false);
       const suiAddress = await getSuiAddress();
-      if (suiAddress == null || suiAddress != account?.address) {
+      if (suiAddress.data == null || suiAddress.data != account?.address) {
         // We haven't proven the SUI address yet
         throw new Error("SUI address not found or not matching");
       }

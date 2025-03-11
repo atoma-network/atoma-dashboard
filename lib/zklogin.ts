@@ -9,19 +9,10 @@ import {
   getZkLoginSignature,
   jwtToAddress,
 } from "@mysten/sui/zklogin";
-import { getSalt, googleOAuth } from "./atoma";
 import { Transaction } from "@mysten/sui/transactions";
-import {
-  // LOCAL_STORAGE_ACCESS_TOKEN,
-  LOCAL_STORAGE_ID_TOKEN,
-  LOCAL_STORAGE_MAX_EPOCH,
-  LOCAL_STORAGE_RANDOMNESS,
-  LOCAL_STORAGE_SECRET_KEY,
-  LOCAL_STORAGE_ZKP,
-  PROVER_URL,
-  SUI_RPC_URL,
-} from "./local_storage_consts";
+import { PROVER_URL, SUI_RPC_URL } from "./local_storage_consts";
 import type { UserSettings } from "@/contexts/settings-context";
+import { getSalt, googleOAuth } from "./api";
 
 type PartialZkLoginSignature = Omit<Parameters<typeof getZkLoginSignature>["0"]["inputs"], "addressSeed">;
 
@@ -117,6 +108,7 @@ export default class ZkLogin {
     }
     const local_storage_secret_key = zkLoginSettings.secretKey;
     if (local_storage_secret_key == null) {
+      console.warn("NO SECRET KEY");
       throw new Error("Secret key not found");
     }
     this.maxEpoch = zkLoginSettings.maxEpoch;
@@ -131,13 +123,15 @@ export default class ZkLogin {
     this.decodeJwt = jwtDecode(idToken);
     let accessToken = settings.accessToken;
     if (!accessToken) {
-      const { access_token, refresh_token } = await googleOAuth(idToken);
+      const {
+        data: { access_token, refresh_token },
+      } = await googleOAuth(idToken);
       updateSettings({ accessToken: access_token, loggedIn: true });
       document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
       accessToken = access_token;
     }
-    const salt = await getSalt(accessToken);
-    this.salt = BigInt(`0x${Buffer.from(salt, "base64").toString("hex")}`);
+    const salt = await getSalt();
+    this.salt = BigInt(`0x${Buffer.from(salt.data, "base64").toString("hex")}`);
     this.zkLoginUserAddress = jwtToAddress(idToken, this.salt);
     this.ephemeralKeyPair = Ed25519Keypair.fromSecretKey(local_storage_secret_key);
     const partialZkLogin = zkLoginSettings.zkp;
@@ -183,6 +177,7 @@ export default class ZkLogin {
       this.ephemeralKeyPair = new Ed25519Keypair();
       updateZkLoginSettings({ secretKey: this.ephemeralKeyPair.getSecretKey() });
     }
+    console.warn("SECRET KEY SET");
     const { epoch } = await this.suiClient.getLatestSuiSystemState();
     this.maxEpoch = Number(epoch) + 2;
     updateZkLoginSettings({ maxEpoch: this.maxEpoch });

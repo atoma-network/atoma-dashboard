@@ -4,8 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import api, { GENERATE_API_TOKEN, type Token } from "@/lib/api";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useSettings } from "@/contexts/settings-context";
+import { generateApiKey, listApiKeys, revokeApiToken } from "@/lib/api";
 
 interface ApiKey {
   name: string;
@@ -46,8 +46,8 @@ export function ApiKeyCard() {
       return;
     }
     try {
-      let tokens: Token[] = (await api.get("/api_tokens")).data;
-      let apiKeys: ApiKey[] = tokens.map((token) => {
+      let tokens = await listApiKeys();
+      let apiKeys: ApiKey[] = tokens.data.map((token) => {
         return {
           name: token.name,
           key: `sk-...${token.token_last_4}`,
@@ -69,9 +69,7 @@ export function ApiKeyCard() {
 
   const handleRevokeKey = async (key: number) => {
     try {
-      await api.post("/revoke_api_token", {
-        api_token_id: key,
-      });
+      await revokeApiToken(key);
       await updateApiTokens();
     } catch (error) {
       alert("failed to delete key");
@@ -81,8 +79,8 @@ export function ApiKeyCard() {
   const handleCreateKey = async () => {
     if (!newKeyName) return;
     try {
-      const generatedKey = (await api.post(GENERATE_API_TOKEN, { name: newKeyName })).data;
-      setNewGeneratedKey(generatedKey);
+      const generatedKey = await generateApiKey(newKeyName);
+      setNewGeneratedKey(generatedKey.data);
       setIsCreateDialogOpen(false);
       setIsSaveKeyDialogOpen(true);
     } catch (error) {

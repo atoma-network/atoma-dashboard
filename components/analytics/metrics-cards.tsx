@@ -2,15 +2,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Network, Activity, Box, Cpu, Clock, ArrowUpRight } from "lucide-react";
 import React from "react";
-import api, {
-  COMPUTE_UNITS_PROCESSED_168,
-  GET_NODES_DISTRIBUTION,
-  LATENCY_168,
-  SUBSCRIPTIONS,
-  TASKS,
-  type ModelModality,
-} from "@/lib/api";
 import { formatNumber } from "@/lib/utils";
+import { getComputeUnitsProcessed, getLatency, getNodesDistribution, getSubscriptions, getTasks } from "@/lib/api";
 
 export function MetricsCards() {
   const [metricsData, setMetricsData] = React.useState({
@@ -25,11 +18,11 @@ export function MetricsCards() {
   React.useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const tasksPromise = api.get(TASKS).catch(() => null);
-        const nodesPromise = api.get(GET_NODES_DISTRIBUTION).catch(() => null);
-        const latencyPromise = api.get(LATENCY_168).catch(() => null);
-        const subscriptionsPromise = api.get(SUBSCRIPTIONS).catch(() => null);
-        const computeUnitsPromise = await api.get(COMPUTE_UNITS_PROCESSED_168).catch(() => null);
+        const tasksPromise = getTasks();
+        const nodesPromise = getNodesDistribution();
+        const latencyPromise = getLatency();
+        const subscriptionsPromise = getSubscriptions();
+        const computeUnitsPromise = getComputeUnitsProcessed();
 
         const [tasksRes, nodesRes, latencyRes, subscriptionsRes, computeUnitsRes] = await Promise.all([
           tasksPromise,
@@ -41,24 +34,17 @@ export function MetricsCards() {
 
         // Total nodes
         const totalNodes =
-          nodesRes?.data?.reduce((sum: number, node: { count: number }) => sum + (+node.count || 0), 0) || 0;
+          nodesRes.data?.reduce((sum: number, node: { count: number }) => sum + (+node.count || 0), 0) || 0;
 
         // Nodes online
-        const nodesOnline = new Set<string>(
+        const nodesOnline = new Set<number>(
           subscriptionsRes?.data
             ?.filter(({ valid }: { valid: boolean }) => valid)
             .map(({ node_small_id }: { node_small_id: number }) => node_small_id)
         ).size;
 
         // Models
-        const modelCount = new Set<string>(
-          tasksRes?.data
-            .filter(
-              (task: [{ model_name: string; is_deprecated: boolean }, ModelModality[]]) =>
-                task[0].model_name && !task[0].is_deprecated && task[1].length !== 0
-            )
-            .map((task: { model_name: string }[]) => task[0].model_name)
-        ).size;
+        const modelCount = new Set<string>(tasksRes.data.map(([task, _]) => task.model_name!)).size;
 
         // Tokens
         const totalComputeUnits = computeUnitsRes?.data.reduce(

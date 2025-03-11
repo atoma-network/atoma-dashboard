@@ -9,8 +9,8 @@ import { toast } from "sonner";
 import { BackgroundGrid } from "@/components/background-grid";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useEffect, useState } from "react";
-import { getUserProfile, saveUserProfile } from "@/lib/atoma";
 import { useCurrentAccount } from "@mysten/dapp-kit";
+import { getUserProfile, saveUserProfile } from "@/lib/api";
 
 export default function SettingsPage() {
   const [userProfile, setUserProfile] = useState({ name: "", email: "" });
@@ -19,7 +19,7 @@ export default function SettingsPage() {
   useEffect(() => {
     (async () => {
       let profile = await getUserProfile();
-      setUserProfile(profile);
+      setUserProfile(profile.data);
     })();
   }, []);
 

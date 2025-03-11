@@ -7,7 +7,8 @@ import { UsageHistory } from "@/components/analytics/usage-history";
 import { BackgroundGrid } from "@/components/background-grid";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { listApiKeys, Token } from "@/lib/atoma";
+import { listApiKeys } from "@/lib/api";
+import type { Token } from "@/lib/atoma";
 
 const timeFrames = [
   { value: "24h", label: "24 hours" },
@@ -29,7 +30,7 @@ export default function AnalyticsPage() {
   useEffect(() => {
     (async () => {
       const keys = await listApiKeys();
-      setApiKeys(keys);
+      setApiKeys(keys.data);
     })();
   }, []);
 

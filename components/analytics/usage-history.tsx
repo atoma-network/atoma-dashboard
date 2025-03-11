@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useEffect, useState } from "react";
-import { getAllStacks, getAllTasks } from "@/lib/atoma";
+import { getAllStacks, getAllTasks } from "@/lib/api";
 
 const usageData = [
   {
@@ -72,7 +72,7 @@ export function UsageHistory() {
       let tasksPromise = getAllTasks();
       let [stacks, tasks] = await Promise.all([stacksPromise, tasksPromise]);
       setUsageHistory(
-        stacks
+        stacks.data
           .sort(([, timestamp0], [, timestamp1]) => (timestamp0 < timestamp1 ? 1 : timestamp0 > timestamp1 ? -1 : 0))
           .map(([stack, timestamp]) => {
             return {
@@ -81,7 +81,8 @@ export function UsageHistory() {
               tokens: stack.num_compute_units,
               used_tokens: stack.already_computed_units,
               cost: (stack.num_compute_units / 1000000) * (stack.price_per_one_million_compute_units / 1000000),
-              model: tasks.find((task) => task[0].task_small_id === stack.task_small_id)?.[0].model_name || "Unknown",
+              model:
+                tasks.data.find((task) => task[0].task_small_id === stack.task_small_id)?.[0].model_name || "Unknown",
             };
           })
       );

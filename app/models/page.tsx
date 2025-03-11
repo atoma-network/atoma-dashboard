@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BackgroundGrid } from "@/components/background-grid";
 import { ApiUsageDialog } from "@/components/api-usage-dialog";
 import Link from "next/link";
-import api, { ModelModality, SUBSCRIPTIONS, TASKS, type NodeSubscription, type Task } from "@/lib/api";
+import { getSubscriptions, getTasks } from "@/lib/api";
 import { simplifyModelName } from "@/lib/utils";
+import { ModelModality, NodeSubscription, Task } from "@/lib/atoma";
 
 interface ModelSection {
   type: ModelModality;
@@ -84,23 +85,18 @@ export default function ModelsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const tasksPromise = api.get(TASKS).catch(() => null);
-        const subscriptionsPromise = api.get(SUBSCRIPTIONS).catch(() => null);
+        const tasksPromise = getTasks();
+        const subscriptionsPromise = getSubscriptions();
 
         const [tasksRes, subscriptionsRes] = await Promise.all([tasksPromise, subscriptionsPromise]);
         const cheapestSubscription = new Map<string, NodeSubscription>();
         const modelModalities = new Map<string, ModelModality[]>();
-        const tasks = tasksRes?.data
-          .map(([task, modality]: [Task, ModelModality]) => ({
-            task: task,
-            modality: modality,
-          }))
-          .filter(
-            ({ task, modality }: { task: Task; modality: ModelModality }) =>
-              task.model_name && !task.is_deprecated && modality.length > 0
-          );
+        const tasks = tasksRes?.data.map(([task, modality]) => ({
+          task: task,
+          modality: modality,
+        }));
         for (const { task, modality } of tasks) {
-          modelModalities.set(task.model_name, modality);
+          modelModalities.set(task.model_name!, modality);
           const subs_for_this_task = subscriptionsRes?.data.filter(
             (subscription: NodeSubscription) => subscription.task_small_id === task.task_small_id && subscription.valid
           );
@@ -109,11 +105,11 @@ export default function ModelsPage() {
             continue;
           }
           cheapestSubscription.set(
-            task.model_name,
+            task.model_name!,
             subs_for_this_task.reduce(
               (min: NodeSubscription, item: NodeSubscription) =>
                 item.price_per_one_million_compute_units < min.price_per_one_million_compute_units ? item : min,
-              cheapestSubscription.get(task.model_name) || subs_for_this_task[0]
+              cheapestSubscription.get(task.model_name!) || subs_for_this_task[0]
             )
           );
         }

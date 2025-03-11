@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSettings } from "@/contexts/settings-context";
-import api from "@/lib/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import AuthForm from "@/components/AuthForm";
 import Modal from "@/components/Modal";
+import { getUserProfile } from "@/lib/api";
 
 export function TopNav() {
   const pathname = usePathname();
@@ -40,7 +40,7 @@ export function TopNav() {
     if (settings.loggedIn) {
       (async () => {
         try {
-          let res = await api.get("/user_profile");
+          let res = await getUserProfile();
           setUsername(res.data.name);
         } catch (error) {
           console.log(error);
@@ -97,15 +97,15 @@ export function TopNav() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                      updateSettings({ accessToken: undefined, loggedIn: false });
-                      updateZkLoginSettings({
-                        idToken: undefined,
-                        isEnabled: false,
-                        secretKey: undefined,
-                        randomness: undefined,
-                        maxEpoch: undefined,
-                        zkp: undefined,
-                      });
+                    updateSettings({ accessToken: undefined, loggedIn: false });
+                    updateZkLoginSettings({
+                      idToken: undefined,
+                      isEnabled: false,
+                      secretKey: undefined,
+                      randomness: undefined,
+                      maxEpoch: undefined,
+                      zkp: undefined,
+                    });
                   }}
                 >
                   Log out

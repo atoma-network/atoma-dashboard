@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import api, { ALL_STACKS, BALANCE } from "@/lib/api";
+import { getAllStacks, getBalance } from "@/lib/api";
 import { useSettings } from "@/contexts/settings-context";
 
 export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => void }) {
@@ -15,8 +15,8 @@ export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => vo
         return;
       }
       try {
-        const balancePromise = api.get(BALANCE).catch(() => null);
-        const allStacksPromise = api.get(ALL_STACKS).catch(() => null);
+        const balancePromise = getBalance();
+        const allStacksPromise = getAllStacks();
         const [balanceRes, allStacksRes] = await Promise.all([balancePromise, allStacksPromise]);
         let partialBalance = allStacksRes?.data.reduce(
           (acc: number, [stack]: any) =>
