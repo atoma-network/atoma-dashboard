@@ -21,7 +21,7 @@ import { getUserProfile } from "@/lib/api";
 
 export function TopNav() {
   const pathname = usePathname();
-  const pathSegments = pathname.split("/").filter(Boolean);
+  const [loggedIn, setLoggedIn] = useState(false); // To prevent hydration error on client side
   const { settings, updateSettings, updateZkLoginSettings } = useSettings();
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authType, setAuthType] = useState("login");
@@ -37,6 +37,7 @@ export function TopNav() {
   };
 
   useEffect(() => {
+    setLoggedIn(settings.loggedIn);
     if (settings.loggedIn) {
       (async () => {
         try {
@@ -48,11 +49,12 @@ export function TopNav() {
       })();
     }
   }, []);
+
   return (
     <header className="sticky top-0 z-40 border-b bg-background dark:bg-darkMode">
       <div className="container flex h-16 items-center justify-end pl-1 pr-4">
         <div className="flex items-center gap-4">
-          {!settings.loggedIn ? (
+          {!loggedIn ? (
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
