@@ -145,7 +145,7 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={requestsPerModel} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
@@ -155,6 +155,16 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
+                formatter={(value: number, name: string) => [
+                  <span key={`${name}-value`} style={{
+                    color: typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                      ? Object.values(colors.dark)[models.indexOf(name)]
+                      : Object.values(colors.light)[models.indexOf(name)]
+                  }}>
+                    {value.toLocaleString()}
+                  </span>,
+                  name,
+                ]}
               />
               {models.map((model, index) => (
                 <Area
@@ -222,6 +232,7 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
+
                 }}
                 formatter={(value: number, name: string, props: any) => {
                   const model = tokensPerModel.find((m) => m.name === props.payload.name)
@@ -234,7 +245,7 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 }}
                 labelFormatter={(name: string) => name}
                 separator=""
-                itemSeparator=""
+                //itemSeparator=""
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} style={{ opacity: 1 }}>
                 {tokensPerModel.map((entry, index) => (

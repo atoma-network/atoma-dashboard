@@ -42,7 +42,7 @@ export function ModelCharts() {
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={requestsData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }}  tickFormatter={(value) => value.toLocaleString()} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
@@ -52,6 +52,7 @@ export function ModelCharts() {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
+                formatter={(value) => [value.toLocaleString(), "Value"]}
               />
               <Area type="monotone" dataKey="value" stroke="#FFC9C9" fill="#FFC9C9" fillOpacity={0.6} strokeWidth={2} />
             </AreaChart>
@@ -80,7 +81,7 @@ export function ModelCharts() {
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={tokensData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }}  tickFormatter={(value) => value.toLocaleString()}/>
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
@@ -90,6 +91,7 @@ export function ModelCharts() {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
+                formatter={(value) => [value.toLocaleString(), "Value"]}
               />
               <Area type="monotone" dataKey="value" stroke="#FFF3C9" fill="#FFF3C9" fillOpacity={0.6} strokeWidth={2} />
             </AreaChart>

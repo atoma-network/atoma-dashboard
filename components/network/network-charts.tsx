@@ -19,25 +19,28 @@ import { Info } from "lucide-react"
 const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"]
 const models = ["Llama", "DeepSeek", "Qwen", "FLUXL", "Mistral"]
 
-// Colors for different chart types
+
 const colors = {
   light: {
-    blue: "#BAE6FD",
-    green: "#D1FAE5",
-    yellow: "#FFF3C9",
-    red: "#FFC9C9",
-    purple: "#E9D5FF",
+    blue: "#42A5F5", 
+    green: "#66BB6A", 
+    yellow: "#FFEB3B", 
+    red: "#E57373",
+    purple: "#9575CD", 
   },
   dark: {
-    blue: "#1e3a8a",
-    green: "#064e3b",
-    yellow: "#713f12",
-    red: "#7f1d1d",
-    purple: "#581c87",
+    blue: "#1E88E5", 
+    green: "#43A047", 
+    yellow: "#FDD835", 
+    red: "#D32F2F", 
+    purple: "#7E57C2", 
   },
-}
+};
 
-// Generate consistent data for each model
+
+type ColorKey = keyof typeof colors.light;
+const colorKeys = Object.keys(colors.light) as ColorKey[];
+
 const generateModelData = (baseRange: [number, number], variance: number) => {
   const baseValue = baseRange[0] + Math.random() * (baseRange[1] - baseRange[0])
   return days.map(() => {
@@ -45,7 +48,6 @@ const generateModelData = (baseRange: [number, number], variance: number) => {
   })
 }
 
-// Generate data for requests
 const requestsPerModel = days.map((day, dayIndex) => {
   const data: Record<string, any> = { name: day }
   models.forEach((model, index) => {
@@ -55,7 +57,7 @@ const requestsPerModel = days.map((day, dayIndex) => {
   return data
 })
 
-// Generate data for TTFT and ITL with separate model lines
+
 const generateLatencyData = (baseRanges: Record<string, [number, number]>, variance: number) => {
   return days.map((day) => {
     const dayData: Record<string, any> = { name: day }
@@ -67,7 +69,7 @@ const generateLatencyData = (baseRanges: Record<string, [number, number]>, varia
   })
 }
 
-// Different base ranges for each model to show variation
+
 const ttftData = generateLatencyData(
   {
     Llama: [80, 120],
@@ -104,7 +106,7 @@ const tokensPerModel = [
       ? Object.values(colors.dark)[index]
       : Object.values(colors.light)[index],
 }))
-
+const formatNumber = (value: number) => value.toLocaleString();
 const chartConfigs = [
   {
     title: "Requests Per Model",
@@ -120,6 +122,7 @@ const chartConfigs = [
     special: "bar",
     id: "tokens-per-model",
     tooltip: "Tokens generated across models",
+    valueFormatter:formatNumber
   },
   {
     title: "Time To First Token (TTFT)",
@@ -187,8 +190,8 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                     style={{
                       color:
                         typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                          ? colors.dark[Object.keys(colors.dark)[models.indexOf(name)]]
-                          : colors.light[Object.keys(colors.light)[models.indexOf(name)]],
+                          ? colors.dark[colorKeys[models.indexOf(name) % colorKeys.length]]
+                          : colors.light[colorKeys[models.indexOf(name) % colorKeys.length]],
                     }}
                   >
                     {config.valueFormatter(value)}
@@ -204,13 +207,13 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   stackId="1"
                   stroke={
                     typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                      ? colors.dark[Object.keys(colors.dark)[index]]
-                      : colors.light[Object.keys(colors.light)[index]]
+                      ? colors.dark[colorKeys[index % colorKeys.length]]
+                      : colors.light[colorKeys[index % colorKeys.length]]
                   }
                   fill={
                     typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                      ? colors.dark[Object.keys(colors.dark)[index]]
-                      : colors.light[Object.keys(colors.light)[index]]
+                      ? colors.dark[colorKeys[index % colorKeys.length]]
+                      : colors.light[colorKeys[index % colorKeys.length]]
                   }
                   strokeWidth={0}
                 />
@@ -276,8 +279,8 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                     style={{
                       color:
                         typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                          ? colors.dark[Object.keys(colors.dark)[models.indexOf(name)]]
-                          : colors.light[Object.keys(colors.light)[models.indexOf(name)]],
+                          ? colors.dark[colorKeys[models.indexOf(name) % colorKeys.length]]
+                          : colors.light[colorKeys[models.indexOf(name) % colorKeys.length]],
                     }}
                   >
                     {config.valueFormatter(value)}
@@ -288,8 +291,8 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
               {models.map((model, index) => {
                 const color =
                   typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                    ? colors.dark[Object.keys(colors.dark)[index]]
-                    : colors.light[Object.keys(colors.light)[index]]
+                    ? colors.dark[colorKeys[index % colorKeys.length]]
+                    : colors.light[colorKeys[index % colorKeys.length]]
                 return (
                   <Area key={model} type="monotone" dataKey={model} stroke={color} strokeWidth={2} fill="transparent" />
                 )
@@ -353,7 +356,6 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 }}
                 labelFormatter={(name: string) => name}
                 separator=""
-                itemSeparator=""
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
                 {tokensPerModel.map((entry, index) => (
