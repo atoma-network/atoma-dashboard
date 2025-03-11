@@ -85,56 +85,57 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
         {loginType === "login" ? "Enter your credentials to access your account." : "Create Account"}
       </h2>
 
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Email</label>
-          <InputText
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
-          />
-        </div>
-        {loginType === "register" && (
+      <div className="flex flex-col space-y-6">
+        <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Name</label>
+            <label className="text-sm font-medium text-gray-700">Email</label>
             <InputText
-              placeholder="Enter your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
             />
           </div>
-        )}
+          {loginType === "register" && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Name</label>
+              <InputText
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
+              />
+            </div>
+          )}
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Password</label>
-          <InputText
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="p-inputtext-lg w-full border border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
-          />
-        </div>
-
-        {loginType === "login" && (
-          <div className="flex justify-end">
-            <a href="#" className="text-sm text-primary hover:text-primary">
-              Forgot password?
-            </a>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Password</label>
+            <InputText
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="p-inputtext-lg w-full border border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
+            />
           </div>
-        )}
 
-        <Button
-          type="submit"
-          label={isLoading ? "please wait ..." : loginType === "login" ? "Sign In" : "Create Account"}
-          className="p-button-lg p-4 bg-primary hover:bg-primary text-white font-medium rounded-md transition-colors duration-200"
-        />
+          {loginType === "login" && (
+            <div className="flex justify-end">
+              <a href="#" className="text-sm text-primary hover:text-primary">
+                Forgot password?
+              </a>
+            </div>
+          )}
 
+          <Button
+            type="submit"
+            label={isLoading ? "please wait ..." : loginType === "login" ? "Sign In" : "Create Account"}
+            className="p-button-lg p-4 bg-primary hover:bg-primary text-white font-medium rounded-md transition-colors duration-200"
+          />
+        </form>
         {process.env.NEXT_PUBLIC_ENABLE_ZK_LOGIN_GOOGLE === "true" && (
           <Button
             className="p-button p-4 font-medium rounded-md transition-colors duration-200 bg-white dark:bg-black hover:bg-gray-200 dark:hover:bg-gray-800 text-black dark:text-white border border-gray-400 dark:border-gray-600"
@@ -162,25 +163,25 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
             <span>Continue with Google</span>
           </Button>
         )}
+      </div>
 
-        <div className="text-center text-sm text-gray-600 mt-4">
-          {loginType === "login" ? (
-            <p>
-              Don't have an account?{" "}
-              <a href="#" className="text-primary hover:underline" onClick={() => setLoginType("register")}>
-                Sign up
-              </a>
-            </p>
-          ) : (
-            <p>
-              Already have an account?{" "}
-              <a href="#" className="text-primary hover:underline" onClick={() => setLoginType("login")}>
-                Sign in
-              </a>
-            </p>
-          )}
-        </div>
-      </form>
+      <div className="text-center text-sm text-gray-600 mt-4">
+        {loginType === "login" ? (
+          <p>
+            Don't have an account?{" "}
+            <a href="#" className="text-primary hover:underline" onClick={() => setLoginType("register")}>
+              Sign up
+            </a>
+          </p>
+        ) : (
+          <p>
+            Already have an account?{" "}
+            <a href="#" className="text-primary hover:underline" onClick={() => setLoginType("login")}>
+              Sign in
+            </a>
+          </p>
+        )}
+      </div>
     </div>
   );
 };

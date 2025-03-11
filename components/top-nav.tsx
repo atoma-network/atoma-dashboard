@@ -48,7 +48,7 @@ export function TopNav() {
         }
       })();
     }
-  }, []);
+  }, [settings.loggedIn]);
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background dark:bg-darkMode">
