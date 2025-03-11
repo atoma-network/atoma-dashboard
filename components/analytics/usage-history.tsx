@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useEffect, useState } from "react";
-import { getAllStacks, getAllTastks as getAllTasks, getTasks } from "@/lib/atoma";
+import { getAllStacks, getAllTasks } from "@/lib/atoma";
 
 const usageData = [
   {
