@@ -79,7 +79,7 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="wallet">Wallet Address</Label>
-                <Input id="wallet" value={address} readOnly className="bg-muted" disabled={!loggedIn} />
+                <Input id="wallet" value={address || ""} readOnly className="bg-muted" disabled={!loggedIn} />
               </div>
               <div className="space-y-2 pt-4 border-t">
                 <Label>Interface Preferences</Label>
