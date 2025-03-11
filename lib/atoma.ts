@@ -3,7 +3,6 @@ import { Transaction } from "@mysten/sui/transactions";
 import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { WalletAccount } from "@mysten/wallet-standard";
 
-const proxy_url = process.env.NEXT_PUBLIC_PROXY_URL;
 const USDC_TYPE = process.env.NEXT_PUBLIC_USDC_TYPE;
 
 export interface NodeSubscription {
