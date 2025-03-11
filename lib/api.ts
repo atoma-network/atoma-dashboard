@@ -1,4 +1,5 @@
 import axios from "axios";
+import { errorHandler } from "./utils"
 import config from "../config/config";
 import type {
   AuthResponse,
@@ -54,141 +55,161 @@ const addAuthInterceptor = (apiClient: any) => {
 addAuthInterceptor(credentialsApi);
 addAuthInterceptor(atomaApi);
 
-// Export a default API object with both clients
-// export default {
-//   credentials: credentialsApi,
-//   atoma: atomaApi,
-
-//   // Helper method to determine which API to use based on the URL
-//   post: (url: string, data: any, config?: any) => {
-//     if (url.startsWith("/v1/")) {
-//       return atomaApi.post(url, data, config);
-//     } else {
-//       return credentialsApi.post(url, data, config);
-//     }
-//   },
-
-//   get: (url: string, config?: any) => {
-//     if (url.startsWith("/v1/")) {
-//       return atomaApi.get(url, config);
-//     } else {
-//       return credentialsApi.get(url, config);
-//     }
-//   },
-
-//   put: (url: string, data: any, config?: any) => {
-//     if (url.startsWith("/v1/")) {
-//       return atomaApi.put(url, data, config);
-//     } else {
-//       return credentialsApi.put(url, data, config);
-//     }
-//   },
-
-//   delete: (url: string, config?: any) => {
-//     if (url.startsWith("/v1/")) {
-//       return atomaApi.delete(url, config);
-//     } else {
-//       return credentialsApi.delete(url, config);
-//     }
-//   },
-// };
-
 export const getSubscriptions = async () => {
-  return await credentialsApi.get<NodeSubscription[]>("/subscriptions");
+  return await errorHandler(() =>
+    credentialsApi.get<NodeSubscription[]>("/subscriptions")
+  );
 };
 
 export const getAllTasks = async () => {
-  return await credentialsApi.get<[Task, ModelModality[]][]>("/tasks");
+  return await errorHandler(() =>
+    credentialsApi.get<[Task, ModelModality[]][]>("/tasks")
+  );
 };
 
 export const getTasks = async () => {
-  const tasks_with_modalities = await getAllTasks();
-  // Filter out deprecated tasks and tasks without model names and modalities (no modalities means the proxy doesn't support the task)
-  tasks_with_modalities.data = tasks_with_modalities.data.filter(
-    ([task, modalities]) => !task.is_deprecated && !!task.model_name && modalities.length > 0
-  );
-  return tasks_with_modalities;
-};
-
-export const registerUser = async (profile: UserProfile, password: string) => {
-  return await credentialsApi.post<AuthResponse>("/register", { user_profile: profile, password });
-};
-
-export const loginUser = async (email: string, password: string) => {
-  return await credentialsApi.post<AuthResponse>("/login", { email, password });
-};
-
-export const generateApiKey = async (name: string) => {
-  return await credentialsApi.post<string>("/generate_api_token", name);
-};
-
-export const revokeApiToken = async (api_token_id: number) => {
-  return await credentialsApi.post<void>("/revoke_api_token", api_token_id);
-};
-
-export const listApiKeys = async () => {
-  return await credentialsApi.get<Token[]>("/api_tokens");
-};
-
-export const getComputeUnitsProcessed = async () => {
-  return await credentialsApi.get<ComputedUnitsProcessedResponse[]>("/compute_units_processed?hours=168");
-};
-
-export const getLatency = async () => {
-  return await credentialsApi.get<LatencyResponse[]>("/latency?hours=168");
-};
-
-export const getNodesDistribution = async () => {
-  return await credentialsApi.get<{ country: string; count: number }[]>("/get_nodes_distribution");
-};
-
-export const getStatsStacks = async () => {
-  return await credentialsApi.get<StatsStack[]>("/get_stats_stacks?hours=168");
-};
-
-export const proofRequest = async (signature: string, walletAddress: string) => {
-  return await credentialsApi.post<void>("/update_sui_address", { signature, address: walletAddress });
-};
-
-export const usdcPayment = async (txDigest: string, proofSignature?: string) => {
-  return await credentialsApi.post<void>("/usdc_payment", {
-    transaction_digest: txDigest,
-    proof_signature: proofSignature,
+  return await errorHandler(async () => {
+    const tasks_with_modalities = await getAllTasks();
+    // Filter out deprecated tasks and tasks without model names and modalities
+    tasks_with_modalities.data = tasks_with_modalities.data.filter(
+      ([task, modalities]) =>
+        !task.is_deprecated && !!task.model_name && modalities.length > 0
+    );
+    return tasks_with_modalities;
   });
 };
 
+export const registerUser = async (profile: UserProfile, password: string) => {
+  return await errorHandler(() =>
+    credentialsApi.post<AuthResponse>("/register", {
+      user_profile: profile,
+      password,
+    })
+  );
+};
+
+export const loginUser = async (email: string, password: string) => {
+  return await errorHandler(() =>
+    credentialsApi.post<AuthResponse>("/login", { email, password })
+  );
+};
+
+export const generateApiKey = async (name: string) => {
+  return await errorHandler(() =>
+    credentialsApi.post<string>("/generate_api_token", name)
+  );
+};
+
+export const revokeApiToken = async (api_token_id: number) => {
+  return await errorHandler(() =>
+    credentialsApi.post<void>("/revoke_api_token", api_token_id)
+  );
+};
+
+export const listApiKeys = async () => {
+  return await errorHandler(() => credentialsApi.get<Token[]>("/api_tokens"));
+};
+
+export const getComputeUnitsProcessed = async () => {
+  return await errorHandler(() =>
+    credentialsApi.get<ComputedUnitsProcessedResponse[]>(
+      "/compute_units_processed?hours=168"
+    )
+  );
+};
+
+export const getLatency = async () => {
+  return await errorHandler(() =>
+    credentialsApi.get<LatencyResponse[]>("/latency?hours=168")
+  );
+};
+
+export const getNodesDistribution = async () => {
+  return await errorHandler(() =>
+    credentialsApi.get<{ country: string; count: number }[]>(
+      "/get_nodes_distribution"
+    )
+  );
+};
+
+export const getStatsStacks = async () => {
+  return await errorHandler(() =>
+    credentialsApi.get<StatsStack[]>("/get_stats_stacks?hours=168")
+  );
+};
+
+export const proofRequest = async (
+  signature: string,
+  walletAddress: string
+) => {
+  return await errorHandler(() =>
+    credentialsApi.post<void>("/update_sui_address", {
+      signature,
+      address: walletAddress,
+    })
+  );
+};
+
+export const usdcPayment = async (
+  txDigest: string,
+  proofSignature?: string
+) => {
+  return await errorHandler(() =>
+    credentialsApi.post<void>("/usdc_payment", {
+      transaction_digest: txDigest,
+      proof_signature: proofSignature,
+    })
+  );
+};
+
 export const getSuiAddress = async () => {
-  return await credentialsApi.get<string>("/get_sui_address");
+  return await errorHandler(() =>
+    credentialsApi.get<string>("/get_sui_address")
+  );
 };
 
 export const getBalance = async () => {
-  return await credentialsApi.get<number>("/balance");
+  return await errorHandler(() => credentialsApi.get<number>("/balance"));
 };
 
 export const getAllStacks = async () => {
-  return await credentialsApi.get<[Stack, string][]>("/all_stacks");
+  return await errorHandler(() =>
+    credentialsApi.get<[Stack, string][]>("/all_stacks")
+  );
 };
 
 export const getUserProfile = async () => {
-  return await credentialsApi.get<UserProfile>("/user_profile");
+  return await errorHandler(() =>
+    credentialsApi.get<UserProfile>("/user_profile")
+  );
 };
 
 export const saveUserProfile = async (profile: UserProfile) => {
-  return await credentialsApi.post<void>("/set_user_profile", profile);
+  return await errorHandler(() =>
+    credentialsApi.post<void>("/set_user_profile", profile)
+  );
 };
 
 export const googleOAuth = async (idToken: string) => {
-  return await credentialsApi.post<AuthResponse>("/google_oauth", idToken);
+  return await errorHandler(() =>
+    credentialsApi.post<AuthResponse>("/google_oauth", idToken)
+  );
 };
 
 export const getSalt = async () => {
-  return await credentialsApi.get<string>("/salt");
+  return await errorHandler(() => credentialsApi.get<string>("/salt"));
 };
 
 export const getGraphs = async () => {
-  return await credentialsApi.get<[string, [string, string, any][]][]>("/get_graphs");
+  return await errorHandler(() =>
+    credentialsApi.get<[string, [string, string, any][]][]>("/get_graphs")
+  );
 };
 
 export const getGraphData = async (query: any) => {
-  return await credentialsApi.post<any>("/get_graph_data", query);
+  return await errorHandler(() =>
+    credentialsApi.post<any>("/get_graph_data", query)
+  );
 };
+
+
