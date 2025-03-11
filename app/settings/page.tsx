@@ -14,14 +14,29 @@ import { getUserProfile, saveUserProfile } from "@/lib/api";
 
 export default function SettingsPage() {
   const [userProfile, setUserProfile] = useState({ name: "", email: "" });
+  const { settings } = useSettings();
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [address, setAddress] = useState<string>();
   const account = useCurrentAccount();
 
   useEffect(() => {
     (async () => {
-      let profile = await getUserProfile();
-      setUserProfile(profile.data);
+      setLoggedIn(settings.loggedIn);
+      if (settings.loggedIn) {
+        let profile = await getUserProfile();
+        setUserProfile(profile.data);
+        if (settings.zkLogin.isEnabled) {
+          setAddress(settings.zkLogin.address);
+        } else {
+          console.log("account?.address", account?.address);
+          setAddress(account?.address);
+        }
+      } else {
+        setAddress(undefined);
+        setUserProfile({ name: "", email: "" });
+      }
     })();
-  }, []);
+  }, [settings.loggedIn, account]);
 
   const handleSaveAccount = async () => {
     await saveUserProfile(userProfile);
@@ -48,6 +63,7 @@ export default function SettingsPage() {
                 <Input
                   id="full-name"
                   defaultValue={userProfile.name}
+                  disabled={!loggedIn}
                   onChange={(e) => setUserProfile({ ...userProfile, name: e.target.value })}
                 />
               </div>
@@ -57,12 +73,13 @@ export default function SettingsPage() {
                   id="email"
                   type="email"
                   defaultValue={userProfile.email}
+                  disabled={!loggedIn}
                   onChange={(e) => setUserProfile({ ...userProfile, email: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="wallet">Wallet Address</Label>
-                <Input id="wallet" value={account?.address} readOnly className="bg-muted" />
+                <Input id="wallet" value={address} readOnly className="bg-muted" disabled={!loggedIn} />
               </div>
               <div className="space-y-2 pt-4 border-t">
                 <Label>Interface Preferences</Label>
@@ -71,7 +88,9 @@ export default function SettingsPage() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={handleSaveAccount}>Save Account Settings</Button>
+              <Button onClick={handleSaveAccount} disabled={!loggedIn}>
+                Save Account Settings
+              </Button>
             </CardFooter>
           </Card>
         </div>

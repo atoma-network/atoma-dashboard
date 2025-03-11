@@ -6,10 +6,12 @@ import { useSettings } from "@/contexts/settings-context";
 
 export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => void }) {
   const [balance, setBalance] = useState("-");
+  const [loggedIn, setLoggedIn] = useState(false);
   const { settings } = useSettings();
 
   useEffect(() => {
     const updateBalance = async () => {
+      setLoggedIn(settings.loggedIn);
       if (!settings.loggedIn) {
         setBalance("-");
         return;
@@ -30,7 +32,7 @@ export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => vo
       }
     };
     updateBalance();
-  }, []);
+  }, [settings.loggedIn]);
   return (
     <Card className="h-[280px] flex flex-col">
       <CardHeader>
@@ -43,7 +45,7 @@ export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => vo
         </div>
         <Button
           className="w-full bg-primary hover:bg-secondary-foreground text-base"
-          disabled={!settings.loggedIn}
+          disabled={!loggedIn}
           onClick={handleAddFunds}
         >
           Add Funds

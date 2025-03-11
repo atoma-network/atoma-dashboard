@@ -1,5 +1,5 @@
 import axios from "axios";
-import { errorHandler } from "./utils"
+import { errorHandler } from "./utils";
 import config from "../config/config";
 import type {
   AuthResponse,
@@ -56,15 +56,11 @@ addAuthInterceptor(credentialsApi);
 addAuthInterceptor(atomaApi);
 
 export const getSubscriptions = async () => {
-  return await errorHandler(() =>
-    credentialsApi.get<NodeSubscription[]>("/subscriptions")
-  );
+  return await errorHandler(() => credentialsApi.get<NodeSubscription[]>("/subscriptions"));
 };
 
 export const getAllTasks = async () => {
-  return await errorHandler(() =>
-    credentialsApi.get<[Task, ModelModality[]][]>("/tasks")
-  );
+  return await errorHandler(() => credentialsApi.get<[Task, ModelModality[]][]>("/tasks"));
 };
 
 export const getTasks = async () => {
@@ -72,8 +68,7 @@ export const getTasks = async () => {
     const tasks_with_modalities = await getAllTasks();
     // Filter out deprecated tasks and tasks without model names and modalities
     tasks_with_modalities.data = tasks_with_modalities.data.filter(
-      ([task, modalities]) =>
-        !task.is_deprecated && !!task.model_name && modalities.length > 0
+      ([task, modalities]) => !task.is_deprecated && !!task.model_name && modalities.length > 0
     );
     return tasks_with_modalities;
   });
@@ -89,21 +84,15 @@ export const registerUser = async (profile: UserProfile, password: string) => {
 };
 
 export const loginUser = async (email: string, password: string) => {
-  return await errorHandler(() =>
-    credentialsApi.post<AuthResponse>("/login", { email, password })
-  );
+  return await errorHandler(() => credentialsApi.post<AuthResponse>("/login", { email, password }));
 };
 
 export const generateApiKey = async (name: string) => {
-  return await errorHandler(() =>
-    credentialsApi.post<string>("/generate_api_token", name)
-  );
+  return await errorHandler(() => credentialsApi.post<string>("/generate_api_token", { name }));
 };
 
-export const revokeApiToken = async (api_token_id: number) => {
-  return await errorHandler(() =>
-    credentialsApi.post<void>("/revoke_api_token", api_token_id)
-  );
+export const revokeApiToken = async (apiTokenId: number) => {
+  return await errorHandler(() => credentialsApi.post<void>("/revoke_api_token", { api_token_id: apiTokenId }));
 };
 
 export const listApiKeys = async () => {
@@ -112,36 +101,23 @@ export const listApiKeys = async () => {
 
 export const getComputeUnitsProcessed = async () => {
   return await errorHandler(() =>
-    credentialsApi.get<ComputedUnitsProcessedResponse[]>(
-      "/compute_units_processed?hours=168"
-    )
+    credentialsApi.get<ComputedUnitsProcessedResponse[]>("/compute_units_processed?hours=168")
   );
 };
 
 export const getLatency = async () => {
-  return await errorHandler(() =>
-    credentialsApi.get<LatencyResponse[]>("/latency?hours=168")
-  );
+  return await errorHandler(() => credentialsApi.get<LatencyResponse[]>("/latency?hours=168"));
 };
 
 export const getNodesDistribution = async () => {
-  return await errorHandler(() =>
-    credentialsApi.get<{ country: string; count: number }[]>(
-      "/get_nodes_distribution"
-    )
-  );
+  return await errorHandler(() => credentialsApi.get<{ country: string; count: number }[]>("/get_nodes_distribution"));
 };
 
 export const getStatsStacks = async () => {
-  return await errorHandler(() =>
-    credentialsApi.get<StatsStack[]>("/get_stats_stacks?hours=168")
-  );
+  return await errorHandler(() => credentialsApi.get<StatsStack[]>("/get_stats_stacks?hours=168"));
 };
 
-export const proofRequest = async (
-  signature: string,
-  walletAddress: string
-) => {
+export const proofRequest = async (signature: string, walletAddress: string) => {
   return await errorHandler(() =>
     credentialsApi.post<void>("/update_sui_address", {
       signature,
@@ -150,10 +126,7 @@ export const proofRequest = async (
   );
 };
 
-export const usdcPayment = async (
-  txDigest: string,
-  proofSignature?: string
-) => {
+export const usdcPayment = async (txDigest: string, proofSignature?: string) => {
   return await errorHandler(() =>
     credentialsApi.post<void>("/usdc_payment", {
       transaction_digest: txDigest,
@@ -163,9 +136,7 @@ export const usdcPayment = async (
 };
 
 export const getSuiAddress = async () => {
-  return await errorHandler(() =>
-    credentialsApi.get<string>("/get_sui_address")
-  );
+  return await errorHandler(() => credentialsApi.get<string>("/get_sui_address"));
 };
 
 export const getBalance = async () => {
@@ -173,27 +144,19 @@ export const getBalance = async () => {
 };
 
 export const getAllStacks = async () => {
-  return await errorHandler(() =>
-    credentialsApi.get<[Stack, string][]>("/all_stacks")
-  );
+  return await errorHandler(() => credentialsApi.get<[Stack, string][]>("/all_stacks"));
 };
 
 export const getUserProfile = async () => {
-  return await errorHandler(() =>
-    credentialsApi.get<UserProfile>("/user_profile")
-  );
+  return await errorHandler(() => credentialsApi.get<UserProfile>("/user_profile"));
 };
 
 export const saveUserProfile = async (profile: UserProfile) => {
-  return await errorHandler(() =>
-    credentialsApi.post<void>("/set_user_profile", profile)
-  );
+  return await errorHandler(() => credentialsApi.post<void>("/set_user_profile", profile));
 };
 
 export const googleOAuth = async (idToken: string) => {
-  return await errorHandler(() =>
-    credentialsApi.post<AuthResponse>("/google_oauth", idToken)
-  );
+  return await errorHandler(() => credentialsApi.post<AuthResponse>("/google_oauth", idToken));
 };
 
 export const getSalt = async () => {
@@ -201,15 +164,9 @@ export const getSalt = async () => {
 };
 
 export const getGraphs = async () => {
-  return await errorHandler(() =>
-    credentialsApi.get<[string, [string, string, any][]][]>("/get_graphs")
-  );
+  return await errorHandler(() => credentialsApi.get<[string, [string, string, any][]][]>("/get_graphs"));
 };
 
 export const getGraphData = async (query: any) => {
-  return await errorHandler(() =>
-    credentialsApi.post<any>("/get_graph_data", query)
-  );
+  return await errorHandler(() => credentialsApi.post<any>("/get_graph_data", query));
 };
-
-

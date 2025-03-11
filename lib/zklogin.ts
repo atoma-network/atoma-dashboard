@@ -27,11 +27,7 @@ export default class ZkLogin {
   private salt?: bigint;
   private decodeJwt?: JwtPayload;
 
-  constructor(
-    settings: UserSettings,
-    updateSettings: (newSettings: Partial<UserSettings>) => void,
-    updateZkLoginSettings: (newSettings: Partial<UserSettings["zkLogin"]>) => void
-  ) {
+  constructor() {
     if (!SUI_RPC_URL) {
       throw new Error("SUI RPC URL is not set");
     }
@@ -43,7 +39,14 @@ export default class ZkLogin {
     });
     this.suiClient = suiClient;
     this.proverUrl = PROVER_URL;
-    this.getRest(settings, updateSettings, updateZkLoginSettings)
+  }
+
+  initialize = async (
+    settings: UserSettings,
+    updateSettings: (newSettings: Partial<UserSettings>) => void,
+    updateZkLoginSettings: (newSettings: Partial<UserSettings["zkLogin"]>) => void
+  ) => {
+    return await this.getRest(settings, updateSettings, updateZkLoginSettings)
       .then(() => {})
       .catch((err) => {
         if (err.name === "TypeError") {
@@ -61,10 +64,11 @@ export default class ZkLogin {
           randomness: undefined,
           maxEpoch: undefined,
           zkp: undefined,
+          address: undefined,
         });
         updateSettings({ loggedIn: false });
       });
-  }
+  };
 
   get zkLoginUserAddressValue() {
     return this.zkLoginUserAddress;
@@ -85,6 +89,7 @@ export default class ZkLogin {
       randomness: undefined,
       maxEpoch: undefined,
       zkp: undefined,
+      address: undefined,
       idToken: undefined,
     });
     this.ephemeralKeyPair = undefined;
@@ -102,6 +107,7 @@ export default class ZkLogin {
     updateZkLoginSettings: (newSettings: Partial<UserSettings["zkLogin"]>) => void
   ) => {
     const zkLoginSettings = settings.zkLogin;
+    console.log("zklogin settings", zkLoginSettings);
     const idToken = zkLoginSettings.idToken;
     if (!idToken) {
       return;
@@ -133,6 +139,7 @@ export default class ZkLogin {
     const salt = await getSalt();
     this.salt = BigInt(`0x${Buffer.from(salt.data, "base64").toString("hex")}`);
     this.zkLoginUserAddress = jwtToAddress(idToken, this.salt);
+    updateZkLoginSettings({ address: this.zkLoginUserAddress });
     this.ephemeralKeyPair = Ed25519Keypair.fromSecretKey(local_storage_secret_key);
     const partialZkLogin = zkLoginSettings.zkp;
     if (!partialZkLogin) {

@@ -38,6 +38,7 @@ export function ApiKeyCard() {
   const [newKeyName, setNewKeyName] = useState("");
   const [newGeneratedKey, setNewGeneratedKey] = useState("");
   const [copied, setCopied] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
   const { settings } = useSettings();
 
   const updateApiTokens = async () => {
@@ -62,6 +63,10 @@ export function ApiKeyCard() {
       setApiKeys(apiKeys);
     } catch (error) {}
   };
+
+  useEffect(() => {
+    setLoggedIn(settings.loggedIn);
+  }, [settings.loggedIn]);
 
   useEffect(() => {
     updateApiTokens();
@@ -99,7 +104,7 @@ export function ApiKeyCard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between p-6">
           <h2 className="text-lg font-semibold text-purple-600">API keys</h2>
-          <Button onClick={() => setIsCreateDialogOpen(true)} disabled={!settings.loggedIn}>
+          <Button onClick={() => setIsCreateDialogOpen(true)} disabled={!loggedIn}>
             <Plus className="mr-2 h-4 w-4" />
             Create new API key
           </Button>

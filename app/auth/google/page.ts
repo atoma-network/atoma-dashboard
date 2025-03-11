@@ -13,7 +13,8 @@ const Callback = () => {
     new URLSearchParams(window.location.hash.slice(1)).forEach((value, key) => {
       if (key === "id_token") {
         updateZkLoginSettings({ idToken: value });
-        const zkLogin = new ZkLogin(
+        const zkLogin = new ZkLogin();
+        zkLogin.initialize(
           { ...settings, zkLogin: { ...settings.zkLogin, idToken: value } },
           updateSettings,
           updateZkLoginSettings

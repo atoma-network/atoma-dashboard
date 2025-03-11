@@ -65,8 +65,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
     }
   };
 
-  const handleGoogleOauth = () => {
-    const zkLogin = new ZkLogin(settings, updateSettings, updateZkLoginSettings);
+  const handleGoogleOauth = async () => {
+    const zkLogin = new ZkLogin();
+    await zkLogin.initialize(settings, updateSettings, updateZkLoginSettings);
     zkLogin
       .getURL(settings.zkLogin, updateZkLoginSettings)
       .then((url) => {

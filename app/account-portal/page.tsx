@@ -88,7 +88,8 @@ export default function DashboardPage() {
   const handleUSDCPayment = async (amount: number) => {
     setHandlingPayment(true);
     if (settings.zkLogin.isEnabled) {
-      const zkLogin = new ZkLogin(settings, updateSettings, updateZkLoginSettings);
+      const zkLogin = new ZkLogin();
+      await zkLogin.initialize(settings, updateSettings, updateZkLoginSettings);
       zkLogin
         .payUSDC(amount * 1000000, suiClient)
         .then((res) => {

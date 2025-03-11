@@ -15,6 +15,7 @@ export interface UserSettings {
     randomness?: string;
     maxEpoch?: number;
     zkp?: string;
+    address?: string;
   };
   // fullName: string
   // email: string
