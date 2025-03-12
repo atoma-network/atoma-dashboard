@@ -24,7 +24,6 @@ export const setToastRef = (toast: Toast) => {
 
 const handleError = (error: any) => {
   let message = "An error occurred.";
-  console.log("hiiii");
   if (error.response) {
     message = error.response.data?.message || `Error: ${error.response.status}`;
   } else if (error.request) {
@@ -39,7 +38,6 @@ const handleError = (error: any) => {
 
   return Promise.reject(error);
 };
-
 
 // Create an API client for the credentials API
 const credentialsApi = axios.create({
@@ -58,8 +56,6 @@ const atomaApi = axios.create({
     "Content-Type": "application/json",
   },
 });
-
-
 
 credentialsApi.interceptors.response.use((response) => response, handleError);
 
