@@ -7,17 +7,17 @@ import { Copy } from "lucide-react";
 
 const endpoints = [
   {
-    name: "Chat Completions",
+    name: "Chat Completion",
     endpoint: "/v1/chat/completions",
     method: "POST",
   },
   {
-    name: "Images Generations",
+    name: "Image Generation",
     endpoint: "/v1/images/generations",
     method: "POST",
   },
   {
-    name: "Embeddings",
+    name: "Embedding",
     endpoint: "/v1/embeddings",
     method: "POST",
   },
@@ -41,7 +41,7 @@ export function ApiAccessCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-purple-600">API Access</CardTitle>
+        <CardTitle className="text-[#DD6C4A]">API Access</CardTitle>
         <CardDescription>Integrate our AI models into your applications using our RESTful API</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -72,7 +72,7 @@ export function ApiAccessCard() {
                   <TableCell>
                     <code className="text-sm">{endpoint.endpoint}</code>
                   </TableCell>
-                  <TableCell className="text-right text-purple-600">{endpoint.method}</TableCell>
+                  <TableCell className="text-right text-[#DD6C4A]">{endpoint.method}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

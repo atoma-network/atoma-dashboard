@@ -1,11 +1,18 @@
+import { cn } from "@/lib/utils"
+
 const LoadingCircle = ({ isSpinning = false }: { isSpinning?: boolean }) => {
   return (
-    <div
-      className={`w-[10em] h-[10em] rounded-full border-4 border-purple-500 ${
-        isSpinning ? "animate-spin border-t-transparent" : ""
-      }`}
-    />
+    <div className="flex items-center justify-center h-full">
+      <div
+        className={cn(
+          "w-12 h-12 border-[3px] border-[#DD6C4A]/20 border-t-[#DD6C4A] rounded-full transition-opacity duration-300",
+          isSpinning ? "animate-spin opacity-100" : "opacity-0",
+          "motion-reduce:animate-none"
+        )}
+        style={{ animationDuration: '0.8s' }}
+      />
+    </div>
   );
 };
 
-export default LoadingCircle; 
+export default LoadingCircle;

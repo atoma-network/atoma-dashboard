@@ -10,19 +10,19 @@
     --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 71.4% 4.1%;
-    --primary: 262 83.3% 57.8%;
+    --primary: 14 72% 58%;
     --primary-foreground: 210 20% 98%;
-    --secondary: 262 59% 97%;
-    --secondary-foreground: 262 83.3% 57.8%;
-    --muted: 262 10% 95%;
-    --muted-foreground: 262 10% 40%;
-    --accent: 262 59% 97%;
-    --accent-foreground: 262 83.3% 57.8%;
+    --secondary: 14 72% 97%;
+    --secondary-foreground: 14 72% 58%;
+    --muted: 14 10% 95%;
+    --muted-foreground: 14 10% 40%;
+    --accent: 14 72% 97%;
+    --accent-foreground: 14 72% 58%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 20% 98%;
     --border: 262 10% 90%;
     --input: 262 10% 90%;
-    --ring: 262 83.3% 57.8%;
+    --ring: 14 72% 58%;
     --radius: 0.5rem;
     --grid-color: rgb(243 244 246);
   }
@@ -31,10 +31,11 @@
     --background: 215 28% 17%; /* #1A1B1E */
     --foreground: 210 40% 98%;
     --card: 222 47% 11%; /* #1F2937 */
+    --card-hover: 222 47% 13%;  /* Add this new variable */
     --card-foreground: 210 40% 98%;
     --popover: 215 28% 17%;
     --popover-foreground: 210 40% 98%;
-    --primary: 263 85% 65%;
+    --primary: 14 72% 58%;
     --primary-foreground: 210 40% 98%;
     --secondary: 215 28% 17%;
     --secondary-foreground: 210 40% 98%;
@@ -46,7 +47,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 215 28% 17%;
     --input: 215 28% 17%;
-    --ring: 263 85% 65%;
+    --ring: 14 72% 58%;
     --grid-color: rgba(31, 41, 55, 0.2);
   }
 }
@@ -80,7 +81,7 @@
 
   .grid-item:hover {
     margin: -1px -1px 0 0;
-    background-color: rgba(139, 92, 246, 0.1);
+    background-color: rgba(221, 108, 74, 0.1);
     transition: background-color 0.3s ease-in-out;
   }
 
@@ -89,8 +90,13 @@
   }
 
   .dark .grid-item:hover {
-    background-color: rgba(139, 92, 246, 0.05);
+    background-color: rgba(221, 108, 74, 0.05);
     transition: background-color 0.3s ease-in-out;
+  }
+
+  .dark .hover-card:hover {
+    background-color: var(--card-hover);
+    transition: background-color 0.2s ease-in-out;
   }
 }
 

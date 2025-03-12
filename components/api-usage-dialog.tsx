@@ -121,38 +121,40 @@ fetch(url, options)
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>API Usage for {modelName}</DialogTitle>
+          <DialogTitle>API Usage: {modelName}</DialogTitle>
         </DialogHeader>
-        
-        <Tabs defaultValue="curl" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="curl">cURL</TabsTrigger>
-            <TabsTrigger value="python">Python</TabsTrigger>
-            <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="curl" className="relative">
-            <pre className="relative rounded-lg bg-muted p-4 overflow-x-auto font-mono text-sm">{curlCode}</pre>
-          </TabsContent>
-          
-          <TabsContent value="python" className="relative">
-            <pre className="relative rounded-lg bg-muted p-4 overflow-x-auto font-mono text-sm">{pythonCode}</pre>
-          </TabsContent>
-          
-          <TabsContent value="javascript" className="relative">
-            <pre className="relative rounded-lg bg-muted p-4 overflow-x-auto font-mono text-sm">{javascriptCode}</pre>
-          </TabsContent>
-        </Tabs>
-        
-        <Button
-          size="icon"
-          variant="ghost"
-          className="absolute top-16 right-6 h-8 w-8 hover:bg-muted-foreground/20"
-          onClick={copyToClipboard}
-        >
-          {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-muted-foreground" />}
-          <span className="sr-only">Copy code</span>
-        </Button>
+        <div className="grid gap-4">
+          <Tabs defaultValue="curl" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="curl">cURL</TabsTrigger>
+              <TabsTrigger value="python">Python</TabsTrigger>
+              <TabsTrigger value="javascript">JavaScript</TabsTrigger>
+            </TabsList>
+            <div className="mt-4 rounded-md bg-muted/50 p-4">
+              <pre className="overflow-x-auto min-h-[280px] flex items-start">
+                <code className="text-sm">{activeTab === "curl" ? curlCode : activeTab === "python" ? pythonCode : javascriptCode}</code>
+              </pre>
+            </div>
+          </Tabs>
+          <div className="flex gap-2">
+            <Button onClick={copyToClipboard} className="w-[100px]">
+              {copied ? (
+                <>
+                  <Check className="mr-2 h-4 w-4" />
+                  Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy
+                </>
+              )}
+            </Button>
+            <Button variant="outline" onClick={onClose}>
+              Close
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )

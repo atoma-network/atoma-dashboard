@@ -50,7 +50,7 @@ const defaultSettings: UserSettings = {
   zkLogin: {
     isEnabled: false,
   },
-  avatar: "/placeholder.svg?height=400&width=400&background=8B5CF6", // Purple
+  avatar: "/placeholder.svg?height=400&width=400&background=DD6C4A", // Coral
   // fullName: "Dollar Singh",
   // email: "dollar.singh@example.com",
   // phone: "+1 (555) 123-4567",

@@ -100,7 +100,7 @@ export function ApiKeyCard() {
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between p-6">
-          <h2 className="text-lg font-semibold text-purple-600">API keys</h2>
+          <h2 className="text-lg font-semibold text-[#DD6C4A]">API Keys</h2>
           <Button onClick={() => setIsCreateDialogOpen(true)} disabled={!settings.loggedIn}>
             <Plus className="mr-2 h-4 w-4" />
             Create new API key

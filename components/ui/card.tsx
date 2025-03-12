@@ -7,7 +7,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, ...props 
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border border-gray-200 bg-white text-gray-950 shadow-sm transition-all duration-300 hover:border-primary dark:border-gray-800 dark:bg-[#020713] dark:text-gray-50 dark:hover:border-purple-400/50 relative",
+      "rounded-lg border border-gray-200 bg-white text-gray-950 shadow-sm transition-all duration-300 hover:border-[#DD6C4A] dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50 dark:hover:border-[#DD6C4A]/50 relative",
       className,
     )}
     {...props}
@@ -57,4 +57,3 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 CardFooter.displayName = "CardFooter"
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
-

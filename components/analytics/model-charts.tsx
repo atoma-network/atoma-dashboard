@@ -52,8 +52,25 @@ export function ModelCharts() {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
+                formatter={(value: number) => [
+                  <div key="value" style={{ 
+                    color: typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                      ? "#1e3a8a" // dark blue
+                      : "#2563eb" // lighter blue but still readable
+                  }}>
+                    {`${value.toLocaleString()} Requests`}
+                  </div>,
+                  null
+                ]}
               />
-              <Area type="monotone" dataKey="value" stroke="#FFC9C9" fill="#FFC9C9" fillOpacity={0.6} strokeWidth={2} />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={typeof window !== "undefined" && document.documentElement.classList.contains("dark") ? "#1e3a8a" : "#BAE6FD"}
+                fill={typeof window !== "undefined" && document.documentElement.classList.contains("dark") ? "#1e3a8a" : "#BAE6FD"}
+                fillOpacity={0.6}
+                strokeWidth={2}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
@@ -90,8 +107,25 @@ export function ModelCharts() {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
+                formatter={(value: number) => [
+                  <div key="value" style={{ 
+                    color: typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                      ? "#7f1d1d" // dark red
+                      : "#dc2626" // lighter red but still readable
+                  }}>
+                    {`${value.toLocaleString()} Tokens`}
+                  </div>,
+                  null
+                ]}
               />
-              <Area type="monotone" dataKey="value" stroke="#FFF3C9" fill="#FFF3C9" fillOpacity={0.6} strokeWidth={2} />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={typeof window !== "undefined" && document.documentElement.classList.contains("dark") ? "#7f1d1d" : "#FFC9C9"}
+                fill={typeof window !== "undefined" && document.documentElement.classList.contains("dark") ? "#7f1d1d" : "#FFC9C9"}
+                fillOpacity={0.6}
+                strokeWidth={2}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>

@@ -8,17 +8,17 @@ import { ApiUsageDialog } from "@/components/api-usage-dialog";
 
 const endpoints = [
   {
-    name: "Chat Completions",
+    name: "Chat Completion",
     endpoint: "/v1/chat/completions",
     method: "POST",
   },
   {
-    name: "Images Generations",
+    name: "Image Generation",
     endpoint: "/v1/images/generations",
     method: "POST",
   },
   {
-    name: "Embeddings",
+    name: "Embedding",
     endpoint: "/v1/embeddings",
     method: "POST",
   },
@@ -71,7 +71,7 @@ export function ApiDocumentation() {
   return (
     <Card className="h-[280px]">
       <CardHeader className="pb-2">
-        <CardTitle className="text-purple-600">Quick Reference</CardTitle>
+        <CardTitle className="text-[#DD6C4A]">Quick Reference</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <Tabs defaultValue="endpoints" className="h-[208px]">
@@ -101,7 +101,7 @@ export function ApiDocumentation() {
                       <span className="font-medium text-sm group-hover:text-primary transition-colors">
                         {endpoint.name}
                       </span>
-                      <span className="text-purple-600 text-xs font-mono bg-purple-100 dark:bg-purple-900/20 px-2 py-0.5 rounded transition-all duration-200 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/40 group-hover:scale-105 group-active:scale-95">
+                      <span className="text-[#DD6C4A] text-xs font-mono bg-[#DD6C4A]/10 dark:bg-[#DD6C4A]/20 px-2 py-0.5 rounded transition-all duration-200 group-hover:bg-[#DD6C4A]/20 dark:group-hover:bg-[#DD6C4A]/30 group-hover:scale-105 group-active:scale-95">
                         {endpoint.method}
                       </span>
                     </div>

@@ -8,7 +8,7 @@ export function BillingSummaryCard() {
   return (
     <Card className="h-[280px] flex flex-col">
       <CardHeader>
-        <CardTitle className="text-purple-600">Billing Summary</CardTitle>
+        <CardTitle className="text-foreground">Credit Balance</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col justify-center">
         <div className="space-y-6">
@@ -25,8 +25,7 @@ export function BillingSummaryCard() {
           <div className="flex justify-between items-center">
             <div className="text-sm font-medium">Billing Period</div>
             <div className="text-lg font-semibold text-foreground">
-              {startOfMonth.toLocaleDateString(undefined, { dateStyle: "long" })} -{" "}
-              {endOfMonth.toLocaleDateString(undefined, { dateStyle: "long" })}
+              {startOfMonth.toLocaleDateString('en-CA').replace(/-/g, '/')} - {endOfMonth.toLocaleDateString('en-CA').replace(/-/g, '/')}
             </div>
           </div>
         </div>
