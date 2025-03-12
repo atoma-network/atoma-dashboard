@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useEffect, useState } from "react";
 import { getAllStacks, getAllTasks } from "@/lib/api";
+import { useToast } from "@/app/toast-provider";
 
 const usageData = [
   {
@@ -65,11 +66,11 @@ interface IUsageHistory {
 
 export function UsageHistory() {
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
-
+const {showToast}=useToast()
   useEffect(() => {
     (async () => {
-      let stacksPromise = getAllStacks();
-      let tasksPromise = getAllTasks();
+      let stacksPromise = await getAllStacks().catch((ex)=>{showToast('Error Occured','error'); return {data:[]}});
+      let tasksPromise = getAllTasks().catch((ex)=>{showToast('Error Occured','error'); return {data:[]}});
       let [stacks, tasks] = await Promise.all([stacksPromise, tasksPromise]);
       setUsageHistory(
         stacks.data

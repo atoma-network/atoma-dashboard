@@ -54,7 +54,8 @@ export function ModelCharts() {
                 }}
                 formatter={(value) => [value.toLocaleString(), "Value"]}
               />
-              <Area type="monotone" dataKey="value" stroke="#FFC9C9" fill="#FFC9C9" fillOpacity={0.6} strokeWidth={2} />
+            <Area type="monotone" dataKey="value" stroke="#FF8080" fill="#FFB3B3" fillOpacity={0.8} strokeWidth={2} />
+
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
@@ -93,7 +94,9 @@ export function ModelCharts() {
                 }}
                 formatter={(value) => [value.toLocaleString(), "Value"]}
               />
-              <Area type="monotone" dataKey="value" stroke="#FFF3C9" fill="#FFF3C9" fillOpacity={0.6} strokeWidth={2} />
+              <Area type="monotone" dataKey="value" stroke="#FFA500" fill="#FFC080" fillOpacity={0.8} strokeWidth={2} />
+
+
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
