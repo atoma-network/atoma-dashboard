@@ -13,7 +13,6 @@ import type {
   UserProfile,
 } from "./atoma";
 
-
 import { Toast } from "primereact/toast";
 
 let toastRef: Toast | null = null;
@@ -60,7 +59,6 @@ const atomaApi = axios.create({
 credentialsApi.interceptors.response.use((response) => response, handleError);
 
 atomaApi.interceptors.response.use((response) => response, handleError);
-
 
 // Add authentication interceptor to both clients
 const addAuthInterceptor = (apiClient: any) => {
@@ -111,7 +109,7 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 export const generateApiKey = async (name: string) => {
-  return await credentialsApi.post<string>("/generate_api_token", name);
+  return await credentialsApi.post<string>("/generate_api_token", { name });
 };
 
 export const revokeApiToken = async (api_token_id: number) => {
