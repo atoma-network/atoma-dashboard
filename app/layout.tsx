@@ -29,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SuiWrap>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitions={false}>
               <TooltipProvider delayDuration={0}>
+                <ClientWrapper>
                 <div className="min-h-screen flex bg-background dark:bg-darkMode">
                   <Sidebar />
                   <div className="flex-1">
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     </div>
                   </div>
                 </div>
+                </ClientWrapper>
                 <Toaster />
               </TooltipProvider>
             </ThemeProvider>
@@ -48,4 +50,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   );
 }
 
-import "./globals.css";
+import "./globals.css";import ClientWrapper from "./client-wrapper";
+
