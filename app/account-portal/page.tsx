@@ -35,13 +35,15 @@ import { payUSDC } from "@/lib/utils";
 import { useSettings } from "@/contexts/settings-context";
 import ZkLogin from "@/lib/zklogin";
 import { getSuiAddress, proofRequest, usdcPayment } from "@/lib/api";
+import { Label } from "@/components/ui/label";
+import LoadingCircle from "@/components/LoadingCircle";
 
 const { networkConfig } = createNetworkConfig({
   testnet: { url: getFullnodeUrl("testnet") },
   mainnet: { url: getFullnodeUrl("mainnet") },
 });
 
-type FundsStep = "choose" | "amount" | "wallet" | "result";
+type FundsStep = "choose" | "amount" | "wallet" | "sending" | "result";
 
 export default function DashboardPage() {
   const [showAddFunds, setShowAddFunds] = useState(false);
@@ -70,10 +72,6 @@ export default function DashboardPage() {
     setShowAddFunds(true);
   };
 
-  const closeAuthForm = () => {
-    setShowAddFunds(false);
-  };
-
   const description = () => {
     switch (fundsStep) {
       case "choose":
@@ -88,6 +86,7 @@ export default function DashboardPage() {
   const handleUSDCPayment = async (amount: number) => {
     setHandlingPayment(true);
     if (settings.zkLogin.isEnabled) {
+      setFundsStep("sending");
       const zkLogin = new ZkLogin();
       await zkLogin.initialize(settings, updateSettings, updateZkLoginSettings);
       zkLogin
@@ -121,7 +120,7 @@ export default function DashboardPage() {
     }
 
     try {
-      setShowAddFunds(false);
+      setFundsStep("sending");
       const suiAddress = await getSuiAddress();
       if (suiAddress.data == null || suiAddress.data != account?.address) {
         // We haven't proven the SUI address yet
@@ -129,7 +128,8 @@ export default function DashboardPage() {
       }
       let res = await payUSDC(amount * 1000000, suiClient, signAndExecuteTransaction, account);
       const txDigest = (res as { digest: string }).digest;
-      await usdcPayment(txDigest);
+      res = await usdcPayment(txDigest);
+      setShowAddFunds(true);
       setFundsStep("result");
     } catch (error) {
       console.error(error);
@@ -240,8 +240,20 @@ export default function DashboardPage() {
             />
           );
         }
-      case "confirm account":
-        return <div />;
+      case "sending":
+        return (
+          <div className="flex items-center justify-center">
+            <LoadingCircle isSpinning={true} />
+          </div>
+        );
+      case "result":
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-center">
+              <Label>Your account has been successfully funded with ${amount.toFixed(2)}</Label>
+            </div>
+          </div>
+        );
     }
   };
 
@@ -264,7 +276,13 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      <Dialog open={showAddFunds} onOpenChange={setShowAddFunds}>
+      <Dialog
+        open={showAddFunds}
+        onOpenChange={(show) => {
+          setShowAddFunds(show);
+          setFundsStep("choose");
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Funds</DialogTitle>
