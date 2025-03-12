@@ -24,9 +24,8 @@ export const setToastRef = (toast: Toast) => {
 
 const handleError = (error: any) => {
   let message = "An error occurred.";
-  console.log('hiiii')
+  console.log("hiiii");
   if (error.response) {
-  
     message = error.response.data?.message || `Error: ${error.response.status}`;
   } else if (error.request) {
     message = "Network error. Please check your connection.";
@@ -62,15 +61,9 @@ const atomaApi = axios.create({
 
 
 
-credentialsApi.interceptors.response.use(
-  (response) => response,
-  handleError
-);
+credentialsApi.interceptors.response.use((response) => response, handleError);
 
-atomaApi.interceptors.response.use(
-  (response) => response,
-  handleError
-);
+atomaApi.interceptors.response.use((response) => response, handleError);
 
 
 // Add authentication interceptor to both clients
@@ -126,7 +119,7 @@ export const generateApiKey = async (name: string) => {
 };
 
 export const revokeApiToken = async (api_token_id: number) => {
-  return await credentialsApi.post<void>("/revoke_api_token", api_token_id);
+  return await credentialsApi.post<void>("/revoke_api_token", { api_token_id });
 };
 
 export const listApiKeys = async () => {
