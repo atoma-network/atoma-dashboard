@@ -33,20 +33,21 @@ const generateSmoothData = (min: number, max: number, trend: "stable" | "decreas
 const models = ["Model1", "Model2", "Model3", "Model4", "Model5"]
 const colors = {
   light: {
-    blue: "#BAE6FD",
-    green: "#D1FAE5",
-    yellow: "#FFF3C9",
-    red: "#FFC9C9",
-    purple: "#E9D5FF",
+    blue: "#42A5F5", 
+    green: "#66BB6A", 
+    yellow: "#FFEB3B", 
+    red: "#E57373",
+    purple: "#9575CD", 
   },
   dark: {
-    blue: "#1e3a8a",
-    green: "#064e3b",
-    yellow: "#713f12",
-    red: "#7f1d1d",
-    purple: "#581c87",
+    blue: "#1E88E5", 
+    green: "#43A047", 
+    yellow: "#FDD835", 
+    red: "#D32F2F", 
+    purple: "#7E57C2", 
   },
-}
+};
+
 
 // Generate smooth stacked area data for requests per model
 const requestsPerModel = days.map((day) => {

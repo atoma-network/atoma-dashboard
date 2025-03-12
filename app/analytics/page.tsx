@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { listApiKeys } from "@/lib/api";
 import type { Token } from "@/lib/atoma";
+import { useToast } from "../toast-provider";
 
 const timeFrames = [
   { value: "24h", label: "24 hours" },
@@ -26,11 +27,16 @@ export default function AnalyticsPage() {
   const [selectedTimeFrame, setSelectedTimeFrame] = useState("24h");
   const [selectedApiKey, setSelectedApiKey] = useState("key1");
   const [apiKeys, setApiKeys] = useState<Token[]>([]);
-
+const {showToast}=useToast()
   useEffect(() => {
     (async () => {
-      const keys = await listApiKeys();
-      setApiKeys(keys.data);
+    try {
+        const keys = await listApiKeys();
+        setApiKeys(keys.data);
+    } catch (error:any) {
+      if(error.status)console.log(error.status)
+      showToast(error?.message && error?.message.includes('401')?"Authentication Error":'Failed request','error')
+    }
     })();
   }, []);
 
