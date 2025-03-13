@@ -34,7 +34,7 @@ export function UserProfileIcon() {
 
   useEffect(() => {
     getUserProfile().then((profile) => {
-      setUsername(profile.username);
+      setUsername(profile.name);
     });
   }, []);
 
