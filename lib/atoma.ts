@@ -21,6 +21,14 @@ export enum ModelModality {
   Embeddings = "Embeddings",
 }
 
+
+export interface Token {
+  created_at: string; // Creation date of the token
+  name: string; // Name of the token
+  token_last_4: string; // Last 4 characters of the token
+  id: number; // Unique identifier of the token
+}
+
 export interface Task {
   task_small_id: number; // Unique small integer identifier for the task
   task_id: string; // Unique string identifier for the task
@@ -92,7 +100,8 @@ export interface LatencyResponse {
 }
 
 export interface UserProfile {
-  username: string;
+  email: string;
+  name: string;
 }
 
 interface RequestOptions {
@@ -143,23 +152,23 @@ export const getTasks = async (): Promise<[Task, ModelModality[]][]> => {
   return tasks_with_modalities.filter((task) => !task[0].is_deprecated && !!task[0].model_name && task[1].length > 0);
 };
 
-export const registerUser = async (username: string, password: string): Promise<AuthResponse> => {
-  return await request({ path: "register", post: true, body: { username, password } });
+export const registerUser = async (profile: UserProfile, password: string): Promise<AuthResponse> => {
+  return await request({ path: "register", post: true, body: { user_profile: profile, password } });
 };
 
-export const loginUser = async (username: string, password: string): Promise<AuthResponse> => {
-  return await request({ path: "login", post: true, body: { username, password } });
+export const loginUser = async (email: string, password: string): Promise<AuthResponse> => {
+  return await request({ path: "login", post: true, body: { email, password } });
 };
 
-export const generateApiKey = async (): Promise<string> => {
-  return await request({ path: "generate_api_token", use_auth: true });
+export const generateApiKey = async (name: string): Promise<string> => {
+  return await request({ path: "generate_api_token", post: true, use_auth: true, body: { name } });
 };
 
-export const revokeApiToken = async (api_token: string): Promise<void> => {
-  return await request({ path: "revoke_api_token", post: true, body: { api_token }, use_auth: true });
+export const revokeApiToken = async (api_token_id: number): Promise<void> => {
+  return await request({ path: "revoke_api_token", post: true, body: { api_token_id }, use_auth: true });
 };
 
-export const listApiKeys = async (): Promise<string[]> => {
+export const listApiKeys = async (): Promise<Token[]> => {
   return await request({ path: "api_tokens", use_auth: true });
 };
 
@@ -222,12 +231,12 @@ export const getSalt = async (): Promise<string> => {
 };
 
 export const getGraphs = async (): Promise<[string, [string, string, any][]][]> => {
-  return await request({path:"get_graphs", use_auth: false});
-}
+  return await request({ path: "get_graphs", use_auth: false });
+};
 
 export const getGraphData = async (query: any): Promise<any> => {
-  return await request({path:"get_graph_data", post: true, body: query, use_auth: false});
-}
+  return await request({ path: "get_graph_data", post: true, body: query, use_auth: false });
+};
 
 export const payUSDC = async (
   amount: number,

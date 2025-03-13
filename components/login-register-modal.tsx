@@ -47,11 +47,11 @@ export function LoginRegisterModal({ isOpen, onClose }: LoginRegisterModalProps)
   };
 
   const onRegister = () => {
-    registerUser(email, password)
+    registerUser({ email, name: email }, password)
       .then(({ access_token, refresh_token }) => {
         localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN, access_token);
         document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
-        setLogState('loggedIn');
+        setLogState("loggedIn");
         onClose();
       })
       .catch((error: Response) => {

@@ -32,6 +32,7 @@ import {
   usdcPayment,
   type NodeSubscription,
   type Task,
+  type Token,
 } from "@/lib/atoma";
 import { useGlobalState } from "@/app/GlobalStateContext";
 import {
@@ -115,7 +116,7 @@ export function CloudView() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isComputeUnitsModalOpen, setIsComputeUnitsModalOpen] = useState(false);
   const [selectedModelForPayment, setSelectedModelForPayment] = useState<IModelOptions | null>(null);
-  const [apiKeys, setApiKeys] = useState<string[] | undefined>();
+  const [apiKeys, setApiKeys] = useState<Token[] | undefined>();
   const [subscribers, setSubscribers] = useState<NodeSubscription[] | undefined>();
   const [tasks, setTasks] = useState<Task[] | undefined>();
   const [modelOptions, setModelOptions] = useState<IModelOptions[]>([]);
@@ -125,6 +126,15 @@ export function CloudView() {
   const [modelModalities, setModelModalities] = useState<Map<string, ModelModality[]>>(new Map());
   const [partialBalance, setPartialBalance] = useState<number | undefined>();
   const { logState, setLogState } = useGlobalState();
+  const [newToken, setNewToken] = useState<string>("");
+  const [showNewToken, setShowNewToken] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(newToken);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     getTasks()
@@ -235,11 +245,15 @@ export function CloudView() {
     );
   }, [subscribers, tasks, modelModalities]);
 
-  const addApiKey = () => {
-    generateApiKey().then(() => listApiKeys().then((keys) => setApiKeys(keys)));
+  const addApiKey = async () => {
+    const newToken = await generateApiKey("token");
+    setNewToken(newToken);
+    setShowNewToken(true);
+    const keys = await listApiKeys();
+    setApiKeys(keys);
   };
 
-  const revokeToken = (token: string) => {
+  const revokeToken = (token: number) => {
     revokeApiToken(token).then(() => listApiKeys().then((keys) => setApiKeys(keys)));
   };
 
@@ -380,18 +394,15 @@ export function CloudView() {
                 <>
                   {apiKeys.map((apiKey) => {
                     return (
-                      <div className="flex items-center space-x-2" key={apiKey}>
-                        <Input
-                          type="password"
-                          value="••••••••••••••••"
+                      <div className="flex items-center space-x-2" key={apiKey.id}>
+                        <input
+                          className="flex-grow font-mono bg-gray-100 dark:bg-[#1A1C23] border-purple-200 dark:border-purple-800/30 text-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600"
+                          value={`Last 4 chars of the token "${apiKey.token_last_4}"`}
                           readOnly
-                          className="font-mono bg-gray-100 dark:bg-[#1A1C23] border-purple-200 dark:border-purple-800/30 text-gray-900 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600"
-                        />
-                        <Button variant="outline" onClick={() => navigator.clipboard.writeText(apiKey)}>
-                          <Copy className="mr-2 h-4 w-4" />
-                          Copy
-                        </Button>
-                        <Button variant="outline" onClick={() => revokeToken(apiKey)}>
+                        >
+                          {/* Last 4 chars of api token {apiKey.token_last_4} */}
+                        </input>
+                        <Button variant="outline" onClick={() => revokeToken(apiKey.id)}>
                           <Delete className="mr-2 h-4 w-4" />
                           Revoke
                         </Button>
@@ -452,9 +463,10 @@ export function CloudView() {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-    const totalUsedTokens = logState === 'loggedIn'
-      ? usageHistory.reduce((sum, item) => sum + (item.date >= startOfMonth ? item.used_tokens : 0), 0)
-      : 0;
+    const totalUsedTokens =
+      logState === "loggedIn"
+        ? usageHistory.reduce((sum, item) => sum + (item.date >= startOfMonth ? item.used_tokens : 0), 0)
+        : 0;
     // const totalUsage = isLoggedIn
     //   ? usageHistory.reduce((sum, item) => sum + (item.date >= startOfMonth ? item.tokens : 0), 0)
     //   : 0;
@@ -477,7 +489,7 @@ export function CloudView() {
       const account = useCurrentAccount();
 
       useEffect(() => {
-        if (logState !== 'loggedIn') {
+        if (logState !== "loggedIn") {
           return;
         }
         getSuiAddress().then((suiAddress) => {
@@ -549,8 +561,8 @@ export function CloudView() {
               console.error(error);
               setError(`${error}`);
             });
-            setHandlingPayment(false);
-            return;
+          setHandlingPayment(false);
+          return;
         }
         if (account == null) {
           setHandlingPayment(false);
@@ -583,8 +595,7 @@ export function CloudView() {
             });
         } catch {
           handleConfirmWallet();
-        }
-        finally {
+        } finally {
           setHandlingPayment(false);
         }
       };
@@ -808,7 +819,7 @@ export function CloudView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {logState === 'loggedIn' &&
+                {logState === "loggedIn" &&
                   usageHistory.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell className="text-gray-900 dark:text-gray-300">
@@ -1034,6 +1045,34 @@ export function CloudView() {
         model={selectedModel}
         privacyEnabled={privacyEnabled}
       /> */}
+      <Dialog open={showNewToken} onOpenChange={setShowNewToken}>
+        <DialogContent className="sm:max-w-[425px] text-center">
+          <DialogHeader className="space-y-2 text-center">
+            <DialogTitle className="text-2xl font-bold text-purple-700 dark:text-purple-300 text-center">
+              Save your key
+            </DialogTitle>
+            <DialogDescription className="text-purple-600 dark:text-purple-400 mx-auto">
+              Please save your secret key in a safe place since{" "}
+              <span className="font-semibold">you won&apos;t be able to view it again</span>. Keep it secure, as anyone
+              with your API key can make requests on your behalf. If you do lose it, you&apos;ll need to generate a new
+              one.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-between items-center">
+            <div className="rounded-md border bg-muted p-2 font-mono text-sm">{newToken}</div>
+            <Button size="sm" onClick={copyToClipboard} className="right-2 ">
+              {copied ? (
+                "Copied"
+              ) : (
+                <>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
