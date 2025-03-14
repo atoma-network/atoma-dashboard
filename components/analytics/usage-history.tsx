@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getAllStacks, getAllTasks } from "@/lib/api";
 import { useToast } from "@/app/toast-provider";
 import LoadingCircle from "../LoadingCircle";
+import { useSettings } from "@/contexts/settings-context";
 
 const usageData = [
   {
@@ -68,19 +69,23 @@ interface IUsageHistory {
 export function UsageHistory() {
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[] | null>(null);
   const { showToast } = useToast();
+  const { settings } = useSettings();
   useEffect(() => {
+    if (!settings.loggedIn) {
+      setUsageHistory([]);
+      return;
+    }
+    setUsageHistory(null);
     (async () => {
       let stacksPromise = await getAllStacks().catch(ex => {
-        showToast("Error Occured", "error");
+        showToast("Error occurred", "error");
         return { data: [] };
       });
       let tasksPromise = getAllTasks().catch(ex => {
-        showToast("Error Occured", "error");
+        showToast("Error occurred", "error");
         return { data: [] };
       });
       let [stacks, tasks] = await Promise.all([stacksPromise, tasksPromise]);
-      console.log("stacks", stacks);
-      console.log("tasks", tasks);
       setUsageHistory(
         stacks.data
           .sort(([, timestamp0], [, timestamp1]) => (timestamp0 < timestamp1 ? 1 : timestamp0 > timestamp1 ? -1 : 0))
@@ -97,7 +102,7 @@ export function UsageHistory() {
           })
       );
     })();
-  }, []);
+  }, [settings.loggedIn]);
   return (
     <Card>
       <CardHeader>
