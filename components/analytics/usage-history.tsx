@@ -70,7 +70,7 @@ export function UsageHistory() {
   useEffect(() => {
     (async () => {
       let stacksPromise = await getAllStacks().catch(ex => {
-        showToast("Error Occured", "error");
+        showToast("Error Occurred", "error");
         return { data: [] };
       });
       let tasksPromise = getAllTasks().catch(ex => {
