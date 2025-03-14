@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { getAllStacks, getAllTasks } from "@/lib/api";
 import { useToast } from "@/app/toast-provider";
+import LoadingCircle from "../LoadingCircle";
+import { useSettings } from "@/contexts/settings-context";
 
 const usageData = [
   {
@@ -65,16 +67,22 @@ interface IUsageHistory {
 }
 
 export function UsageHistory() {
-  const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
+  const [usageHistory, setUsageHistory] = useState<IUsageHistory[] | null>(null);
   const { showToast } = useToast();
+  const { settings } = useSettings();
   useEffect(() => {
+    if (!settings.loggedIn) {
+      setUsageHistory([]);
+      return;
+    }
+    setUsageHistory(null);
     (async () => {
       let stacksPromise = await getAllStacks().catch(ex => {
-        showToast("Error Occurred", "error");
+        showToast("Error occurred", "error");
         return { data: [] };
       });
       let tasksPromise = getAllTasks().catch(ex => {
-        showToast("Error Occured", "error");
+        showToast("Error occurred", "error");
         return { data: [] };
       });
       let [stacks, tasks] = await Promise.all([stacksPromise, tasksPromise]);
@@ -94,33 +102,39 @@ export function UsageHistory() {
           })
       );
     })();
-  }, []);
+  }, [settings.loggedIn]);
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-sm font-medium">Usage History</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Model</TableHead>
-              <TableHead className="text-right">Tokens</TableHead>
-              <TableHead className="text-right">Cost</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {usageHistory.map((row, index) => (
-              <TableRow key={index}>
-                <TableCell>{row.date}</TableCell>
-                <TableCell className="font-mono text-sm">{row.model}</TableCell>
-                <TableCell className="text-right">{row.tokens}</TableCell>
-                <TableCell className="text-right">{row.cost}</TableCell>
+        {usageHistory ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Model</TableHead>
+                <TableHead className="text-right">Tokens</TableHead>
+                <TableHead className="text-right">Cost</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {usageHistory.map((row, index) => (
+                <TableRow key={index}>
+                  <TableCell>{row.date}</TableCell>
+                  <TableCell className="font-mono text-sm">{row.model}</TableCell>
+                  <TableCell className="text-right">{row.tokens}</TableCell>
+                  <TableCell className="text-right">{row.cost}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <div className="flex justify-center">
+            <LoadingCircle isSpinning={true} />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
