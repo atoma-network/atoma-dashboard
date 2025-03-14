@@ -5,7 +5,6 @@ import { InputText } from "primereact/inputtext";
 import ZkLogin from "@/lib/zklogin";
 import { useSettings } from "@/contexts/settings-context";
 import { loginUser, registerUser } from "@/lib/api";
-import { useRouter } from "next/navigation";
 interface AuthFormProps {
   type: "login" | "register";
   onClose: () => void;
