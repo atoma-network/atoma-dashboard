@@ -26,24 +26,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <SettingsProvider>
-          <SuiWrap>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitions={false}>
-              <TooltipProvider delayDuration={0}>
-                <ClientWrapper>
-                  <div className="min-h-screen flex bg-background dark:bg-darkMode">
-                    <Sidebar />
-                    <div className="flex-1">
-                      <TopNav />
-                      <div className="container mx-auto p-4 max-w-[1600px]">
-                        <main className="w-full">{children}</main>
+          <AppStateProvider>
+            <SuiWrap>
+              <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitions={false}>
+                <TooltipProvider delayDuration={0}>
+                  <ClientWrapper>
+                    <div className="min-h-screen flex bg-background dark:bg-darkMode">
+                      <Sidebar />
+                      <div className="flex-1">
+                        <TopNav />
+                        <div className="container mx-auto p-4 max-w-[1600px]">
+                          <main className="w-full">{children}</main>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </ClientWrapper>
-                <Toaster />
-              </TooltipProvider>
-            </ThemeProvider>
-          </SuiWrap>
+                  </ClientWrapper>
+                  <Toaster />
+                </TooltipProvider>
+              </ThemeProvider>
+            </SuiWrap>
+          </AppStateProvider>
         </SettingsProvider>
       </body>
     </html>
@@ -52,3 +54,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 import "./globals.css";
 import ClientWrapper from "./client-wrapper";
+import { AppStateProvider } from "@/contexts/app-state";
+

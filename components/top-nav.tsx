@@ -18,22 +18,24 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import AuthForm from "@/components/AuthForm";
 import Modal from "@/components/Modal";
 import { getUserProfile } from "@/lib/api";
+import { useAppState } from "@/contexts/app-state";
 
 export function TopNav() {
   const pathname = usePathname();
   const [loggedIn, setLoggedIn] = useState(false); // To prevent hydration error on client side
   const { settings, updateSettings, updateZkLoginSettings } = useSettings();
+  const { state, updateState } = useAppState();
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authType, setAuthType] = useState("login");
   const [username, setUsername] = useState("user");
 
   const handleAuth = (type: string) => {
     setAuthType(type);
-    setShowAuthForm(true);
+    updateState({ showLogin: true });
   };
 
   const closeAuthForm = () => {
-    setShowAuthForm(false);
+    updateState({ showLogin: false });
   };
 
   useEffect(() => {
@@ -49,6 +51,10 @@ export function TopNav() {
       })();
     }
   }, [settings.loggedIn]);
+
+  useEffect(() => {
+    setShowAuthForm(state.showLogin);
+  }, [state.showLogin]);
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background dark:bg-darkMode">

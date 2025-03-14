@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { getAllStacks, getBalance } from "@/lib/api";
 import { useSettings } from "@/contexts/settings-context";
+import { useAppState } from "@/contexts/app-state";
 
 export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => void }) {
   const [balance, setBalance] = useState("-");
   const [loggedIn, setLoggedIn] = useState(false);
   const { settings } = useSettings();
+  const { updateState } = useAppState();
 
   useEffect(() => {
     const updateBalance = async () => {
@@ -45,10 +47,9 @@ export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => vo
         </div>
         <Button
           className="w-full bg-primary hover:bg-secondary-foreground text-base"
-          disabled={!loggedIn}
-          onClick={handleAddFunds}
+          onClick={() => (loggedIn ? handleAddFunds : updateState({ showLogin: true }))}
         >
-          Add Funds
+          {loggedIn ? "Add Funds" : "Login"}
         </Button>
       </CardContent>
     </Card>
