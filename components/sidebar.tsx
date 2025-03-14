@@ -23,7 +23,7 @@ import { useSettings } from "@/contexts/settings-context";
 
 const navigation = [
   { name: "Network Status", href: "/", icon: Network },
-  { name: "Account Portal", href: "/account-portal", icon: LayoutDashboard, needAuth: true },
+  { name: "Account Portal", href: "/account-portal", icon: LayoutDashboard },
   { name: "Models", href: "/models", icon: Box },
   { name: "Playground", href: "/playground", icon: PlayCircle },
   { name: "Analytics", href: "/analytics", icon: TrendingUp },
