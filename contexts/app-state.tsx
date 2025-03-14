@@ -6,10 +6,12 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 export interface AppState {
   showLogin: boolean;
+  refreshBalance: boolean;
 }
 
 const defaultAppState: AppState = {
   showLogin: false,
+  refreshBalance: false,
 };
 
 interface AppContextType {
