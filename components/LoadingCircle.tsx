@@ -8,4 +8,4 @@ const LoadingCircle = ({ isSpinning = false }: { isSpinning?: boolean }) => {
   );
 };
 
-export default LoadingCircle; 
+export default LoadingCircle;

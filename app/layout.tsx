@@ -30,15 +30,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitions={false}>
               <TooltipProvider delayDuration={0}>
                 <ClientWrapper>
-                <div className="min-h-screen flex bg-background dark:bg-darkMode">
-                  <Sidebar />
-                  <div className="flex-1">
-                    <TopNav />
-                    <div className="container mx-auto p-4 max-w-[1600px]">
-                      <main className="w-full">{children}</main>
+                  <div className="min-h-screen flex bg-background dark:bg-darkMode">
+                    <Sidebar />
+                    <div className="flex-1">
+                      <TopNav />
+                      <div className="container mx-auto p-4 max-w-[1600px]">
+                        <main className="w-full">{children}</main>
+                      </div>
                     </div>
                   </div>
-                </div>
                 </ClientWrapper>
                 <Toaster />
               </TooltipProvider>
@@ -50,5 +50,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   );
 }
 
-import "./globals.css";import ClientWrapper from "./client-wrapper";
-
+import "./globals.css";
+import ClientWrapper from "./client-wrapper";

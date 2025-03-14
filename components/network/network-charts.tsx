@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Bar,
   BarChart,
@@ -12,12 +12,12 @@ import {
   Cell,
   Tooltip,
   CartesianGrid,
-} from "recharts"
-import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip as ShadTooltip } from "@/components/ui/tooltip"
-import { Info } from "lucide-react"
+} from "recharts";
+import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip as ShadTooltip } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
-const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"]
-const models = ["Llama", "DeepSeek", "Qwen", "FLUXL", "Mistral"]
+const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"];
+const models = ["Llama", "DeepSeek", "Qwen", "FLUXL", "Mistral"];
 
 // Colors for different chart types
 const colors = {
@@ -28,7 +28,8 @@ const colors = {
     red: "#FFC9C9",
     purple: "#E9D5FF",
   },
-  lightText: {  // Add this new object for tooltip text colors
+  lightText: {
+    // Add this new object for tooltip text colors
     blue: "#2563eb",
     green: "#059669",
     yellow: "#b45309",
@@ -42,37 +43,37 @@ const colors = {
     red: "#7f1d1d",
     purple: "#581c87",
   },
-}
+};
 
 // Generate consistent data for each model
 const generateModelData = (baseRange: [number, number], variance: number) => {
-  const baseValue = baseRange[0] + Math.random() * (baseRange[1] - baseRange[0])
+  const baseValue = baseRange[0] + Math.random() * (baseRange[1] - baseRange[0]);
   return days.map(() => {
-    return Math.round(baseValue + (Math.random() - 0.5) * variance)
-  })
-}
+    return Math.round(baseValue + (Math.random() - 0.5) * variance);
+  });
+};
 
 // Generate data for requests
 const requestsPerModel = days.map((day, dayIndex) => {
-  const data: Record<string, any> = { name: day }
+  const data: Record<string, any> = { name: day };
   models.forEach((model, index) => {
-    const modelData = generateModelData([3000, 5000], 1000)
-    data[model] = modelData[dayIndex]
-  })
-  return data
-})
+    const modelData = generateModelData([3000, 5000], 1000);
+    data[model] = modelData[dayIndex];
+  });
+  return data;
+});
 
 // Generate data for TTFT and ITL with separate model lines
 const generateLatencyData = (baseRanges: Record<string, [number, number]>, variance: number) => {
-  return days.map((day) => {
-    const dayData: Record<string, any> = { name: day }
-    models.forEach((model) => {
-      const modelData = generateModelData(baseRanges[model], variance)
-      dayData[model] = modelData[days.indexOf(day)]
-    })
-    return dayData
-  })
-}
+  return days.map(day => {
+    const dayData: Record<string, any> = { name: day };
+    models.forEach(model => {
+      const modelData = generateModelData(baseRanges[model], variance);
+      dayData[model] = modelData[days.indexOf(day)];
+    });
+    return dayData;
+  });
+};
 
 // Different base ranges for each model to show variation
 const ttftData = generateLatencyData(
@@ -83,8 +84,8 @@ const ttftData = generateLatencyData(
     FLUXL: [70, 110],
     Mistral: [100, 140],
   },
-  15,
-)
+  15
+);
 
 const itlData = generateLatencyData(
   {
@@ -94,8 +95,8 @@ const itlData = generateLatencyData(
     FLUXL: [20, 40],
     Mistral: [40, 60],
   },
-  8,
-)
+  8
+);
 
 // Data for the bar chart
 const tokensPerModel = [
@@ -108,7 +109,7 @@ const tokensPerModel = [
   ...item,
   colorLight: colors.light[Object.keys(colors.light)[index]],
   colorDark: colors.dark[Object.keys(colors.dark)[index]],
-}))
+}));
 
 const chartConfigs = [
   {
@@ -144,7 +145,7 @@ const chartConfigs = [
     colors: colors,
     valueFormatter: (value: number) => `${value}ms`,
   },
-]
+];
 
 function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
   if (config.special === "stacked") {
@@ -190,14 +191,15 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   <div
                     key={`${name}-value`}
                     style={{
-                      color: typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                        ? colors.dark[Object.keys(colors.dark)[models.indexOf(name)]]
-                        : colors.lightText[Object.keys(colors.lightText)[models.indexOf(name)]]
+                      color:
+                        typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                          ? colors.dark[Object.keys(colors.dark)[models.indexOf(name)]]
+                          : colors.lightText[Object.keys(colors.lightText)[models.indexOf(name)]],
                     }}
                   >
                     {`${name}: ${config.valueFormatter(value)}`}
                   </div>,
-                  null
+                  null,
                 ]}
               />
               {models.map((model, index) => (
@@ -223,7 +225,7 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
           </ResponsiveContainer>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (config.special === "latency") {
@@ -286,23 +288,23 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   >
                     {`${name}: ${config.valueFormatter(value)}`}
                   </div>,
-                  null
+                  null,
                 ]}
               />
               {models.map((model, index) => {
                 const color =
                   typeof window !== "undefined" && document.documentElement.classList.contains("dark")
                     ? colors.dark[Object.keys(colors.dark)[index]]
-                    : colors.light[Object.keys(colors.light)[index]]
+                    : colors.light[Object.keys(colors.light)[index]];
                 return (
                   <Area key={model} type="monotone" dataKey={model} stroke={color} strokeWidth={2} fill="transparent" />
-                )
+                );
               })}
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (config.special === "bar") {
@@ -335,7 +337,7 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 tickLine={false}
                 tick={{ fill: "#888888", fontSize: 12 }}
                 width={60}
-                tickFormatter={(value) => value.split(" ")[0]}
+                tickFormatter={value => value.split(" ")[0]}
               />
               <Tooltip
                 contentStyle={{
@@ -347,39 +349,44 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   color: "var(--card-foreground)",
                 }}
                 formatter={(value: number, name: string, props: any) => {
-                  const model = tokensPerModel.find((m) => m.name === props.payload.name)
-                  const colorIndex = tokensPerModel.indexOf(model as any)
+                  const model = tokensPerModel.find(m => m.name === props.payload.name);
+                  const colorIndex = tokensPerModel.indexOf(model as any);
                   return [
-                    <div key={`${name}-value`} style={{ 
-                      color: (() => {
-                        const isDarkMode = typeof window !== "undefined" && document.documentElement.classList.contains("dark");
-                        const themeColors = isDarkMode ? colors.dark : colors.lightText;
-                        
-                        const colorKeys = Object.keys(themeColors) as Array<keyof typeof themeColors>;
-                        const safeIndex = Math.max(0, Math.min(colorIndex, colorKeys.length - 1)); // Ensure within bounds
-                        const colorKey = colorKeys[safeIndex];
-                    
-                        return themeColors[colorKey]; // Safe color retrieval
-                      })()
-                    }}>
+                    <div
+                      key={`${name}-value`}
+                      style={{
+                        color: (() => {
+                          const isDarkMode =
+                            typeof window !== "undefined" && document.documentElement.classList.contains("dark");
+                          const themeColors = isDarkMode ? colors.dark : colors.lightText;
+
+                          const colorKeys = Object.keys(themeColors) as Array<keyof typeof themeColors>;
+                          const safeIndex = Math.max(0, Math.min(colorIndex, colorKeys.length - 1)); // Ensure within bounds
+                          const colorKey = colorKeys[safeIndex];
+
+                          return themeColors[colorKey]; // Safe color retrieval
+                        })(),
+                      }}
+                    >
                       {`${value.toLocaleString()} Tokens`}
                     </div>,
-                    
+
                     null,
-                  ]
+                  ];
                 }}
                 labelFormatter={(name: string) => name}
                 separator=""
-             
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
                 {tokensPerModel.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                      ? entry.colorDark
-                      : entry.colorLight} 
-                    fillOpacity={0.6} 
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                        ? entry.colorDark
+                        : entry.colorLight
+                    }
+                    fillOpacity={0.6}
                   />
                 ))}
               </Bar>
@@ -387,18 +394,18 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
           </ResponsiveContainer>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  return null
+  return null;
 }
 
 export function NetworkCharts() {
   return (
     <div className="grid gap-6 md:grid-cols-4">
-      {chartConfigs.map((config) => (
+      {chartConfigs.map(config => (
         <NetworkChartCard key={config.id} config={config} />
       ))}
     </div>
-  )
+  );
 }

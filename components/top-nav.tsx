@@ -74,7 +74,7 @@ export function TopNav() {
                   <Avatar className="h-8 w-8">
                     <div
                       className="h-full w-full rounded-full flex items-center justify-center bg-primary text-white"
-                     // style={{ backgroundColor: "" + settings.avatar.split("background=")[1] }}
+                      // style={{ backgroundColor: "" + settings.avatar.split("background=")[1] }}
                     >
                       {username[0].toUpperCase()}
                     </div>
@@ -91,7 +91,7 @@ export function TopNav() {
                 <DropdownMenuItem asChild>
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem onSelect={e => e.preventDefault()}>
                   <div className="flex items-center justify-between w-full">
                     <span>Theme</span>
                     <ThemeToggle />
@@ -108,9 +108,8 @@ export function TopNav() {
                       maxEpoch: undefined,
                       zkp: undefined,
                     });
-                    window.location.href='/'
+                    window.location.href = "/";
                   }}
-                
                 >
                   Log out
                 </DropdownMenuItem>

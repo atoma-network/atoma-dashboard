@@ -1,45 +1,46 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Area, AreaChart, Cell, Tooltip } from "recharts"
-import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip as ShadTooltip } from "@/components/ui/tooltip"
-import { Info } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Area, AreaChart, Cell, Tooltip } from "recharts";
+import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip as ShadTooltip } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
-const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"]
+const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"];
 
 // Generate smooth curves that match the image
 const generateSmoothData = (min: number, max: number, trend: "stable" | "decreasing" | "variable") => {
-  let lastValue = (min + max) / 2
-  return days.map((day) => {
-    let change
+  let lastValue = (min + max) / 2;
+  return days.map(day => {
+    let change;
     switch (trend) {
       case "decreasing":
-        change = Math.random() * (max - min) * 0.1 - (max - min) * 0.05
-        break
+        change = Math.random() * (max - min) * 0.1 - (max - min) * 0.05;
+        break;
       case "variable":
-        change = Math.random() * (max - min) * 0.2 - (max - min) * 0.1
-        break
+        change = Math.random() * (max - min) * 0.2 - (max - min) * 0.1;
+        break;
       default:
-        change = Math.random() * (max - min) * 0.15 - (max - min) * 0.075
+        change = Math.random() * (max - min) * 0.15 - (max - min) * 0.075;
     }
-    lastValue = Math.max(min, Math.min(max, lastValue + change))
+    lastValue = Math.max(min, Math.min(max, lastValue + change));
     return {
       name: day,
       value: Math.round(lastValue),
-    }
-  })
-}
+    };
+  });
+};
 
-const models = ["Model1", "Model2", "Model3", "Model4", "Model5"]
+const models = ["Model1", "Model2", "Model3", "Model4", "Model5"];
 const colors = {
   light: {
     blue: "#BAE6FD",
     green: "#D1FAE5",
     yellow: "#FFF3C9",
     red: "#FFC9C9",
-    purple: "#E9D5FF",  // Reverted back to purple
+    purple: "#E9D5FF", // Reverted back to purple
   },
-  lightText: {  // Add this new object for tooltip text colors
+  lightText: {
+    // Add this new object for tooltip text colors
     blue: "#2563eb",
     green: "#059669",
     yellow: "#b45309",
@@ -51,15 +52,13 @@ const colors = {
     green: "#064e3b",
     yellow: "#713f12",
     red: "#7f1d1d",
-    purple: "#581c87",  // Reverted back to dark purple
+    purple: "#581c87", // Reverted back to dark purple
   },
 } as const;
 
-
-
 // Generate smooth stacked area data for requests per model
-const requestsPerModel = days.map((day) => {
-  const baseValues = models.map(() => Math.floor(Math.random() * 5000 + 3000))
+const requestsPerModel = days.map(day => {
+  const baseValues = models.map(() => Math.floor(Math.random() * 5000 + 3000));
   return {
     name: day,
     ...models.reduce(
@@ -67,10 +66,10 @@ const requestsPerModel = days.map((day) => {
         ...acc,
         [model]: baseValues[index],
       }),
-      {},
+      {}
     ),
-  }
-})
+  };
+});
 
 const tokensPerModel = [
   {
@@ -103,7 +102,7 @@ const tokensPerModel = [
     colorLight: colors.light.purple,
     colorDark: colors.dark.purple,
   },
-]
+];
 
 const chartConfigs = [
   {
@@ -118,7 +117,7 @@ const chartConfigs = [
     id: "tokens-per-model",
     tooltip: "Tokens generated across models",
   },
-]
+];
 
 function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
   if (config.special === "stacked") {
@@ -156,16 +155,20 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 }}
                 formatter={(value: number, name: string) => {
                   const modelIndex = models.indexOf(name);
-                  if (modelIndex === -1) return [null, null]; 
-                  const isDarkMode = typeof window !== "undefined" && document.documentElement.classList.contains("dark");
+                  if (modelIndex === -1) return [null, null];
+                  const isDarkMode =
+                    typeof window !== "undefined" && document.documentElement.classList.contains("dark");
                   const colorKey = Object.keys(isDarkMode ? colors.dark : colors.lightText)[modelIndex];
                   return [
-                    <div key={`${name}-value`} style={{ 
-                      color: (isDarkMode ? colors.dark : colors.lightText)[colorKey as keyof typeof colors.dark]
-                    }}>
+                    <div
+                      key={`${name}-value`}
+                      style={{
+                        color: (isDarkMode ? colors.dark : colors.lightText)[colorKey as keyof typeof colors.dark],
+                      }}
+                    >
                       {`${name}: ${value.toLocaleString()}`}
                     </div>,
-                    null
+                    null,
                   ];
                 }}
               />
@@ -192,7 +195,7 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
           </ResponsiveContainer>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (config.special === "bar") {
@@ -225,7 +228,7 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 tickLine={false}
                 tick={{ fill: "#888888", fontSize: 12 }}
                 width={60}
-                tickFormatter={(value) => value.split(" ")[0]}
+                tickFormatter={value => value.split(" ")[0]}
               />
               <Tooltip
                 contentStyle={{
@@ -237,15 +240,16 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   color: "var(--card-foreground)",
                 }}
                 formatter={(value: number, name: string, props: any) => {
-                  const model = tokensPerModel.find((m) => m.name === props.payload.name);
+                  const model = tokensPerModel.find(m => m.name === props.payload.name);
                   if (!model) return [null, null]; // Avoid issues if model is not found
-                
+
                   const colorIndex = tokensPerModel.indexOf(model);
-                  const isDarkMode = typeof window !== "undefined" && document.documentElement.classList.contains("dark");
+                  const isDarkMode =
+                    typeof window !== "undefined" && document.documentElement.classList.contains("dark");
                   const themeColors = isDarkMode ? colors.dark : colors.lightText;
                   const colorKeys = Object.keys(themeColors) as Array<keyof typeof themeColors>;
                   const colorKey = colorKeys[colorIndex] ?? colorKeys[0]; // Default to first key if index is invalid
-                
+
                   return [
                     <div key={`${name}-value`} style={{ color: themeColors[colorKey] }}>
                       {`${value.toLocaleString()} Tokens`}
@@ -253,44 +257,41 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                     null,
                   ];
                 }}
-                
                 labelFormatter={(name: string) => name}
                 separator=""
-      
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
                 {tokensPerModel.map((entry, index) => {
                   const colorKey = Object.keys(colors.light)[index];
                   return (
-                    <Cell 
-  key={`cell-${index}`} 
-  fill={
-    typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-      ? colors.dark[colorKey as keyof typeof colors.dark] || colors.dark
-      : colors.light[colorKey as keyof typeof colors.light] || colors.light
-  }
-  fillOpacity={0.6} 
-/>
-
-                  )
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={
+                        typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                          ? colors.dark[colorKey as keyof typeof colors.dark] || colors.dark
+                          : colors.light[colorKey as keyof typeof colors.light] || colors.light
+                      }
+                      fillOpacity={0.6}
+                    />
+                  );
                 })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  return null
+  return null;
 }
 
 export function AreaCharts() {
   return (
     <div className="grid gap-6 md:grid-cols-4">
-      {chartConfigs.map((config) => (
+      {chartConfigs.map(config => (
         <AreaChartCard key={config.id} config={config} />
       ))}
     </div>
-  )
+  );
 }

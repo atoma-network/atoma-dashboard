@@ -31,9 +31,9 @@ module.exports = {
           DEFAULT: "#faeee8",
           foreground: "#de6c49",
         },
-        darkMode:{
-          DEFAULT:'#09090b',
-          foreground:'#020713'
+        darkMode: {
+          DEFAULT: "#09090b",
+          foreground: "#020713",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -78,5 +78,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
-
+};

@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"
-import { cn } from "@/lib/utils"
-import { toggleVariants } from "@/components/ui/toggle"
+import * as React from "react";
+import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group";
+import { cn } from "@/lib/utils";
+import { toggleVariants } from "@/components/ui/toggle";
 
 const ToggleGroup = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Root>,
@@ -14,8 +14,8 @@ const ToggleGroup = React.forwardRef<
     className={cn("inline-flex items-center justify-center gap-1 rounded-md bg-muted p-1", className)}
     {...props}
   />
-))
-ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName
+));
+ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName;
 
 const ToggleGroupItem = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Item>,
@@ -26,14 +26,13 @@ const ToggleGroupItem = React.forwardRef<
     className={cn(
       toggleVariants({ variant: "default" }),
       "data-[state=on]:bg-background data-[state=on]:text-foreground",
-      className,
+      className
     )}
     {...props}
   >
     {children}
   </ToggleGroupPrimitive.Item>
-))
-ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName
+));
+ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName;
 
-export { ToggleGroup, ToggleGroupItem }
-
+export { ToggleGroup, ToggleGroupItem };

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useEffect, useState } from "react";
 import { AreaCharts } from "@/components/analytics/area-charts";
@@ -27,16 +27,19 @@ export default function AnalyticsPage() {
   const [selectedTimeFrame, setSelectedTimeFrame] = useState("24h");
   const [selectedApiKey, setSelectedApiKey] = useState("key1");
   const [apiKeys, setApiKeys] = useState<Token[]>([]);
-const {showToast}=useToast()
+  const { showToast } = useToast();
   useEffect(() => {
     (async () => {
-    try {
+      try {
         const keys = await listApiKeys();
         setApiKeys(keys.data);
-    } catch (error:any) {
-      if(error.status)console.log(error.status)
-      showToast(error?.message && error?.message.includes('401')?"Authentication Error":'Failed request','error')
-    }
+      } catch (error: any) {
+        if (error.status) console.log(error.status);
+        showToast(
+          error?.message && error?.message.includes("401") ? "Authentication Error" : "Failed request",
+          "error"
+        );
+      }
     })();
   }, []);
 
@@ -59,7 +62,7 @@ const {showToast}=useToast()
                 <SelectValue placeholder="Select API Key" />
               </SelectTrigger>
               <SelectContent>
-                {apiKeys.map((key) => (
+                {apiKeys.map(key => (
                   <SelectItem key={key.id} value={`${key.id}`}>
                     {key.name}
                   </SelectItem>
@@ -70,12 +73,12 @@ const {showToast}=useToast()
             <ToggleGroup
               type="single"
               value={selectedTimeFrame}
-              onValueChange={(value) => {
+              onValueChange={value => {
                 if (value) setSelectedTimeFrame(value);
               }}
               className="justify-start"
             >
-              {timeFrames.map((timeFrame) => (
+              {timeFrames.map(timeFrame => (
                 <ToggleGroupItem
                   key={timeFrame.value}
                   value={timeFrame.value}
@@ -96,4 +99,3 @@ const {showToast}=useToast()
     </div>
   );
 }
-

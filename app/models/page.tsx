@@ -39,7 +39,7 @@ function ModelCard({ name, price, modalities }: { name: string; price: string; m
               <h3 className="text-base font-medium">{simplifyModelName(name)}</h3>
               <p className="text-sm text-muted-foreground">{price} per 1M tokens</p>
             </div>
-            {modalities.map((modality) => (
+            {modalities.map(modality => (
               <span
                 className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20"
                 key={modality}
@@ -155,9 +155,9 @@ export default function ModelsPage() {
   // Reorder sections based on selected category
   const orderedSections = [
     // Selected category first
-    ...modelSections.filter((section) => section.type === selectedCategory),
+    ...modelSections.filter(section => section.type === selectedCategory),
     // Other categories after
-    ...modelSections.filter((section) => section.type !== selectedCategory),
+    ...modelSections.filter(section => section.type !== selectedCategory),
   ];
 
   return (
@@ -184,11 +184,11 @@ export default function ModelsPage() {
             </Select>
           </div>
 
-          {orderedSections.map((section) => (
+          {orderedSections.map(section => (
             <div key={section.type} className="space-y-6">
               <h2 className="text-lg font-medium text-primary">{section.title}</h2>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {section.models.map((model) => (
+                {section.models.map(model => (
                   <ModelCard key={model.name} name={model.name} price={model.price} modalities={model.modalities} />
                 ))}
               </div>

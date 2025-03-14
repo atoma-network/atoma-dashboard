@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ResponsiveContainer, XAxis, YAxis, Tooltip, Area, AreaChart } from "recharts"
-import { TooltipProvider, Tooltip as ShadTooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { Info } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ResponsiveContainer, XAxis, YAxis, Tooltip, Area, AreaChart } from "recharts";
+import { TooltipProvider, Tooltip as ShadTooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
-const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"]
+const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"];
 
 // Generate smooth data for requests processed and tokens processed
-const requestsData = days.map((day) => ({
+const requestsData = days.map(day => ({
   name: day,
   value: Math.floor(Math.random() * 30000 + 15000),
-}))
+}));
 
-const tokensData = days.map((day) => ({
+const tokensData = days.map(day => ({
   name: day,
   value: Math.floor(Math.random() * 40000 + 20000),
-}))
+}));
 
 export function ModelCharts() {
   return (
@@ -53,21 +53,33 @@ export function ModelCharts() {
                   color: "var(--card-foreground)",
                 }}
                 formatter={(value: number) => [
-                  <div key="value" style={{ 
-                    color: typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                      ? "#1e3a8a" // dark blue
-                      : "#2563eb" // lighter blue but still readable
-                  }}>
+                  <div
+                    key="value"
+                    style={{
+                      color:
+                        typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                          ? "#1e3a8a" // dark blue
+                          : "#2563eb", // lighter blue but still readable
+                    }}
+                  >
                     {`${value.toLocaleString()} Requests`}
                   </div>,
-                  null
+                  null,
                 ]}
               />
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke={typeof window !== "undefined" && document.documentElement.classList.contains("dark") ? "#1e3a8a" : "#BAE6FD"}
-                fill={typeof window !== "undefined" && document.documentElement.classList.contains("dark") ? "#1e3a8a" : "#BAE6FD"}
+                stroke={
+                  typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                    ? "#1e3a8a"
+                    : "#BAE6FD"
+                }
+                fill={
+                  typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                    ? "#1e3a8a"
+                    : "#BAE6FD"
+                }
                 fillOpacity={0.6}
                 strokeWidth={2}
               />
@@ -108,21 +120,33 @@ export function ModelCharts() {
                   color: "var(--card-foreground)",
                 }}
                 formatter={(value: number) => [
-                  <div key="value" style={{ 
-                    color: typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                      ? "#7f1d1d" // dark red
-                      : "#dc2626" // lighter red but still readable
-                  }}>
+                  <div
+                    key="value"
+                    style={{
+                      color:
+                        typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                          ? "#7f1d1d" // dark red
+                          : "#dc2626", // lighter red but still readable
+                    }}
+                  >
                     {`${value.toLocaleString()} Tokens`}
                   </div>,
-                  null
+                  null,
                 ]}
               />
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke={typeof window !== "undefined" && document.documentElement.classList.contains("dark") ? "#7f1d1d" : "#FFC9C9"}
-                fill={typeof window !== "undefined" && document.documentElement.classList.contains("dark") ? "#7f1d1d" : "#FFC9C9"}
+                stroke={
+                  typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                    ? "#7f1d1d"
+                    : "#FFC9C9"
+                }
+                fill={
+                  typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                    ? "#7f1d1d"
+                    : "#FFC9C9"
+                }
                 fillOpacity={0.6}
                 strokeWidth={2}
               />
@@ -131,5 +155,5 @@ export function ModelCharts() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

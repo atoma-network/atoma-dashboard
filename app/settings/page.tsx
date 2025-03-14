@@ -64,7 +64,7 @@ export default function SettingsPage() {
                   id="full-name"
                   defaultValue={userProfile.name}
                   disabled={!loggedIn}
-                  onChange={(e) => setUserProfile({ ...userProfile, name: e.target.value })}
+                  onChange={e => setUserProfile({ ...userProfile, name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -74,7 +74,7 @@ export default function SettingsPage() {
                   type="email"
                   defaultValue={userProfile.email}
                   disabled={!loggedIn}
-                  onChange={(e) => setUserProfile({ ...userProfile, email: e.target.value })}
+                  onChange={e => setUserProfile({ ...userProfile, email: e.target.value })}
                 />
               </div>
               <div className="space-y-2">

@@ -48,7 +48,7 @@ export default class ZkLogin {
   ) => {
     return await this.getRest(settings, updateSettings, updateZkLoginSettings)
       .then(() => {})
-      .catch((err) => {
+      .catch(err => {
         if (err.name === "TypeError") {
           /// This can happen when you reload the page before the responses from prover server
           return;
