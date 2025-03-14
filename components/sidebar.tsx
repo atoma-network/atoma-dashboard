@@ -26,7 +26,7 @@ const navigation = [
   { name: "Account Portal", href: "/account-portal", icon: LayoutDashboard, needAuth: true },
   { name: "Models", href: "/models", icon: Box },
   { name: "Playground", href: "/playground", icon: PlayCircle },
-  { name: "Analytics", href: "/analytics", icon: TrendingUp, needAuth: true },
+  { name: "Analytics", href: "/analytics", icon: TrendingUp },
   { name: "Docs", href: "https://docs.atoma.network/cloud-api-reference/get-started", icon: FileText },
   { name: "Settings", href: "/settings", icon: Settings },
   {
