@@ -18,6 +18,8 @@ import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useSettings } from "@/contexts/settings-context";
 import { generateApiKey, listApiKeys, revokeApiToken } from "@/lib/api";
+import Modal from "./Modal";
+import LoadingCircle from "./LoadingCircle";
 
 interface ApiKey {
   name: string;
@@ -31,7 +33,7 @@ interface ApiKey {
 }
 
 export function ApiKeyCard() {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [apiKeys, setApiKeys] = useState<ApiKey[] | null>(null);
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isSaveKeyDialogOpen, setIsSaveKeyDialogOpen] = useState(false);
@@ -39,6 +41,7 @@ export function ApiKeyCard() {
   const [newGeneratedKey, setNewGeneratedKey] = useState("");
   const [copied, setCopied] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [selectedToRevokeToken, setSelectedToRevokeToken] = useState<{ id: number; name: string } | null>(null);
   const { settings } = useSettings();
 
   const updateApiTokens = async () => {
@@ -46,6 +49,7 @@ export function ApiKeyCard() {
       setApiKeys([]);
       return;
     }
+    setApiKeys(null);
     try {
       let tokens = await listApiKeys();
       let apiKeys: ApiKey[] = tokens.data.map(token => {
@@ -111,52 +115,58 @@ export function ApiKeyCard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>NAME</TableHead>
-                  <TableHead>SECRET KEY</TableHead>
-                  <TableHead>CREATED</TableHead>
-                  <TableHead>LAST USED</TableHead>
-                  <TableHead>PROJECT ACCESS</TableHead>
-                  <TableHead>CREATED BY</TableHead>
-                  <TableHead>PERMISSIONS</TableHead>
-                  <TableHead className="w-[100px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {apiKeys
-                  .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
-                  .map(key => (
-                    <TableRow key={key.name}>
-                      <TableCell>{key.name}</TableCell>
-                      <TableCell className="font-mono">{key.key}</TableCell>
-                      <TableCell>{key.created}</TableCell>
-                      <TableCell>{key.lastUsed}</TableCell>
-                      <TableCell>{key.projectAccess}</TableCell>
-                      <TableCell>{key.createdBy}</TableCell>
-                      <TableCell>{key.permissions}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive"
-                            onClick={() => {
-                              return handleRevokeKey(key.id);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
+            {apiKeys ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>NAME</TableHead>
+                    <TableHead>SECRET KEY</TableHead>
+                    <TableHead>CREATED</TableHead>
+                    <TableHead>LAST USED</TableHead>
+                    <TableHead>PROJECT ACCESS</TableHead>
+                    <TableHead>CREATED BY</TableHead>
+                    <TableHead>PERMISSIONS</TableHead>
+                    <TableHead className="w-[100px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {apiKeys
+                    .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
+                    .map(key => (
+                      <TableRow key={key.id} className={key.id == selectedToRevokeToken?.id ? "bg-red-100" : ""}>
+                        <TableCell>{key.name}</TableCell>
+                        <TableCell className="font-mono">{key.key}</TableCell>
+                        <TableCell>{key.created}</TableCell>
+                        <TableCell>{key.lastUsed}</TableCell>
+                        <TableCell>{key.projectAccess}</TableCell>
+                        <TableCell>{key.createdBy}</TableCell>
+                        <TableCell>{key.permissions}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="icon">
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive"
+                              onClick={() => {
+                                setSelectedToRevokeToken({ id: key.id, name: key.name });
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="flex items-center justify-center">
+                <LoadingCircle isSpinning={true} />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -198,12 +208,13 @@ export function ApiKeyCard() {
           <DialogHeader>
             <DialogTitle>Save your key</DialogTitle>
             <DialogDescription className="space-y-4">
-              <p>
+              <span>
                 Please save your secret key in a safe place since{" "}
                 <span className="font-semibold">you won't be able to view it again</span>. Keep it secure, as anyone
                 with your API key can make requests on your behalf. If you do lose it, you'll need to generate a new
                 one.
-              </p>
+              </span>
+              <br />
               <Link href="#" className="text-primary hover:underline inline-flex items-center">
                 Learn more about API key best practices
                 <svg
@@ -239,6 +250,26 @@ export function ApiKeyCard() {
           </div>
         </DialogContent>
       </Dialog>
+      <Modal isOpen={!!selectedToRevokeToken} onClose={() => setSelectedToRevokeToken(null)}>
+        <h2 className="text-lg font-semibold text-purple-600">Revoke API Key json</h2>
+        <p className="text-sm text-gray-500">
+          Are you sure you want to revoke this <b>{selectedToRevokeToken?.name}</b> API key?
+        </p>
+        <div className="flex justify-end mt-4">
+          <Button variant="outline" onClick={() => setSelectedToRevokeToken(null)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              handleRevokeKey(selectedToRevokeToken!.id);
+              setSelectedToRevokeToken(null);
+            }}
+            className="ml-2"
+          >
+            Revoke
+          </Button>
+        </div>
+      </Modal>
     </>
   );
 }
