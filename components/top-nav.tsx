@@ -91,7 +91,7 @@ export function TopNav() {
                 <DropdownMenuItem asChild>
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem onSelect={e => e.preventDefault()}>
                   <div className="flex items-center justify-between w-full">
                     <span>Theme</span>
                     <ThemeToggle />

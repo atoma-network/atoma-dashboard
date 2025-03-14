@@ -70,10 +70,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
     await zkLogin.initialize(settings, updateSettings, updateZkLoginSettings);
     zkLogin
       .getURL(settings.zkLogin, updateZkLoginSettings)
-      .then((url) => {
+      .then(url => {
         window.location.href = url;
       })
-      .catch((error) => {
+      .catch(error => {
         console.error(error);
       });
   };
@@ -93,7 +93,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
             <InputText
               placeholder="Enter your email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               required
               className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
             />
@@ -104,7 +104,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
               <InputText
                 placeholder="Enter your name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={e => setName(e.target.value)}
                 required
                 className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
               />
@@ -117,7 +117,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
               type="password"
               placeholder="Enter your password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               required
               className="p-inputtext-lg w-full border border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
             />

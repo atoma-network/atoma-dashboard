@@ -6,7 +6,6 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import axios, { AxiosError } from "axios";
 
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -76,7 +75,6 @@ export const payUSDC = async (
   });
 };
 
-
 // API Error handling
 export class ApiError extends Error {
   constructor(
@@ -93,23 +91,13 @@ export class ApiError extends Error {
 export const handleApiError = (error: AxiosError | unknown): never => {
   if (axios.isAxiosError(error)) {
     if (error.code === "ECONNABORTED") {
-      throw new ApiError(
-        "Request timed out. Please try again.",
-        undefined,
-        true,
-        error
-      );
+      throw new ApiError("Request timed out. Please try again.", undefined, true, error);
     }
 
     const statusCode = error.response?.status;
     const message = error.response?.data?.message || error.message;
 
-    throw new ApiError(
-      message || "An error occurred while making the request",
-      statusCode,
-      false,
-      error
-    );
+    throw new ApiError(message || "An error occurred while making the request", statusCode, false, error);
   }
 
   throw new ApiError("An unexpected error occurred", undefined, false, error);

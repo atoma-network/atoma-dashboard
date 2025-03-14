@@ -1,29 +1,29 @@
-import { Info } from "lucide-react"
-import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { Info } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 // Update Parameters interface
 interface Parameters {
-  apiKey: string
-  systemPrompt: string
-  customSystemPrompt: string
-  autoSetLength: boolean
-  outputLength: number
-  temperature: number
-  topP: number
-  topK: number
-  repetitionPenalty: number
+  apiKey: string;
+  systemPrompt: string;
+  customSystemPrompt: string;
+  autoSetLength: boolean;
+  outputLength: number;
+  temperature: number;
+  topP: number;
+  topK: number;
+  repetitionPenalty: number;
 }
 
 interface ParametersSidebarProps {
-  parameters: Parameters
-  onChange: (key: keyof Parameters, value: number | boolean | string) => void
+  parameters: Parameters;
+  onChange: (key: keyof Parameters, value: number | boolean | string) => void;
 }
 
 // Replace the entire content of ParametersSidebar
@@ -41,7 +41,7 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
               id="apiKey"
               type="password"
               value={parameters.apiKey}
-              onChange={(e) => onChange("apiKey", e.target.value)}
+              onChange={e => onChange("apiKey", e.target.value)}
               placeholder="Enter your API key"
             />
           </div>
@@ -49,7 +49,7 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>System Prompt</Label>
-              <Select value={parameters.systemPrompt} onValueChange={(value) => onChange("systemPrompt", value)}>
+              <Select value={parameters.systemPrompt} onValueChange={value => onChange("systemPrompt", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select system prompt" />
                 </SelectTrigger>
@@ -63,7 +63,7 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
                   <Textarea
                     placeholder="Enter custom system prompt"
                     value={parameters.customSystemPrompt}
-                    onChange={(e) => onChange("customSystemPrompt", e.target.value)}
+                    onChange={e => onChange("customSystemPrompt", e.target.value)}
                     className="min-h-[150px] resize-none"
                   />
                 </div>
@@ -74,7 +74,7 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
               <Checkbox
                 id="auto-length"
                 checked={parameters.autoSetLength}
-                onCheckedChange={(checked) => onChange("autoSetLength", checked)}
+                onCheckedChange={checked => onChange("autoSetLength", checked)}
               />
               <label
                 htmlFor="auto-length"
@@ -98,7 +98,7 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
                 <Input
                   type="number"
                   value={parameters.outputLength}
-                  onChange={(e) => onChange("outputLength", Number(e.target.value))}
+                  onChange={e => onChange("outputLength", Number(e.target.value))}
                   className="w-20"
                 />
               </div>
@@ -128,7 +128,7 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
                 <Input
                   type="number"
                   value={parameters.temperature}
-                  onChange={(e) => onChange("temperature", Number(e.target.value))}
+                  onChange={e => onChange("temperature", Number(e.target.value))}
                   className="w-20"
                 />
               </div>
@@ -158,7 +158,7 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
                 <Input
                   type="number"
                   value={parameters.topP}
-                  onChange={(e) => onChange("topP", Number(e.target.value))}
+                  onChange={e => onChange("topP", Number(e.target.value))}
                   className="w-20"
                 />
               </div>
@@ -185,7 +185,7 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
                 <Input
                   type="number"
                   value={parameters.topK}
-                  onChange={(e) => onChange("topK", Number(e.target.value))}
+                  onChange={e => onChange("topK", Number(e.target.value))}
                   className="w-20"
                 />
               </div>
@@ -212,7 +212,7 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
                 <Input
                   type="number"
                   value={parameters.repetitionPenalty}
-                  onChange={(e) => onChange("repetitionPenalty", Number(e.target.value))}
+                  onChange={e => onChange("repetitionPenalty", Number(e.target.value))}
                   className="w-20"
                 />
               </div>
@@ -235,6 +235,5 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
         </div>
       </div>
     </TooltipProvider>
-  )
+  );
 }
-

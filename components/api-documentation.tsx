@@ -88,7 +88,7 @@ export function ApiDocumentation() {
           <ScrollArea>
             <TabsContent value="endpoints" className="p-4 m-0">
               <div className="space-y-4">
-                {endpoints.map((endpoint) => (
+                {endpoints.map(endpoint => (
                   <div
                     key={endpoint.endpoint}
                     className="group space-y-1.5 rounded-lg bg-muted/50 p-3 cursor-pointer transition-all duration-200 hover:bg-muted/70 active:bg-muted/90"

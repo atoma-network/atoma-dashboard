@@ -91,10 +91,10 @@ export default function DashboardPage() {
       await zkLogin.initialize(settings, updateSettings, updateZkLoginSettings);
       zkLogin
         .payUSDC(amount * 1000000, suiClient)
-        .then((res) => {
+        .then(res => {
           const txDigest = res.digest;
           // const txDigest = "ASp9K5Ms1HS1sKW2H4oa4Q9q6Zz3kBqKUn3x9JbZcGsw";
-          zkLogin.signMessage(txDigest).then((proofSignature) => {
+          zkLogin.signMessage(txDigest).then(proofSignature => {
             setTimeout(() => {
               usdcPayment(txDigest, proofSignature)
                 .then(() => {
@@ -107,7 +107,7 @@ export default function DashboardPage() {
             }, 1000);
           });
         })
-        .catch((error) => {
+        .catch(error => {
           console.error(error);
           // setError(`${error}`);
         });
@@ -165,7 +165,7 @@ export default function DashboardPage() {
       message: new TextEncoder().encode(
         `Sign this message to prove you are the owner of this wallet. User ID: ${user_id}`
       ),
-    }).then((res) => {
+    }).then(res => {
       proofRequest(res.signature, account.address)
         .then(() => {
           setFundsStep("amount");
@@ -198,7 +198,7 @@ export default function DashboardPage() {
               min="1"
               step="1"
               value={amount}
-              onChange={(e) => {
+              onChange={e => {
                 const value = parseInt(e.target.value) || 0;
                 e.target.value = value.toString();
                 setAmount(value);
@@ -278,7 +278,7 @@ export default function DashboardPage() {
       </div>
       <Dialog
         open={showAddFunds}
-        onOpenChange={(show) => {
+        onOpenChange={show => {
           setShowAddFunds(show);
           setFundsStep("choose");
         }}

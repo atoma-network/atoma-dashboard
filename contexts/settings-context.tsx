@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState } from "react";
 
 export interface UserSettings {
   loggedIn: boolean;
@@ -104,7 +104,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   });
 
   const updateSettings = (newSettings: Partial<UserSettings>) => {
-    setSettings((prev) => {
+    setSettings(prev => {
       const updatedSettings = { ...prev, ...newSettings };
       localStorage.setItem("userSettings", JSON.stringify(updatedSettings)); // update here, to take effect immediately
       return updatedSettings;
@@ -112,7 +112,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateZkLoginSettings = (zkLoginSettings: Partial<UserSettings["zkLogin"]>) => {
-    setSettings((prev) => {
+    setSettings(prev => {
       const updatedSettings = {
         ...prev,
         zkLogin: { ...prev.zkLogin, ...zkLoginSettings },
@@ -123,7 +123,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateNotificationSettings = (notificationSettings: Partial<UserSettings["notifications"]>) => {
-    setSettings((prev) => {
+    setSettings(prev => {
       const updatedSettings = {
         ...prev,
         notifications: { ...prev.notifications, ...notificationSettings },
@@ -135,7 +135,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updatePrivacySettings = (privacySettings: Partial<UserSettings["privacy"]>) => {
-    setSettings((prev) => {
+    setSettings(prev => {
       const updatedSettings = {
         ...prev,
         privacy: { ...prev.privacy, ...privacySettings },
@@ -161,10 +161,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useSettings() {
-  const context = useContext(SettingsContext)
+  const context = useContext(SettingsContext);
   if (context === undefined) {
-    throw new Error("useSettings must be used within a SettingsProvider")
+    throw new Error("useSettings must be used within a SettingsProvider");
   }
-  return context
+  return context;
 }
-

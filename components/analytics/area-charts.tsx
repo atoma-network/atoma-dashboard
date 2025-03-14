@@ -1,57 +1,56 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Area, AreaChart, Cell, Tooltip } from "recharts"
-import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip as ShadTooltip } from "@/components/ui/tooltip"
-import { Info } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Area, AreaChart, Cell, Tooltip } from "recharts";
+import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip as ShadTooltip } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
-const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"]
+const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"];
 
 // Generate smooth curves that match the image
 const generateSmoothData = (min: number, max: number, trend: "stable" | "decreasing" | "variable") => {
-  let lastValue = (min + max) / 2
-  return days.map((day) => {
-    let change
+  let lastValue = (min + max) / 2;
+  return days.map(day => {
+    let change;
     switch (trend) {
       case "decreasing":
-        change = Math.random() * (max - min) * 0.1 - (max - min) * 0.05
-        break
+        change = Math.random() * (max - min) * 0.1 - (max - min) * 0.05;
+        break;
       case "variable":
-        change = Math.random() * (max - min) * 0.2 - (max - min) * 0.1
-        break
+        change = Math.random() * (max - min) * 0.2 - (max - min) * 0.1;
+        break;
       default:
-        change = Math.random() * (max - min) * 0.15 - (max - min) * 0.075
+        change = Math.random() * (max - min) * 0.15 - (max - min) * 0.075;
     }
-    lastValue = Math.max(min, Math.min(max, lastValue + change))
+    lastValue = Math.max(min, Math.min(max, lastValue + change));
     return {
       name: day,
       value: Math.round(lastValue),
-    }
-  })
-}
+    };
+  });
+};
 
-const models = ["Model1", "Model2", "Model3", "Model4", "Model5"]
+const models = ["Model1", "Model2", "Model3", "Model4", "Model5"];
 const colors = {
   light: {
-    blue: "#42A5F5", 
-    green: "#66BB6A", 
-    yellow: "#FFEB3B", 
+    blue: "#42A5F5",
+    green: "#66BB6A",
+    yellow: "#FFEB3B",
     red: "#E57373",
-    purple: "#9575CD", 
+    purple: "#9575CD",
   },
   dark: {
-    blue: "#1E88E5", 
-    green: "#43A047", 
-    yellow: "#FDD835", 
-    red: "#D32F2F", 
-    purple: "#7E57C2", 
+    blue: "#1E88E5",
+    green: "#43A047",
+    yellow: "#FDD835",
+    red: "#D32F2F",
+    purple: "#7E57C2",
   },
 };
 
-
 // Generate smooth stacked area data for requests per model
-const requestsPerModel = days.map((day) => {
-  const baseValues = models.map(() => Math.floor(Math.random() * 5000 + 3000))
+const requestsPerModel = days.map(day => {
+  const baseValues = models.map(() => Math.floor(Math.random() * 5000 + 3000));
   return {
     name: day,
     ...models.reduce(
@@ -59,10 +58,10 @@ const requestsPerModel = days.map((day) => {
         ...acc,
         [model]: baseValues[index],
       }),
-      {},
+      {}
     ),
-  }
-})
+  };
+});
 
 const tokensPerModel = [
   {
@@ -105,7 +104,7 @@ const tokensPerModel = [
         ? colors.dark.purple
         : colors.light.purple,
   },
-]
+];
 
 const chartConfigs = [
   {
@@ -120,7 +119,7 @@ const chartConfigs = [
     id: "tokens-per-model",
     tooltip: "Tokens generated across models",
   },
-]
+];
 
 function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
   if (config.special === "stacked") {
@@ -146,7 +145,12 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={requestsPerModel} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#888888", fontSize: 12 }}
+                tickFormatter={value => value.toLocaleString()}
+              />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
@@ -157,11 +161,15 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   color: "var(--card-foreground)",
                 }}
                 formatter={(value: number, name: string) => [
-                  <span key={`${name}-value`} style={{
-                    color: typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                      ? Object.values(colors.dark)[models.indexOf(name)]
-                      : Object.values(colors.light)[models.indexOf(name)]
-                  }}>
+                  <span
+                    key={`${name}-value`}
+                    style={{
+                      color:
+                        typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                          ? Object.values(colors.dark)[models.indexOf(name)]
+                          : Object.values(colors.light)[models.indexOf(name)],
+                    }}
+                  >
                     {value.toLocaleString()}
                   </span>,
                   name,
@@ -190,7 +198,7 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
           </ResponsiveContainer>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (config.special === "bar") {
@@ -223,7 +231,7 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 tickLine={false}
                 tick={{ fill: "#888888", fontSize: 12 }}
                 width={60}
-                tickFormatter={(value) => value.split(" ")[0]}
+                tickFormatter={value => value.split(" ")[0]}
               />
               <Tooltip
                 contentStyle={{
@@ -233,16 +241,15 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
-
                 }}
                 formatter={(value: number, name: string, props: any) => {
-                  const model = tokensPerModel.find((m) => m.name === props.payload.name)
+                  const model = tokensPerModel.find(m => m.name === props.payload.name);
                   return [
                     <span key={`${name}-value`} style={{ color: model?.color }}>
                       {value.toLocaleString()}
                     </span>,
                     "",
-                  ]
+                  ];
                 }}
                 labelFormatter={(name: string) => name}
                 separator=""
@@ -257,19 +264,18 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
           </ResponsiveContainer>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  return null
+  return null;
 }
 
 export function AreaCharts() {
   return (
     <div className="grid gap-6 md:grid-cols-4">
-      {chartConfigs.map((config) => (
+      {chartConfigs.map(config => (
         <AreaChartCard key={config.id} config={config} />
       ))}
     </div>
-  )
+  );
 }
-

@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ResponsiveContainer, XAxis, YAxis, Tooltip, Area, AreaChart } from "recharts"
-import { TooltipProvider, Tooltip as ShadTooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { Info } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ResponsiveContainer, XAxis, YAxis, Tooltip, Area, AreaChart } from "recharts";
+import { TooltipProvider, Tooltip as ShadTooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
-const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"]
+const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"];
 
 // Generate smooth data for requests processed and tokens processed
-const requestsData = days.map((day) => ({
+const requestsData = days.map(day => ({
   name: day,
   value: Math.floor(Math.random() * 30000 + 15000),
-}))
+}));
 
-const tokensData = days.map((day) => ({
+const tokensData = days.map(day => ({
   name: day,
   value: Math.floor(Math.random() * 40000 + 20000),
-}))
+}));
 
 export function ModelCharts() {
   return (
@@ -42,7 +42,12 @@ export function ModelCharts() {
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={requestsData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }}  tickFormatter={(value) => value.toLocaleString()} />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#888888", fontSize: 12 }}
+                tickFormatter={value => value.toLocaleString()}
+              />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
@@ -52,10 +57,9 @@ export function ModelCharts() {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
-                formatter={(value) => [value.toLocaleString(), "Value"]}
+                formatter={value => [value.toLocaleString(), "Value"]}
               />
-            <Area type="monotone" dataKey="value" stroke="#FF8080" fill="#FFB3B3" fillOpacity={0.8} strokeWidth={2} />
-
+              <Area type="monotone" dataKey="value" stroke="#FF8080" fill="#FFB3B3" fillOpacity={0.8} strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
@@ -82,7 +86,12 @@ export function ModelCharts() {
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={tokensData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }}  tickFormatter={(value) => value.toLocaleString()}/>
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#888888", fontSize: 12 }}
+                tickFormatter={value => value.toLocaleString()}
+              />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
@@ -92,16 +101,13 @@ export function ModelCharts() {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
-                formatter={(value) => [value.toLocaleString(), "Value"]}
+                formatter={value => [value.toLocaleString(), "Value"]}
               />
               <Area type="monotone" dataKey="value" stroke="#FFA500" fill="#FFC080" fillOpacity={0.8} strokeWidth={2} />
-
-
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-

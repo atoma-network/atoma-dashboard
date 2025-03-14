@@ -1,5 +1,5 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { getAllStacks, getAllTasks } from "@/lib/api";
 import { useToast } from "@/app/toast-provider";
@@ -66,11 +66,17 @@ interface IUsageHistory {
 
 export function UsageHistory() {
   const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
-const {showToast}=useToast()
+  const { showToast } = useToast();
   useEffect(() => {
     (async () => {
-      let stacksPromise = await getAllStacks().catch((ex)=>{showToast('Error Occured','error'); return {data:[]}});
-      let tasksPromise = getAllTasks().catch((ex)=>{showToast('Error Occured','error'); return {data:[]}});
+      let stacksPromise = await getAllStacks().catch(ex => {
+        showToast("Error Occured", "error");
+        return { data: [] };
+      });
+      let tasksPromise = getAllTasks().catch(ex => {
+        showToast("Error Occured", "error");
+        return { data: [] };
+      });
       let [stacks, tasks] = await Promise.all([stacksPromise, tasksPromise]);
       setUsageHistory(
         stacks.data
@@ -83,7 +89,7 @@ const {showToast}=useToast()
               used_tokens: stack.already_computed_units,
               cost: (stack.num_compute_units / 1000000) * (stack.price_per_one_million_compute_units / 1000000),
               model:
-                tasks.data.find((task) => task[0].task_small_id === stack.task_small_id)?.[0].model_name || "Unknown",
+                tasks.data.find(task => task[0].task_small_id === stack.task_small_id)?.[0].model_name || "Unknown",
             };
           })
       );
@@ -119,4 +125,3 @@ const {showToast}=useToast()
     </Card>
   );
 }
-
