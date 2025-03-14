@@ -45,7 +45,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 export function useAppState() {
   const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error("useSettings must be used within a SettingsProvider");
+    throw new Error("useAppState must be used within a AppStateProvider");
   }
   return context;
 }
