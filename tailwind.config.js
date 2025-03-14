@@ -24,16 +24,16 @@ module.exports = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#dc6d4b",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "#faeee8",
+          foreground: "#de6c49",
         },
-        darkMode: {
-          DEFAULT: "#09090b",
-          foreground: "#020713",
+        darkMode:{
+          DEFAULT:'#09090b',
+          foreground:'#020713'
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -44,8 +44,8 @@ module.exports = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#faeee8",
+          foreground: "#de6c49",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -78,4 +78,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-};
+}
