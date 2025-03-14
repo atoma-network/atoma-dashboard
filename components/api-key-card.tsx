@@ -164,7 +164,7 @@ export function ApiKeyCard() {
               </Table>
             ) : (
               <div className="flex items-center justify-center">
-                <LoadingCircle isSpinning={true} />
+                <LoadingCircle isSpinning={true} size="md" />
               </div>
             )}
           </div>

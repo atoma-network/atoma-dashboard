@@ -7,19 +7,20 @@ export function renderModelListBasedOnTabs(
     case "chat":
       return [
         {
-          modelName: "Llama 3.3 70B",
-          model: "meta-llama/Llama-3.3-70B-Instruct",
+          modelName: "QwQ 32B",
+          model: "Qwen/QwQ-32B",
         },
         {
-          modelName: "DeepSeek R1",
-          model: "deepseek-ai/DeepSeek-R1",
+          modelName: "DeepSeek R1 Distill 70B",
+          model: "neuralmagic/DeepSeek-R1-Distill-Llama-70B-FP8-dynamic",
         },
-      ];
-    case "embeddings":
-      return [
         {
-          modelName: "MultiLingual E5 large",
-          model: "intfloat/multilingual-e5-large-instruct",
+          modelName: "Qwen2 72B",
+          model: "neuralmagic/Qwen2-72B-Instruct-FP8",
+        },
+        {
+          modelName: "Llama 3.1 8B",
+          model: "meta-llama/Llama-3.1-8B-Instruct",
         },
       ];
     case "images":

@@ -12,7 +12,6 @@ import { ApiUsageDialog } from "@/components/api-usage-dialog";
 import { ParametersSidebar } from "@/components/parameters-sidebar";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
-import { Loader2 } from "lucide-react";
 import {
   renderModelListBasedOnTabs,
   RenderRequestBodyBasedOnEndPoint,
@@ -48,7 +47,7 @@ const defaultParameters: Parameters = {
 };
 
 export default function PlaygroundPage() {
-  const [selectedModel, setSelectedModel] = useState("meta-llama/Llama-3.3-70B-Instruct");
+  const [selectedModel, setSelectedModel] = useState("meta-llama/Llama-3.1-8B-Instruct");
   const [selectedTab, setSelectedTab] = useState<ModelCategories>("chat");
 
   const [message, setMessage] = useState("");

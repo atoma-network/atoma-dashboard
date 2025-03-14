@@ -56,7 +56,7 @@ export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => vo
               `$${balance}`
             ) : (
               <div className="w-[3rem] h-[3rem]">
-                <LoadingCircle isSpinning={true} />
+                <LoadingCircle isSpinning={true} size="sm" />
               </div>
             )}
           </div>
