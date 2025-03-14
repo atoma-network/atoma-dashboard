@@ -37,6 +37,7 @@ import ZkLogin from "@/lib/zklogin";
 import { getSuiAddress, proofRequest, usdcPayment } from "@/lib/api";
 import { Label } from "@/components/ui/label";
 import LoadingCircle from "@/components/LoadingCircle";
+import { useAppState } from "@/contexts/app-state";
 
 const { networkConfig } = createNetworkConfig({
   testnet: { url: getFullnodeUrl("testnet") },
@@ -57,6 +58,7 @@ export default function DashboardPage() {
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
   const { settings, updateSettings, updateZkLoginSettings } = useSettings();
+  const { updateState } = useAppState();
 
   useEffect(() => {
     (async () => {
@@ -98,6 +100,7 @@ export default function DashboardPage() {
             setTimeout(() => {
               usdcPayment(txDigest, proofSignature)
                 .then(() => {
+                  updateState({ refreshBalance: true });
                   setFundsStep("result");
                 })
                 .catch((error: Response) => {
@@ -130,6 +133,7 @@ export default function DashboardPage() {
       const txDigest = (res as { digest: string }).digest;
       res = await usdcPayment(txDigest);
       setShowAddFunds(true);
+      updateState({ refreshBalance: true });
       setFundsStep("result");
     } catch (error) {
       console.error(error);
@@ -243,7 +247,9 @@ export default function DashboardPage() {
       case "sending":
         return (
           <div className="flex items-center justify-center">
-            <LoadingCircle isSpinning={true} />
+            <div className="w-20 h-20">
+              <LoadingCircle isSpinning={true} />
+            </div>
           </div>
         );
       case "result":
