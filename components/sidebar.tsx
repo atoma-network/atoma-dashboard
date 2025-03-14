@@ -159,12 +159,9 @@ export function Sidebar() {
           </div>
           <div className="flex-1 overflow-auto dark:bg-darkMode">
             <nav className="flex-1 space-y-2 px-2 py-4 dark:text-[#8f8f98]">
-              {navigation.map(item => {
-                if (item.needAuth && !settings.loggedIn) {
-                  return null;
-                }
-                return <NavItem key={item.name} item={item} />;
-              })}
+              {navigation.map(item => (
+                <NavItem key={item.name} item={item} />
+              ))}
             </nav>
           </div>
           <div className="border-t border-border p-2">
