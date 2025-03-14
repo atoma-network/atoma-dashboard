@@ -56,9 +56,9 @@ const atomaApi = axios.create({
   },
 });
 
-credentialsApi.interceptors.response.use(response => response, handleError);
+credentialsApi.interceptors.response.use((response) => response, handleError);
 
-atomaApi.interceptors.response.use(response => response, handleError);
+atomaApi.interceptors.response.use((response) => response, handleError);
 
 // Add authentication interceptor to both clients
 const addAuthInterceptor = (apiClient: any) => {

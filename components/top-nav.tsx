@@ -18,24 +18,22 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import AuthForm from "@/components/AuthForm";
 import Modal from "@/components/Modal";
 import { getUserProfile } from "@/lib/api";
-import { useAppState } from "@/contexts/app-state";
 
 export function TopNav() {
   const pathname = usePathname();
   const [loggedIn, setLoggedIn] = useState(false); // To prevent hydration error on client side
   const { settings, updateSettings, updateZkLoginSettings } = useSettings();
-  const { state, updateState } = useAppState();
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authType, setAuthType] = useState("login");
   const [username, setUsername] = useState("user");
 
   const handleAuth = (type: string) => {
     setAuthType(type);
-    updateState({ showLogin: true });
+    setShowAuthForm(true);
   };
 
   const closeAuthForm = () => {
-    updateState({ showLogin: false });
+    setShowAuthForm(false);
   };
 
   useEffect(() => {
@@ -51,10 +49,6 @@ export function TopNav() {
       })();
     }
   }, [settings.loggedIn]);
-
-  useEffect(() => {
-    setShowAuthForm(state.showLogin);
-  }, [state.showLogin]);
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background dark:bg-darkMode">
@@ -79,8 +73,8 @@ export function TopNav() {
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0 hover:bg-transparent">
                   <Avatar className="h-8 w-8">
                     <div
-                      className="h-full w-full rounded-full flex items-center justify-center text-white"
-                      style={{ backgroundColor: "#" + settings.avatar.split("background=")[1] }}
+                      className="h-full w-full rounded-full flex items-center justify-center bg-primary text-white"
+                     // style={{ backgroundColor: "" + settings.avatar.split("background=")[1] }}
                     >
                       {username[0].toUpperCase()}
                     </div>
@@ -97,7 +91,7 @@ export function TopNav() {
                 <DropdownMenuItem asChild>
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                   <div className="flex items-center justify-between w-full">
                     <span>Theme</span>
                     <ThemeToggle />
