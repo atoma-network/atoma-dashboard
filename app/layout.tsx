@@ -47,7 +47,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </SettingsProvider>
       </body>
     </html>
-    
   );
 }
 

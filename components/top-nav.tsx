@@ -73,8 +73,8 @@ export function TopNav() {
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0 hover:bg-transparent">
                   <Avatar className="h-8 w-8">
                     <div
-                      className="h-full w-full rounded-full flex items-center justify-center bg-primary text-white"
-                      // style={{ backgroundColor: "" + settings.avatar.split("background=")[1] }}
+                      className="h-full w-full rounded-full flex items-center justify-center text-white"
+                      style={{ backgroundColor: "#" + settings.avatar.split("background=")[1] }}
                     >
                       {username[0].toUpperCase()}
                     </div>
@@ -108,7 +108,6 @@ export function TopNav() {
                       maxEpoch: undefined,
                       zkp: undefined,
                     });
-                    window.location.href = "/";
                   }}
                 >
                   Log out
