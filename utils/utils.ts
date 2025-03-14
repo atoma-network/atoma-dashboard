@@ -34,7 +34,11 @@ export function renderModelListBasedOnTabs(
   }
 }
 
-export function RenderRequestBodyBasedOnEndPoint(endpoint: ModelCategories, selectedModel: string, message: string) {
+export function RenderRequestBodyBasedOnEndPoint(
+  endpoint: ModelCategories,
+  selectedModel: string,
+  message: string
+) {
   switch (endpoint) {
     case "chat":
       return {
@@ -54,7 +58,10 @@ export function RenderRequestBodyBasedOnEndPoint(endpoint: ModelCategories, sele
   }
 }
 
-export function parseOutputBasedOnEndpoint(endpoint: ModelCategories, response: AxiosResponse) {
+export function parseOutputBasedOnEndpoint(
+  endpoint: ModelCategories,
+  response: AxiosResponse
+) {
   switch (endpoint) {
     case "chat":
       return response.data.choices[0].message.content;

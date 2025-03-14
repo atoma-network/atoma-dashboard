@@ -20,7 +20,7 @@ module.exports = {
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
+        ring: "#dc6d4b",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
@@ -52,7 +52,7 @@ module.exports = {
           foreground: "hsl(var(--popover-foreground))",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
+          DEFAULT: "#de6c49",
           foreground: "hsl(var(--card-foreground))",
         },
       },
@@ -79,3 +79,4 @@ module.exports = {
   },
   plugins: [require("tailwindcss-animate")],
 }
+

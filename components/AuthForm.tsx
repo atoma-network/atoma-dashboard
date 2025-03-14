@@ -5,7 +5,7 @@ import { InputText } from "primereact/inputtext";
 import ZkLogin from "@/lib/zklogin";
 import { useSettings } from "@/contexts/settings-context";
 import { loginUser, registerUser } from "@/lib/api";
-
+import { useRouter } from "next/navigation";
 interface AuthFormProps {
   type: "login" | "register";
   onClose: () => void;
@@ -18,7 +18,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const toastRef = useRef<Toast>(null);
   const { settings, updateSettings, updateZkLoginSettings } = useSettings();
-
+  const router=useRouter();
   const [loginType, setLoginType] = useState<"login" | "register">(type);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +41,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
         life: 3000,
       });
       //onClose();
-      window.location.reload();
+      
+      window.location.href='/';
+     
     } catch (error: any) {
       console.error("Error during authentication:", error);
       if (error.response && error.response.status === 401) {
@@ -70,10 +72,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
     await zkLogin.initialize(settings, updateSettings, updateZkLoginSettings);
     zkLogin
       .getURL(settings.zkLogin, updateZkLoginSettings)
-      .then(url => {
+      .then((url) => {
         window.location.href = url;
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
       });
   };
@@ -93,7 +95,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
             <InputText
               placeholder="Enter your email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
             />
@@ -104,7 +106,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
               <InputText
                 placeholder="Enter your name"
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 required
                 className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
               />
@@ -117,7 +119,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
               type="password"
               placeholder="Enter your password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               required
               className="p-inputtext-lg w-full border border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
             />

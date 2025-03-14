@@ -1,10 +1,8 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useEffect, useState } from "react";
 import { getAllStacks, getAllTasks } from "@/lib/api";
 import { useToast } from "@/app/toast-provider";
-import LoadingCircle from "../LoadingCircle";
-import { useSettings } from "@/contexts/settings-context";
 
 const usageData = [
   {
@@ -67,24 +65,12 @@ interface IUsageHistory {
 }
 
 export function UsageHistory() {
-  const [usageHistory, setUsageHistory] = useState<IUsageHistory[] | null>(null);
-  const { showToast } = useToast();
-  const { settings } = useSettings();
+  const [usageHistory, setUsageHistory] = useState<IUsageHistory[]>([]);
+const {showToast}=useToast()
   useEffect(() => {
-    if (!settings.loggedIn) {
-      setUsageHistory([]);
-      return;
-    }
-    setUsageHistory(null);
     (async () => {
-      let stacksPromise = await getAllStacks().catch(ex => {
-        showToast("Error occurred", "error");
-        return { data: [] };
-      });
-      let tasksPromise = getAllTasks().catch(ex => {
-        showToast("Error occurred", "error");
-        return { data: [] };
-      });
+      let stacksPromise = await getAllStacks().catch((ex)=>{showToast('Error Occured','error'); return {data:[]}});
+      let tasksPromise = getAllTasks().catch((ex)=>{showToast('Error Occured','error'); return {data:[]}});
       let [stacks, tasks] = await Promise.all([stacksPromise, tasksPromise]);
       setUsageHistory(
         stacks.data
@@ -97,45 +83,40 @@ export function UsageHistory() {
               used_tokens: stack.already_computed_units,
               cost: (stack.num_compute_units / 1000000) * (stack.price_per_one_million_compute_units / 1000000),
               model:
-                tasks.data.find(task => task[0].task_small_id === stack.task_small_id)?.[0].model_name || "Unknown",
+                tasks.data.find((task) => task[0].task_small_id === stack.task_small_id)?.[0].model_name || "Unknown",
             };
           })
       );
     })();
-  }, [settings.loggedIn]);
+  }, []);
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-sm font-medium">Usage History</CardTitle>
       </CardHeader>
       <CardContent>
-        {usageHistory ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Model</TableHead>
-                <TableHead className="text-right">Tokens</TableHead>
-                <TableHead className="text-right">Cost</TableHead>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Model</TableHead>
+              <TableHead className="text-right">Tokens</TableHead>
+              <TableHead className="text-right">Cost</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {usageHistory.map((row, index) => (
+              <TableRow key={index}>
+                <TableCell>{row.date}</TableCell>
+                <TableCell className="font-mono text-sm">{row.model}</TableCell>
+                <TableCell className="text-right">{row.tokens}</TableCell>
+                <TableCell className="text-right">{row.cost}</TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {usageHistory.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell>{row.date}</TableCell>
-                  <TableCell className="font-mono text-sm">{row.model}</TableCell>
-                  <TableCell className="text-right">{row.tokens}</TableCell>
-                  <TableCell className="text-right">{row.cost}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <div className="flex justify-center">
-            <LoadingCircle isSpinning={true} />
-          </div>
-        )}
+            ))}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );
 }
+

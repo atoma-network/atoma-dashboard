@@ -1,35 +1,35 @@
-"use client";
+"use client"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
+import { useState } from "react"
 
 export interface ModelSettings {
-  privateKey: string;
-  temperature: number;
-  maxTokens: number;
-  topP: number;
-  frequencyPenalty: number;
-  presencePenalty: number;
+  privateKey: string
+  temperature: number
+  maxTokens: number
+  topP: number
+  frequencyPenalty: number
+  presencePenalty: number
 }
 
 interface ModelSettingsDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  settings: ModelSettings;
-  onSave: (settings: ModelSettings) => void;
+  isOpen: boolean
+  onClose: () => void
+  settings: ModelSettings
+  onSave: (settings: ModelSettings) => void
 }
 
 export function ModelSettingsDialog({ isOpen, onClose, settings, onSave }: ModelSettingsDialogProps) {
-  const [localSettings, setLocalSettings] = useState<ModelSettings>(settings);
+  const [localSettings, setLocalSettings] = useState<ModelSettings>(settings)
 
   const handleSave = () => {
-    onSave(localSettings);
-    onClose();
-  };
+    onSave(localSettings)
+    onClose()
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -44,7 +44,7 @@ export function ModelSettingsDialog({ isOpen, onClose, settings, onSave }: Model
               id="privateKey"
               type="password"
               value={localSettings.privateKey}
-              onChange={e => setLocalSettings({ ...localSettings, privateKey: e.target.value })}
+              onChange={(e) => setLocalSettings({ ...localSettings, privateKey: e.target.value })}
               placeholder="Enter your private key"
             />
           </div>
@@ -52,7 +52,7 @@ export function ModelSettingsDialog({ isOpen, onClose, settings, onSave }: Model
             <Label>Temperature ({localSettings.temperature})</Label>
             <Slider
               value={[localSettings.temperature]}
-              onValueChange={value => setLocalSettings({ ...localSettings, temperature: value[0] })}
+              onValueChange={(value) => setLocalSettings({ ...localSettings, temperature: value[0] })}
               max={2}
               step={0.1}
             />
@@ -66,7 +66,7 @@ export function ModelSettingsDialog({ isOpen, onClose, settings, onSave }: Model
               id="maxTokens"
               type="number"
               value={localSettings.maxTokens}
-              onChange={e => setLocalSettings({ ...localSettings, maxTokens: Number.parseInt(e.target.value) })}
+              onChange={(e) => setLocalSettings({ ...localSettings, maxTokens: Number.parseInt(e.target.value) })}
               min={1}
               max={4096}
             />
@@ -75,7 +75,7 @@ export function ModelSettingsDialog({ isOpen, onClose, settings, onSave }: Model
             <Label>Top P ({localSettings.topP})</Label>
             <Slider
               value={[localSettings.topP]}
-              onValueChange={value => setLocalSettings({ ...localSettings, topP: value[0] })}
+              onValueChange={(value) => setLocalSettings({ ...localSettings, topP: value[0] })}
               max={1}
               step={0.05}
             />
@@ -87,7 +87,7 @@ export function ModelSettingsDialog({ isOpen, onClose, settings, onSave }: Model
             <Label>Frequency Penalty ({localSettings.frequencyPenalty})</Label>
             <Slider
               value={[localSettings.frequencyPenalty]}
-              onValueChange={value => setLocalSettings({ ...localSettings, frequencyPenalty: value[0] })}
+              onValueChange={(value) => setLocalSettings({ ...localSettings, frequencyPenalty: value[0] })}
               max={2}
               step={0.1}
             />
@@ -99,7 +99,7 @@ export function ModelSettingsDialog({ isOpen, onClose, settings, onSave }: Model
             <Label>Presence Penalty ({localSettings.presencePenalty})</Label>
             <Slider
               value={[localSettings.presencePenalty]}
-              onValueChange={value => setLocalSettings({ ...localSettings, presencePenalty: value[0] })}
+              onValueChange={(value) => setLocalSettings({ ...localSettings, presencePenalty: value[0] })}
               max={2}
               step={0.1}
             />
@@ -114,5 +114,6 @@ export function ModelSettingsDialog({ isOpen, onClose, settings, onSave }: Model
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
+

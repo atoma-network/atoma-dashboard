@@ -108,7 +108,9 @@ export function TopNav() {
                       maxEpoch: undefined,
                       zkp: undefined,
                     });
+                    window.location.href='/'
                   }}
+                
                 >
                   Log out
                 </DropdownMenuItem>

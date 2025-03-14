@@ -1,7 +1,7 @@
-import { MetricsCards } from "@/components/analytics/metrics-cards";
-import { NetworkCharts } from "@/components/network/network-charts";
-import { ModelCharts } from "@/components/analytics/model-charts";
-import { BackgroundGrid } from "@/components/background-grid";
+import { MetricsCards } from "@/components/analytics/metrics-cards"
+import { NetworkCharts } from "@/components/network/network-charts"
+import { ModelCharts } from "@/components/analytics/model-charts"
+import { BackgroundGrid } from "@/components/background-grid"
 
 export default function NetworkStatusPage() {
   return (
@@ -16,5 +16,6 @@ export default function NetworkStatusPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
+

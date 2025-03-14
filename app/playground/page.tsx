@@ -12,7 +12,7 @@ import { ApiUsageDialog } from "@/components/api-usage-dialog";
 import { ParametersSidebar } from "@/components/parameters-sidebar";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
-import { Loader2 } from "lucide-react";
+import {Loader2 } from "lucide-react";
 import {
   renderModelListBasedOnTabs,
   RenderRequestBodyBasedOnEndPoint,
@@ -111,7 +111,7 @@ export default function PlaygroundPage() {
   };
 
   const handleParameterChange = (key: keyof Parameters, value: number | boolean | string) => {
-    setParameters(prev => ({ ...prev, [key]: value }));
+    setParameters((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
@@ -125,7 +125,7 @@ export default function PlaygroundPage() {
               <div className="flex w-full justify-between p-2">
                 {/* Tabs Section */}
                 <div className="flex gap-x-4">
-                  {["chat"].map(tab => (
+                  {["chat"].map((tab) => (
                     <Button
                       key={tab}
                       variant="ghost"
@@ -151,7 +151,7 @@ export default function PlaygroundPage() {
 
               {/* Model Selection */}
               <div className="flex items-center">
-                {renderModelListBasedOnTabs(selectedTab).map(model => (
+                {renderModelListBasedOnTabs(selectedTab).map((model) => (
                   <Button
                     key={model.modelName}
                     variant="ghost"
@@ -187,7 +187,7 @@ export default function PlaygroundPage() {
                 <form onSubmit={handleSubmit} className="flex gap-3">
                   <Input
                     value={message}
-                    onChange={e => setMessage(e.target.value)}
+                    onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type your message..."
                     className="flex-1 px-4 py-2 rounded-lg bg-background/80 border border-primary focus:ring-2 focus:ring-primary transition"
                   />

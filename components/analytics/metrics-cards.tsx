@@ -74,7 +74,7 @@ export function MetricsCards() {
         // Throughput
         const averageThroughPut = totalComputeUnits?.totalRequests * (60 / totalComputeUnits?.totalTime);
 
-        setMetricsData(prevData => ({
+        setMetricsData((prevData) => ({
           totalNodes: formatNumber(totalNodes),
           nodesOnline: formatNumber(nodesOnline),
           models: formatNumber(modelCount),
@@ -143,7 +143,7 @@ export function MetricsCards() {
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6">
-      {metrics.map(metric => (
+      {metrics.map((metric) => (
         <Card key={metric.title} className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{metric.title}</CardTitle>

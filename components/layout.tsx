@@ -1,6 +1,6 @@
-import type React from "react";
-import { Sidebar } from "./sidebar";
-import { TopNav } from "./top-nav";
+import type React from "react"
+import { Sidebar } from "./sidebar"
+import { TopNav } from "./top-nav"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,5 +11,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background">{children}</main>
       </div>
     </div>
-  );
+  )
 }
+

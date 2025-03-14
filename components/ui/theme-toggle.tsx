@@ -1,35 +1,35 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { useTheme } from "next-themes";
-import { cn } from "@/lib/utils";
+import * as React from "react"
+import { useTheme } from "next-themes"
+import { cn } from "@/lib/utils"
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
 
   // Initialize isToggled based on theme
-  const [isToggled, setIsToggled] = React.useState(theme === "dark");
+  const [isToggled, setIsToggled] = React.useState(theme === "dark")
 
   // Update isToggled when theme changes
   React.useEffect(() => {
-    setIsToggled(theme === "dark");
-  }, [theme]);
+    setIsToggled(theme === "dark")
+  }, [theme])
 
   // Handle mounting
   React.useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   if (!mounted) {
-    return <div className="h-8 w-14 rounded-full bg-muted animate-pulse" />;
+    return <div className="h-8 w-14 rounded-full bg-muted animate-pulse" />
   }
 
   const handleToggle = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    setIsToggled(newTheme === "dark");
-  };
+    const newTheme = theme === "light" ? "dark" : "light"
+    setTheme(newTheme)
+    setIsToggled(newTheme === "dark")
+  }
 
   return (
     <button
@@ -39,21 +39,21 @@ export function ThemeToggle() {
         "bg-white dark:bg-darkMode",
         "shadow-sm dark:shadow-darkMode",
         "border border-slate-200 dark:border-darkMode",
-        "hover:bg-slate-50 dark:hover:bg-darkMode"
+        "hover:bg-slate-50 dark:hover:bg-darkMode",
       )}
     >
       <div
         className={cn(
           "absolute top-1 left-1 h-6 w-6 rounded-full bg-white shadow-sm transition-transform duration-300",
           "flex items-center justify-center",
-          isToggled && "translate-x-6 bg-white"
+          isToggled && "translate-x-6 bg-white",
         )}
       >
         {/* Sun Icon */}
         <div
           className={cn(
             "absolute inset-0 flex items-center justify-center transition-opacity duration-300",
-            isToggled ? "opacity-0" : "opacity-100"
+            isToggled ? "opacity-0" : "opacity-100",
           )}
         >
           <svg
@@ -69,7 +69,7 @@ export function ThemeToggle() {
         <div
           className={cn(
             "absolute inset-0 flex items-center justify-center transition-opacity duration-300",
-            isToggled ? "opacity-100" : "opacity-0"
+            isToggled ? "opacity-100" : "opacity-0",
           )}
         >
           <svg
@@ -88,7 +88,7 @@ export function ThemeToggle() {
         <div
           className={cn(
             "absolute inset-0 flex items-center justify-between px-2 transition-opacity duration-300",
-            isToggled ? "opacity-0" : "opacity-100"
+            isToggled ? "opacity-0" : "opacity-100",
           )}
         >
           <div className="h-4 w-4" />
@@ -97,7 +97,7 @@ export function ThemeToggle() {
         <div
           className={cn(
             "absolute inset-0 flex items-center justify-between px-2 transition-opacity duration-300",
-            isToggled ? "opacity-100" : "opacity-0"
+            isToggled ? "opacity-100" : "opacity-0",
           )}
         >
           <div className="h-4 w-4 rounded-full bg-white/20" />
@@ -105,5 +105,6 @@ export function ThemeToggle() {
         </div>
       </div>
     </button>
-  );
+  )
 }
+

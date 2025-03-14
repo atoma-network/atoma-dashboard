@@ -1,6 +1,6 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import * as TabsPrimitive from "@radix-ui/react-tabs";
+import * as React from "react"
+import { cn } from "@/lib/utils"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 const Tabs = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Root>,
@@ -9,14 +9,14 @@ const Tabs = React.forwardRef<
   <TabsPrimitive.Root {...props} className={cn("flex flex-col", className)} ref={ref}>
     {children}
   </TabsPrimitive.Root>
-));
-Tabs.displayName = TabsPrimitive.Root.displayName;
+))
+Tabs.displayName = TabsPrimitive.Root.displayName
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => <TabsPrimitive.List {...props} className={cn("hidden", className)} ref={ref} />);
-TabsList.displayName = TabsPrimitive.List.displayName;
+>(({ className, ...props }, ref) => <TabsPrimitive.List {...props} className={cn("hidden", className)} ref={ref} />)
+TabsList.displayName = TabsPrimitive.List.displayName
 
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
@@ -26,14 +26,14 @@ const TabsTrigger = React.forwardRef<
     {...props}
     className={cn(
       "inline-flex items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all focus-visible:relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-      className
+      className,
     )}
     ref={ref}
   >
     {children}
   </TabsPrimitive.Trigger>
-));
-TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
+))
+TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
 const TabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
@@ -43,13 +43,14 @@ const TabsContent = React.forwardRef<
     {...props}
     className={cn(
       "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      className
+      className,
     )}
     ref={ref}
   >
     {children}
   </TabsPrimitive.Content>
-));
-TabsContent.displayName = TabsPrimitive.Content.displayName;
+))
+TabsContent.displayName = TabsPrimitive.Content.displayName
 
-export { Tabs, TabsContent, TabsList, TabsTrigger };
+export { Tabs, TabsContent, TabsList, TabsTrigger }
+

@@ -66,7 +66,7 @@ export function ApiAccessCard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {endpoints.map(endpoint => (
+              {endpoints.map((endpoint) => (
                 <TableRow key={endpoint.endpoint}>
                   <TableCell>{endpoint.name}</TableCell>
                   <TableCell>

@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Dialog,
@@ -48,7 +48,7 @@ export function ApiKeyCard() {
     }
     try {
       let tokens = await listApiKeys();
-      let apiKeys: ApiKey[] = tokens.data.map(token => {
+      let apiKeys: ApiKey[] = tokens.data.map((token) => {
         return {
           name: token.name,
           key: `sk-...${token.token_last_4}`,
@@ -103,7 +103,7 @@ export function ApiKeyCard() {
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between p-6">
-          <h2 className="text-lg font-semibold text-purple-600">API keys</h2>
+          <h2 className="text-lg font-semibold text-primary">API keys</h2>
           <Button onClick={() => setIsCreateDialogOpen(true)} disabled={!loggedIn}>
             <Plus className="mr-2 h-4 w-4" />
             Create new API key
@@ -127,7 +127,7 @@ export function ApiKeyCard() {
               <TableBody>
                 {apiKeys
                   .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
-                  .map(key => (
+                  .map((key) => (
                     <TableRow key={key.name}>
                       <TableCell>{key.name}</TableCell>
                       <TableCell className="font-mono">{key.key}</TableCell>
@@ -177,7 +177,7 @@ export function ApiKeyCard() {
                 id="name"
                 placeholder="My API key"
                 value={newKeyName}
-                onChange={e => setNewKeyName(e.target.value)}
+                onChange={(e) => setNewKeyName(e.target.value)}
               />
             </div>
           </div>
@@ -242,3 +242,4 @@ export function ApiKeyCard() {
     </>
   );
 }
+
