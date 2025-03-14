@@ -40,9 +40,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
         detail: "Login successful!",
         life: 3000,
       });
-      //onClose();
-
-      window.location.href = "/";
+      onClose();
     } catch (error: any) {
       console.error("Error during authentication:", error);
       if (error.response && error.response.status === 401) {
