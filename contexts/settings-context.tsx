@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 export interface UserSettings {
   loggedIn: boolean;
@@ -17,33 +17,6 @@ export interface UserSettings {
     zkp?: string;
     address?: string;
   };
-  // fullName: string
-  // email: string
-  // phone: string
-  // timezone: string
-  // language: string
-  // currency: string
-  // dateFormat: string
-  // fontSize: number
-  // theme: "light" | "dark" | "system"
-  // layout: "default" | "compact" | "expanded"
-  notifications: {
-    //   email: boolean
-    //   push: boolean
-    //   sms: boolean
-    //   accountActivity: boolean
-    //   newFeatures: boolean
-    //   marketing: boolean
-    //   frequency: "real-time" | "daily" | "weekly"
-    //   quietHoursStart: string
-    //   quietHoursEnd: string
-  };
-  privacy: {
-    //   analyticsSharing: boolean
-    //   personalizedAds: boolean
-    //   visibility: "public" | "private"
-    //   dataRetention: "6-months" | "1-year" | "2-years" | "indefinite"
-  };
 }
 
 const defaultSettings: UserSettings = {
@@ -52,41 +25,12 @@ const defaultSettings: UserSettings = {
     isEnabled: false,
   },
   avatar: "/placeholder.svg?height=400&width=400&background=8B5CF6", // Purple
-  // fullName: "Dollar Singh",
-  // email: "dollar.singh@example.com",
-  // phone: "+1 (555) 123-4567",
-  // timezone: "utc-8",
-  // language: "en",
-  // currency: "usd",
-  // dateFormat: "mm-dd-yyyy",
-  // fontSize: 16,
-  // theme: "system",
-  // layout: "default",
-  notifications: {
-    //   email: true,
-    //   push: true,
-    //   sms: false,
-    //   accountActivity: true,
-    //   newFeatures: true,
-    //   marketing: false,
-    //   frequency: "real-time",
-    //   quietHoursStart: "22:00",
-    //   quietHoursEnd: "07:00",
-  },
-  privacy: {
-    //   analyticsSharing: true,
-    //   personalizedAds: false,
-    //   visibility: "public",
-    //   dataRetention: "1-year",
-  },
 };
 
 interface SettingsContextType {
   settings: UserSettings;
   updateSettings: (newSettings: Partial<UserSettings>) => void;
   updateZkLoginSettings: (newSettings: Partial<UserSettings["zkLogin"]>) => void;
-  updateNotificationSettings: (settings: Partial<UserSettings["notifications"]>) => void;
-  updatePrivacySettings: (settings: Partial<UserSettings["privacy"]>) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -122,37 +66,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const updateNotificationSettings = (notificationSettings: Partial<UserSettings["notifications"]>) => {
-    setSettings(prev => {
-      const updatedSettings = {
-        ...prev,
-        notifications: { ...prev.notifications, ...notificationSettings },
-      };
-      localStorage.setItem("userSettings", JSON.stringify(updatedSettings)); // update here, to take effect immediately
-      return updatedSettings;
-    });
-    localStorage.setItem("userSettings", JSON.stringify(settings)); // update here, to take effect immediately
-  };
-
-  const updatePrivacySettings = (privacySettings: Partial<UserSettings["privacy"]>) => {
-    setSettings(prev => {
-      const updatedSettings = {
-        ...prev,
-        privacy: { ...prev.privacy, ...privacySettings },
-      };
-      localStorage.setItem("userSettings", JSON.stringify(updatedSettings)); // update here, to take effect immediately
-      return updatedSettings;
-    });
-  };
-
   return (
     <SettingsContext.Provider
       value={{
         settings,
         updateSettings,
         updateZkLoginSettings,
-        updateNotificationSettings,
-        updatePrivacySettings,
       }}
     >
       {children}
