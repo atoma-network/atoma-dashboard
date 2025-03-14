@@ -207,7 +207,7 @@ export default function DashboardPage() {
                 e.target.value = value.toString();
                 setAmount(value);
               }}
-              className="border-purple-200 dark:border-purple-800/30"
+              className="border-primary dark:border-primary"
             />
             <Button
               onClick={() =>
@@ -215,7 +215,7 @@ export default function DashboardPage() {
                   ? handleUSDCPayment(amount)
                   : setFundsStep("wallet")
               }
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              className="w-full bg-primary hover:bg-primary text-white"
               disabled={false}
             >
               <ArrowRight className="h-6 w-6" />

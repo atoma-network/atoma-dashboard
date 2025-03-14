@@ -71,7 +71,7 @@ export function ApiDocumentation() {
   return (
     <Card className="h-[280px]">
       <CardHeader className="pb-2">
-        <CardTitle className="text-purple-600">Quick Reference</CardTitle>
+        <CardTitle className="text-primary">Quick Reference</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <Tabs defaultValue="endpoints" className="h-[208px]">
@@ -91,7 +91,7 @@ export function ApiDocumentation() {
                 {endpoints.map(endpoint => (
                   <div
                     key={endpoint.endpoint}
-                    className="group space-y-1.5 rounded-lg bg-muted/50 p-3 cursor-pointer transition-all duration-200 hover:bg-muted/70 active:bg-muted/90"
+                    className="group space-y-1.5 rounded-lg bg-muted/50 p-3 cursor-pointer transition-all duration-200 hover:bg-muted/70 active:bg-muted/90 outline-none focus:ring-0"
                     onClick={() => {
                       setSelectedEndpoint(endpoint.name);
                       setIsApiDialogOpen(true);
@@ -101,7 +101,7 @@ export function ApiDocumentation() {
                       <span className="font-medium text-sm group-hover:text-primary transition-colors">
                         {endpoint.name}
                       </span>
-                      <span className="text-purple-600 text-xs font-mono bg-purple-100 dark:bg-purple-900/20 px-2 py-0.5 rounded transition-all duration-200 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/40 group-hover:scale-105 group-active:scale-95">
+                      <span className="text-primary text-xs font-mono bg-secondary dark:bg-purple-900/20 px-2 py-0.5 rounded transition-all duration-200 group-hover:bg-secondary dark:group-hover:bg-secondary group-hover:scale-105 group-active:scale-95">
                         {endpoint.method}
                       </span>
                     </div>

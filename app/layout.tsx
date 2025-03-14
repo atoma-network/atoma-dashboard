@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/sidebar";
 import { TopNav } from "@/components/top-nav";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/contexts/settings-context";
+import { AppStateProvider } from "@/contexts/app-state";
 import type React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SettingsProvider>
           <AppStateProvider>
             <SuiWrap>
-              <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitions={false}>
+              <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                 <TooltipProvider delayDuration={0}>
                   <ClientWrapper>
                     <div className="min-h-screen flex bg-background dark:bg-darkMode">
@@ -54,5 +55,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 import "./globals.css";
 import ClientWrapper from "./client-wrapper";
-import { AppStateProvider } from "@/contexts/app-state";
-

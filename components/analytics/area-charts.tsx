@@ -33,20 +33,28 @@ const generateSmoothData = (min: number, max: number, trend: "stable" | "decreas
 const models = ["Model1", "Model2", "Model3", "Model4", "Model5"];
 const colors = {
   light: {
-    blue: "#42A5F5",
-    green: "#66BB6A",
-    yellow: "#FFEB3B",
-    red: "#E57373",
-    purple: "#9575CD",
+    blue: "#BAE6FD",
+    green: "#D1FAE5",
+    yellow: "#FFF3C9",
+    red: "#FFC9C9",
+    purple: "#E9D5FF", // Reverted back to purple
+  },
+  lightText: {
+    // Add this new object for tooltip text colors
+    blue: "#2563eb",
+    green: "#059669",
+    yellow: "#b45309",
+    red: "#dc2626",
+    purple: "#7c3aed",
   },
   dark: {
-    blue: "#1E88E5",
-    green: "#43A047",
-    yellow: "#FDD835",
-    red: "#D32F2F",
-    purple: "#7E57C2",
+    blue: "#1e3a8a",
+    green: "#064e3b",
+    yellow: "#713f12",
+    red: "#7f1d1d",
+    purple: "#581c87", // Reverted back to dark purple
   },
-};
+} as const;
 
 // Generate smooth stacked area data for requests per model
 const requestsPerModel = days.map(day => {
@@ -67,42 +75,32 @@ const tokensPerModel = [
   {
     name: "Llama",
     value: 5702,
-    color:
-      typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-        ? colors.dark.red
-        : colors.light.red,
+    colorLight: colors.light.red,
+    colorDark: colors.dark.red,
   },
   {
     name: "DeepSeek",
     value: 4200,
-    color:
-      typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-        ? colors.dark.yellow
-        : colors.light.yellow,
+    colorLight: colors.light.yellow,
+    colorDark: colors.dark.yellow,
   },
   {
     name: "Qwen",
     value: 3728,
-    color:
-      typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-        ? colors.dark.green
-        : colors.light.green,
+    colorLight: colors.light.green,
+    colorDark: colors.dark.green,
   },
   {
     name: "FLUXL",
     value: 2500,
-    color:
-      typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-        ? colors.dark.blue
-        : colors.light.blue,
+    colorLight: colors.light.blue,
+    colorDark: colors.dark.blue,
   },
   {
     name: "Mistral",
     value: 1800,
-    color:
-      typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-        ? colors.dark.purple
-        : colors.light.purple,
+    colorLight: colors.light.purple,
+    colorDark: colors.dark.purple,
   },
 ];
 
@@ -138,19 +136,14 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{config.tooltip}</p>
+                <p className="text-foreground/90 dark:text-foreground/90 font-medium">{config.tooltip}</p>
               </TooltipContent>
             </ShadTooltip>
           </TooltipProvider>
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={requestsPerModel} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "#888888", fontSize: 12 }}
-                tickFormatter={value => value.toLocaleString()}
-              />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
@@ -160,20 +153,24 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
-                formatter={(value: number, name: string) => [
-                  <span
-                    key={`${name}-value`}
-                    style={{
-                      color:
-                        typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                          ? Object.values(colors.dark)[models.indexOf(name)]
-                          : Object.values(colors.light)[models.indexOf(name)],
-                    }}
-                  >
-                    {value.toLocaleString()}
-                  </span>,
-                  name,
-                ]}
+                formatter={(value: number, name: string) => {
+                  const modelIndex = models.indexOf(name);
+                  if (modelIndex === -1) return [null, null];
+                  const isDarkMode =
+                    typeof window !== "undefined" && document.documentElement.classList.contains("dark");
+                  const colorKey = Object.keys(isDarkMode ? colors.dark : colors.lightText)[modelIndex];
+                  return [
+                    <div
+                      key={`${name}-value`}
+                      style={{
+                        color: (isDarkMode ? colors.dark : colors.lightText)[colorKey as keyof typeof colors.dark],
+                      }}
+                    >
+                      {`${name}: ${value.toLocaleString()}`}
+                    </div>,
+                    null,
+                  ];
+                }}
               />
               {models.map((model, index) => (
                 <Area
@@ -217,7 +214,7 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{config.tooltip}</p>
+                <p className="text-foreground/90 dark:text-foreground/90 font-medium">{config.tooltip}</p>
               </TooltipContent>
             </ShadTooltip>
           </TooltipProvider>
@@ -244,21 +241,40 @@ function AreaChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 }}
                 formatter={(value: number, name: string, props: any) => {
                   const model = tokensPerModel.find(m => m.name === props.payload.name);
+                  if (!model) return [null, null]; // Avoid issues if model is not found
+
+                  const colorIndex = tokensPerModel.indexOf(model);
+                  const isDarkMode =
+                    typeof window !== "undefined" && document.documentElement.classList.contains("dark");
+                  const themeColors = isDarkMode ? colors.dark : colors.lightText;
+                  const colorKeys = Object.keys(themeColors) as Array<keyof typeof themeColors>;
+                  const colorKey = colorKeys[colorIndex] ?? colorKeys[0]; // Default to first key if index is invalid
+
                   return [
-                    <span key={`${name}-value`} style={{ color: model?.color }}>
-                      {value.toLocaleString()}
-                    </span>,
-                    "",
+                    <div key={`${name}-value`} style={{ color: themeColors[colorKey] }}>
+                      {`${value.toLocaleString()} Tokens`}
+                    </div>,
+                    null,
                   ];
                 }}
                 labelFormatter={(name: string) => name}
                 separator=""
-                //itemSeparator=""
               />
-              <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} style={{ opacity: 1 }}>
-                {tokensPerModel.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.6} />
-                ))}
+              <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
+                {tokensPerModel.map((entry, index) => {
+                  const colorKey = Object.keys(colors.light)[index];
+                  return (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={
+                        typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                          ? colors.dark[colorKey as keyof typeof colors.dark] || colors.dark
+                          : colors.light[colorKey as keyof typeof colors.light] || colors.light
+                      }
+                      fillOpacity={0.6}
+                    />
+                  );
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>

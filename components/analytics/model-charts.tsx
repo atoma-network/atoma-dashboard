@@ -42,12 +42,7 @@ export function ModelCharts() {
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={requestsData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "#888888", fontSize: 12 }}
-                tickFormatter={value => value.toLocaleString()}
-              />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
@@ -57,9 +52,37 @@ export function ModelCharts() {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
-                formatter={value => [value.toLocaleString(), "Value"]}
+                formatter={(value: number) => [
+                  <div
+                    key="value"
+                    style={{
+                      color:
+                        typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                          ? "#1e3a8a" // dark blue
+                          : "#2563eb", // lighter blue but still readable
+                    }}
+                  >
+                    {`${value.toLocaleString()} Requests`}
+                  </div>,
+                  null,
+                ]}
               />
-              <Area type="monotone" dataKey="value" stroke="#FF8080" fill="#FFB3B3" fillOpacity={0.8} strokeWidth={2} />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={
+                  typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                    ? "#1e3a8a"
+                    : "#BAE6FD"
+                }
+                fill={
+                  typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                    ? "#1e3a8a"
+                    : "#BAE6FD"
+                }
+                fillOpacity={0.6}
+                strokeWidth={2}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
@@ -86,12 +109,7 @@ export function ModelCharts() {
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={tokensData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "#888888", fontSize: 12 }}
-                tickFormatter={value => value.toLocaleString()}
-              />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(var(--card))",
@@ -101,9 +119,37 @@ export function ModelCharts() {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
-                formatter={value => [value.toLocaleString(), "Value"]}
+                formatter={(value: number) => [
+                  <div
+                    key="value"
+                    style={{
+                      color:
+                        typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                          ? "#7f1d1d" // dark red
+                          : "#dc2626", // lighter red but still readable
+                    }}
+                  >
+                    {`${value.toLocaleString()} Tokens`}
+                  </div>,
+                  null,
+                ]}
               />
-              <Area type="monotone" dataKey="value" stroke="#FFA500" fill="#FFC080" fillOpacity={0.8} strokeWidth={2} />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={
+                  typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                    ? "#7f1d1d"
+                    : "#FFC9C9"
+                }
+                fill={
+                  typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                    ? "#7f1d1d"
+                    : "#FFC9C9"
+                }
+                fillOpacity={0.6}
+                strokeWidth={2}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>

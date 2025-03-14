@@ -26,7 +26,7 @@ export function BillingSummaryCard() {
   return (
     <Card className="h-[280px] flex flex-col">
       <CardHeader>
-        <CardTitle className="text-purple-600">Billing Summary</CardTitle>
+        <CardTitle className="text-primary">Billing Summary</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col justify-center">
         <div className="space-y-6">

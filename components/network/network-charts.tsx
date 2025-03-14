@@ -19,26 +19,33 @@ import { Info } from "lucide-react";
 const days = ["Wed", "Thu", "Fri", "Sat", "Sun", "Mon", "Tue"];
 const models = ["Llama", "DeepSeek", "Qwen", "FLUXL", "Mistral"];
 
+// Colors for different chart types
 const colors = {
   light: {
-    blue: "#42A5F5",
-    green: "#66BB6A",
-    yellow: "#FFEB3B",
-    red: "#E57373",
-    purple: "#9575CD",
+    blue: "#BAE6FD",
+    green: "#D1FAE5",
+    yellow: "#FFF3C9",
+    red: "#FFC9C9",
+    purple: "#E9D5FF",
+  },
+  lightText: {
+    // Add this new object for tooltip text colors
+    blue: "#2563eb",
+    green: "#059669",
+    yellow: "#b45309",
+    red: "#dc2626",
+    purple: "#7c3aed",
   },
   dark: {
-    blue: "#1E88E5",
-    green: "#43A047",
-    yellow: "#FDD835",
-    red: "#D32F2F",
-    purple: "#7E57C2",
+    blue: "#1e3a8a",
+    green: "#064e3b",
+    yellow: "#713f12",
+    red: "#7f1d1d",
+    purple: "#581c87",
   },
 };
 
-type ColorKey = keyof typeof colors.light;
-const colorKeys = Object.keys(colors.light) as ColorKey[];
-
+// Generate consistent data for each model
 const generateModelData = (baseRange: [number, number], variance: number) => {
   const baseValue = baseRange[0] + Math.random() * (baseRange[1] - baseRange[0]);
   return days.map(() => {
@@ -46,6 +53,7 @@ const generateModelData = (baseRange: [number, number], variance: number) => {
   });
 };
 
+// Generate data for requests
 const requestsPerModel = days.map((day, dayIndex) => {
   const data: Record<string, any> = { name: day };
   models.forEach((model, index) => {
@@ -55,6 +63,7 @@ const requestsPerModel = days.map((day, dayIndex) => {
   return data;
 });
 
+// Generate data for TTFT and ITL with separate model lines
 const generateLatencyData = (baseRanges: Record<string, [number, number]>, variance: number) => {
   return days.map(day => {
     const dayData: Record<string, any> = { name: day };
@@ -66,6 +75,7 @@ const generateLatencyData = (baseRanges: Record<string, [number, number]>, varia
   });
 };
 
+// Different base ranges for each model to show variation
 const ttftData = generateLatencyData(
   {
     Llama: [80, 120],
@@ -97,12 +107,10 @@ const tokensPerModel = [
   { name: "Mistral", value: 1800 },
 ].map((item, index) => ({
   ...item,
-  color:
-    typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-      ? Object.values(colors.dark)[index]
-      : Object.values(colors.light)[index],
+  colorLight: colors.light[Object.keys(colors.light)[index]],
+  colorDark: colors.dark[Object.keys(colors.dark)[index]],
 }));
-const formatNumber = (value: number) => value.toLocaleString();
+
 const chartConfigs = [
   {
     title: "Requests Per Model",
@@ -118,7 +126,6 @@ const chartConfigs = [
     special: "bar",
     id: "tokens-per-model",
     tooltip: "Tokens generated across models",
-    valueFormatter: formatNumber,
   },
   {
     title: "Time To First Token (TTFT)",
@@ -157,7 +164,7 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{config.tooltip}</p>
+                <p className="text-foreground/90 dark:text-foreground/90 font-medium">{config.tooltip}</p>
               </TooltipContent>
             </ShadTooltip>
           </TooltipProvider>
@@ -181,18 +188,18 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   color: "var(--card-foreground)",
                 }}
                 formatter={(value: number, name: string) => [
-                  <span
+                  <div
                     key={`${name}-value`}
                     style={{
                       color:
                         typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                          ? colors.dark[colorKeys[models.indexOf(name) % colorKeys.length]]
-                          : colors.light[colorKeys[models.indexOf(name) % colorKeys.length]],
+                          ? colors.dark[Object.keys(colors.dark)[models.indexOf(name)]]
+                          : colors.lightText[Object.keys(colors.lightText)[models.indexOf(name)]],
                     }}
                   >
-                    {config.valueFormatter(value)}
-                  </span>,
-                  name,
+                    {`${name}: ${config.valueFormatter(value)}`}
+                  </div>,
+                  null,
                 ]}
               />
               {models.map((model, index) => (
@@ -203,13 +210,13 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   stackId="1"
                   stroke={
                     typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                      ? colors.dark[colorKeys[index % colorKeys.length]]
-                      : colors.light[colorKeys[index % colorKeys.length]]
+                      ? colors.dark[Object.keys(colors.dark)[index]]
+                      : colors.light[Object.keys(colors.light)[index]]
                   }
                   fill={
                     typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                      ? colors.dark[colorKeys[index % colorKeys.length]]
-                      : colors.light[colorKeys[index % colorKeys.length]]
+                      ? colors.dark[Object.keys(colors.dark)[index]]
+                      : colors.light[Object.keys(colors.light)[index]]
                   }
                   strokeWidth={0}
                 />
@@ -237,7 +244,7 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{config.tooltip}</p>
+                <p className="text-foreground/90 dark:text-foreground/90 font-medium">{config.tooltip}</p>
               </TooltipContent>
             </ShadTooltip>
           </TooltipProvider>
@@ -270,25 +277,25 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   color: "var(--card-foreground)",
                 }}
                 formatter={(value: number, name: string) => [
-                  <span
+                  <div
                     key={`${name}-value`}
                     style={{
                       color:
                         typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                          ? colors.dark[colorKeys[models.indexOf(name) % colorKeys.length]]
-                          : colors.light[colorKeys[models.indexOf(name) % colorKeys.length]],
+                          ? colors.dark[Object.keys(colors.dark)[models.indexOf(name)]]
+                          : colors.lightText[Object.keys(colors.lightText)[models.indexOf(name)]],
                     }}
                   >
-                    {config.valueFormatter(value)}
-                  </span>,
-                  name,
+                    {`${name}: ${config.valueFormatter(value)}`}
+                  </div>,
+                  null,
                 ]}
               />
               {models.map((model, index) => {
                 const color =
                   typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                    ? colors.dark[colorKeys[index % colorKeys.length]]
-                    : colors.light[colorKeys[index % colorKeys.length]];
+                    ? colors.dark[Object.keys(colors.dark)[index]]
+                    : colors.light[Object.keys(colors.light)[index]];
                 return (
                   <Area key={model} type="monotone" dataKey={model} stroke={color} strokeWidth={2} fill="transparent" />
                 );
@@ -316,7 +323,7 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{config.tooltip}</p>
+                <p className="text-foreground/90 dark:text-foreground/90 font-medium">{config.tooltip}</p>
               </TooltipContent>
             </ShadTooltip>
           </TooltipProvider>
@@ -343,11 +350,28 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 }}
                 formatter={(value: number, name: string, props: any) => {
                   const model = tokensPerModel.find(m => m.name === props.payload.name);
+                  const colorIndex = tokensPerModel.indexOf(model as any);
                   return [
-                    <span key={`${name}-value`} style={{ color: model?.color }}>
-                      {value.toLocaleString()}
-                    </span>,
-                    "",
+                    <div
+                      key={`${name}-value`}
+                      style={{
+                        color: (() => {
+                          const isDarkMode =
+                            typeof window !== "undefined" && document.documentElement.classList.contains("dark");
+                          const themeColors = isDarkMode ? colors.dark : colors.lightText;
+
+                          const colorKeys = Object.keys(themeColors) as Array<keyof typeof themeColors>;
+                          const safeIndex = Math.max(0, Math.min(colorIndex, colorKeys.length - 1)); // Ensure within bounds
+                          const colorKey = colorKeys[safeIndex];
+
+                          return themeColors[colorKey]; // Safe color retrieval
+                        })(),
+                      }}
+                    >
+                      {`${value.toLocaleString()} Tokens`}
+                    </div>,
+
+                    null,
                   ];
                 }}
                 labelFormatter={(name: string) => name}
@@ -355,7 +379,15 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
                 {tokensPerModel.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.6} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                        ? entry.colorDark
+                        : entry.colorLight
+                    }
+                    fillOpacity={0.6}
+                  />
                 ))}
               </Bar>
             </BarChart>

@@ -5,7 +5,6 @@ import { InputText } from "primereact/inputtext";
 import ZkLogin from "@/lib/zklogin";
 import { useSettings } from "@/contexts/settings-context";
 import { loginUser, registerUser } from "@/lib/api";
-
 interface AuthFormProps {
   type: "login" | "register";
   onClose: () => void;
@@ -18,7 +17,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const toastRef = useRef<Toast>(null);
   const { settings, updateSettings, updateZkLoginSettings } = useSettings();
-
   const [loginType, setLoginType] = useState<"login" | "register">(type);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,8 +38,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
         detail: "Login successful!",
         life: 3000,
       });
-      //onClose();
-      window.location.reload();
+      onClose();
     } catch (error: any) {
       console.error("Error during authentication:", error);
       if (error.response && error.response.status === 401) {

@@ -107,7 +107,7 @@ export function ApiKeyCard() {
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between p-6">
-          <h2 className="text-lg font-semibold text-purple-600">API keys</h2>
+          <h2 className="text-lg font-semibold text-primary">API keys</h2>
           <Button onClick={() => setIsCreateDialogOpen(true)} disabled={!loggedIn}>
             <Plus className="mr-2 h-4 w-4" />
             Create new API key
@@ -164,7 +164,7 @@ export function ApiKeyCard() {
               </Table>
             ) : (
               <div className="flex items-center justify-center">
-                <LoadingCircle isSpinning={true} />
+                <LoadingCircle isSpinning={true} size="md" />
               </div>
             )}
           </div>
