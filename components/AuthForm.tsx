@@ -18,7 +18,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const toastRef = useRef<Toast>(null);
   const { settings, updateSettings, updateZkLoginSettings } = useSettings();
-  const router = useRouter();
   const [loginType, setLoginType] = useState<"login" | "register">(type);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
