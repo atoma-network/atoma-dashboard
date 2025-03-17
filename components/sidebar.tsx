@@ -143,7 +143,20 @@ export function Sidebar() {
             >
               {!isCollapsed && (
                 <Link href="/" className="flex items-center font-semibold relative mr-auto">
-                  <Image alt="atoma logo" src="/atoma_logo_cropped.svg" height={110} width={110} className="ml-0 " />
+                  <Image
+                    alt="atoma logo"
+                    src="/Logo_balck.svg"
+                    height={110}
+                    width={110}
+                    className="ml-0 block dark:hidden"
+                  />
+                  <Image
+                    alt="atoma logo"
+                    src="/atoma_logo_cropped.svg"
+                    height={110}
+                    width={110}
+                    className="ml-0 hidden dark:block"
+                  />
                 </Link>
               )}
               <Button
