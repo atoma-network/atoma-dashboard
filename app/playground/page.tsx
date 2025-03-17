@@ -50,7 +50,6 @@ const defaultParameters: Parameters = {
 
 export default function PlaygroundPage() {
   const [selectedModel, setSelectedModel] = useState("");
-  const [selectedTab, setSelectedTab] = useState<ModelCategories>("chat");
   const [availableModels, setAvailableModels] = useState<TaskResponse>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
   const [modelError, setModelError] = useState<string | null>(null);
@@ -102,8 +101,8 @@ export default function PlaygroundPage() {
       setIsLoading(true);
 
       const response = await axios.post(
-        `${config.ATOMA_API_URL}${endpoints[selectedTab]}`,
-        RenderRequestBodyBasedOnEndPoint(selectedTab, selectedModel, message),
+        `${config.ATOMA_API_URL}${endpoints.chat}`,
+        RenderRequestBodyBasedOnEndPoint("chat", selectedModel, message),
         {
           headers: {
             "Content-Type": "application/json",
@@ -114,7 +113,7 @@ export default function PlaygroundPage() {
       console.log(response);
 
       setResponse({
-        response: parseOutputBasedOnEndpoint(selectedTab, response),
+        response: parseOutputBasedOnEndpoint("chat", response),
         error: false,
       });
     } catch (error: unknown) {
@@ -141,7 +140,7 @@ export default function PlaygroundPage() {
     setParameters(prev => ({ ...prev, [key]: value }));
   };
 
-  const currentModels = processModelsForCategory(availableModels, selectedTab);
+  const currentModels = processModelsForCategory(availableModels, "chat");
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
@@ -150,28 +149,30 @@ export default function PlaygroundPage() {
         <div className="h-full p-4 grid grid-cols-[1fr,400px] gap-4">
           <Card className="flex flex-col overflow-hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             {/* Header Section */}
-            <div className="p-4 space-y-4">
-              <div className="flex w-full justify-between p-2">
-                {/* Tabs Section */}
-                <div className="flex gap-x-4">
-                  {["chat", "embeddings"].map(tab => (
-                    <Button
-                      key={tab}
-                      variant="ghost"
-                      className={`px-4 py-2 text-sm font-medium ${
-                        selectedTab === tab ? "bg-secondary text-secondary-foreground" : "text-gray-500"
-                      }`}
-                      onClick={() => {
-                        setSelectedTab(tab as ModelCategories);
-                        const models = processModelsForCategory(availableModels, tab as ModelCategories);
-                        if (models.length > 0) {
-                          setSelectedModel(models[0].model);
-                        }
-                      }}
-                    >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </Button>
-                  ))}
+            <div className="p-4">
+              <div className="flex w-full items-center justify-between p-2">
+                {/* Model Selection */}
+                <div className="flex items-center gap-2 flex-1">
+                  {isLoadingModels ? (
+                    <div className="flex justify-center">
+                      <LoadingCircle isSpinning={true} />
+                    </div>
+                  ) : modelError ? (
+                    <div className="text-red-500">{modelError}</div>
+                  ) : (
+                    currentModels.map(model => (
+                      <Button
+                        key={model.model}
+                        variant="ghost"
+                        className={`px-3 py-1 rounded-lg ${
+                          selectedModel === model.model ? "bg-secondary text-secondary-foreground" : "text-gray-700"
+                        }`}
+                        onClick={() => setSelectedModel(model.model)}
+                      >
+                        {model.modelName}
+                      </Button>
+                    ))
+                  )}
                 </div>
 
                 <div>
@@ -180,31 +181,7 @@ export default function PlaygroundPage() {
                   </Button>
                 </div>
               </div>
-
-              {/* Model Selection */}
-              <div className="flex items-center flex-wrap gap-2">
-                {isLoadingModels ? (
-                  <div className="w-full flex justify-center">
-                    <LoadingCircle isSpinning={true} />
-                  </div>
-                ) : modelError ? (
-                  <div className="w-full text-center text-red-500">{modelError}</div>
-                ) : (
-                  currentModels.map(model => (
-                    <Button
-                      key={model.model}
-                      variant="ghost"
-                      className={`px-3 py-1 rounded-lg ${
-                        selectedModel === model.model ? "bg-secondary text-secondary-foreground" : "text-gray-700"
-                      }`}
-                      onClick={() => setSelectedModel(model.model)}
-                    >
-                      {model.modelName}
-                    </Button>
-                  ))
-                )}
-              </div>
-              <Separator />
+              <Separator className="mt-4" />
             </div>
 
             {/* Chat Section */}
