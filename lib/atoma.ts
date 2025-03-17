@@ -22,6 +22,7 @@ export enum ModelModality {
 export interface Token {
   created_at: string; // Creation date of the token
   name: string; // Name of the token
+  last_used_timestamp: string;
   token_last_4: string; // Last 4 characters of the token
   id: number; // Unique identifier of the token
 }
