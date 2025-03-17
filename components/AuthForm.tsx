@@ -76,7 +76,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
   };
 
   return (
-    <div className="p-8  w-full max-w-md mx-auto dark:bg-darkMode">
+    <div className="p-8 w-96 mx-auto dark:bg-darkMode">
       <Toast ref={toastRef} />
 
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-50">
@@ -136,7 +136,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
         </form>
         {process.env.NEXT_PUBLIC_ENABLE_ZK_LOGIN_GOOGLE === "true" && (
           <Button
-            className="p-button p-4 font-medium rounded-md transition-colors duration-200 bg-white dark:bg-black hover:bg-gray-200 dark:hover:bg-gray-800 text-black dark:text-white border border-gray-400 dark:border-gray-600"
+            className="justify-center p-button p-4 font-medium rounded-md transition-colors duration-200 bg-white dark:bg-black hover:bg-gray-200 dark:hover:bg-gray-800 text-black dark:text-white border border-gray-400 dark:border-gray-600"
             onClick={handleGoogleOauth}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="size-6 mr-3">
