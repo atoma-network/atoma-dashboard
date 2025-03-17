@@ -263,7 +263,6 @@ export default function NetworkStatusPage() {
   useEffect(() => {
     (async () => {
       let graphs = await getGraphs();
-      console.log("graphs", graphs);
       setGraphs(
         graphs.data.map(([title, dashboard]) => ({
           title: title,
@@ -278,7 +277,6 @@ export default function NetworkStatusPage() {
       graphs.data.forEach(([, dashboard], dashboardIndex) => {
         dashboard.forEach(([, , panelQuery], panelIndex) => {
           getGraphData(panelQuery).then(panelData => {
-            console.log("panel data", panelData);
             setGraphs(graphs => {
               const updatedGraphs = [...graphs!];
               updatedGraphs[dashboardIndex].panels[panelIndex].data = panelData;
