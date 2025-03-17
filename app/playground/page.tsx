@@ -165,7 +165,9 @@ export default function PlaygroundPage() {
                         key={model.model}
                         variant="ghost"
                         className={`px-3 py-1 rounded-lg ${
-                          selectedModel === model.model ? "bg-secondary text-secondary-foreground" : "text-gray-700"
+                          selectedModel === model.model
+                            ? "bg-background/80 text-foreground border border-border"
+                            : "text-muted-foreground hover:bg-background/40 hover:text-foreground"
                         }`}
                         onClick={() => setSelectedModel(model.model)}
                       >
