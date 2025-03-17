@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useSettings } from "@/contexts/settings-context";
-import { generateApiKey, listApiKeys, revokeApiToken } from "@/lib/api";
+import { generateApiKey, getUserProfile, listApiKeys, revokeApiToken } from "@/lib/api";
 import Modal from "./Modal";
 import LoadingCircle from "./LoadingCircle";
 
@@ -52,13 +52,14 @@ export function ApiKeyCard() {
     setApiKeys(null);
     try {
       let tokens = await listApiKeys();
+      let userProfile = await getUserProfile();
       let apiKeys: ApiKey[] = tokens.data.map(token => {
         return {
           name: token.name,
           key: `sk-...${token.token_last_4}`,
           created: new Date(token.created_at).toLocaleDateString(),
           projectAccess: "all",
-          createdBy: "-",
+          createdBy: userProfile.data.name,
           permissions: "all",
           lastUsed: "_",
           id: token.id,
