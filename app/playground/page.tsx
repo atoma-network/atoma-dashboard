@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,11 @@ import { ParametersSidebar } from "@/components/parameters-sidebar";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
 import {
-  renderModelListBasedOnTabs,
+  processModelsForCategory,
   RenderRequestBodyBasedOnEndPoint,
   parseOutputBasedOnEndpoint,
+  fetchAvailableModels,
+  TaskResponse,
 } from "../../utils/utils";
 import config from "@/config/config";
 import LoadingCircle from "../../components/LoadingCircle";
@@ -47,20 +49,46 @@ const defaultParameters: Parameters = {
 };
 
 export default function PlaygroundPage() {
-  const [selectedModel, setSelectedModel] = useState("meta-llama/Llama-3.1-8B-Instruct");
+  const [selectedModel, setSelectedModel] = useState("");
   const [selectedTab, setSelectedTab] = useState<ModelCategories>("chat");
+  const [availableModels, setAvailableModels] = useState<TaskResponse>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(true);
+  const [modelError, setModelError] = useState<string | null>(null);
 
   const [message, setMessage] = useState("");
   const [isApiDialogOpen, setIsApiDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [response, setResponse] = useState<{
     response: string;
     error: boolean;
   }>({ response: "", error: false });
-  // const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
   const [parameters, setParameters] = useState<Parameters>(defaultParameters);
+
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        setIsLoadingModels(true);
+        setModelError(null);
+        const models = await fetchAvailableModels();
+        setAvailableModels(models);
+
+        // Set initial selected model
+        const processedModels = processModelsForCategory(models, "chat");
+        if (processedModels.length > 0) {
+          setSelectedModel(processedModels[0].model);
+        }
+      } catch (error) {
+        console.error("Failed to fetch models:", error);
+        setModelError("Failed to load available models. Please try again later.");
+      } finally {
+        setIsLoadingModels(false);
+      }
+    };
+
+    loadModels();
+  }, []);
+
   const endpoints = {
     chat: "chat/completions",
     embeddings: "embeddings",
@@ -113,6 +141,8 @@ export default function PlaygroundPage() {
     setParameters(prev => ({ ...prev, [key]: value }));
   };
 
+  const currentModels = processModelsForCategory(availableModels, selectedTab);
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       <BackgroundGrid />
@@ -124,7 +154,7 @@ export default function PlaygroundPage() {
               <div className="flex w-full justify-between p-2">
                 {/* Tabs Section */}
                 <div className="flex gap-x-4">
-                  {["chat"].map(tab => (
+                  {["chat", "embeddings"].map(tab => (
                     <Button
                       key={tab}
                       variant="ghost"
@@ -133,7 +163,10 @@ export default function PlaygroundPage() {
                       }`}
                       onClick={() => {
                         setSelectedTab(tab as ModelCategories);
-                        setSelectedModel(renderModelListBasedOnTabs(tab as ModelCategories)[0].model);
+                        const models = processModelsForCategory(availableModels, tab as ModelCategories);
+                        if (models.length > 0) {
+                          setSelectedModel(models[0].model);
+                        }
                       }}
                     >
                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -149,19 +182,27 @@ export default function PlaygroundPage() {
               </div>
 
               {/* Model Selection */}
-              <div className="flex items-center">
-                {renderModelListBasedOnTabs(selectedTab).map(model => (
-                  <Button
-                    key={model.modelName}
-                    variant="ghost"
-                    className={`mr-2 px-3 py-1 rounded-lg ${
-                      selectedModel === model.model ? "bg-secondary text-secondary-foreground" : "text-gray-700"
-                    }`}
-                    onClick={() => setSelectedModel(model.model.trim())}
-                  >
-                    {model.modelName}
-                  </Button>
-                ))}
+              <div className="flex items-center flex-wrap gap-2">
+                {isLoadingModels ? (
+                  <div className="w-full flex justify-center">
+                    <LoadingCircle isSpinning={true} />
+                  </div>
+                ) : modelError ? (
+                  <div className="w-full text-center text-red-500">{modelError}</div>
+                ) : (
+                  currentModels.map(model => (
+                    <Button
+                      key={model.model}
+                      variant="ghost"
+                      className={`px-3 py-1 rounded-lg ${
+                        selectedModel === model.model ? "bg-secondary text-secondary-foreground" : "text-gray-700"
+                      }`}
+                      onClick={() => setSelectedModel(model.model)}
+                    >
+                      {model.modelName}
+                    </Button>
+                  ))
+                )}
               </div>
               <Separator />
             </div>
