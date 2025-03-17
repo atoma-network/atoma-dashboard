@@ -69,13 +69,7 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  defaultValue={userProfile.email}
-                  disabled={!loggedIn}
-                  onChange={e => setUserProfile({ ...userProfile, email: e.target.value })}
-                />
+                <Input id="email" type="email" defaultValue={userProfile.email} readOnly className="bg-muted" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="wallet">Wallet Address</Label>
