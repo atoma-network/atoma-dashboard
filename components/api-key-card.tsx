@@ -61,7 +61,7 @@ export function ApiKeyCard() {
           projectAccess: "all",
           createdBy: userProfile.data.name,
           permissions: "all",
-          lastUsed: "_",
+          lastUsed: token.last_used_timestamp || "Never",
           id: token.id,
         };
       });
