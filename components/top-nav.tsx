@@ -67,7 +67,7 @@ export function TopNav() {
                 onClick={() => handleAuth("login")}
                 className="w-24 dark:bg-darkMode dark:border-gray-300"
               >
-                Login
+                Sign in
               </Button>
               <Button onClick={() => handleAuth("register")} className="w-24 dark:text-darkMode dark:bg-white">
                 Register
