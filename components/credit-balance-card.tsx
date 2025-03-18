@@ -66,7 +66,7 @@ export function CreditBalanceCard({ handleAddFunds }: { handleAddFunds: () => vo
           className="w-full bg-primary hover:bg-secondary-foreground text-base"
           onClick={() => (loggedIn ? handleAddFunds() : updateState({ showLogin: true }))}
         >
-          {loggedIn ? "Add Funds" : "Login"}
+          {loggedIn ? "Add Funds" : "Sign in"}
         </Button>
       </CardContent>
     </Card>

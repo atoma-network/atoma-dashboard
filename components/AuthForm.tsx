@@ -80,7 +80,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
       <Toast ref={toastRef} />
 
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-50">
-        {loginType === "login" ? "Enter your credentials to access your account." : "Create Account"}
+        {loginType === "login" ? "Enter your credentials." : "Create Account"}
       </h2>
 
       <div className="flex flex-col space-y-6">
