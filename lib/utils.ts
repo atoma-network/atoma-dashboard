@@ -5,6 +5,7 @@ import type { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import axios, { AxiosError } from "axios";
+import { ModelModality } from "./atoma";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -30,6 +31,19 @@ export function formatNumber(num?: number): string {
   }
   return num.toString();
 }
+
+export const modalityToFeatureName = (modality: ModelModality): string => {
+  switch (modality) {
+    case ModelModality.ChatCompletions:
+      return "Chat Completion";
+    case ModelModality.ImagesGenerations:
+      return "Image Generation";
+    case ModelModality.Embeddings:
+      return "Embedding";
+    default:
+      return modality;
+  }
+};
 
 const USDC_TYPE = process.env.NEXT_PUBLIC_USDC_TYPE;
 
