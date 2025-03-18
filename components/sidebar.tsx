@@ -162,7 +162,7 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("ml-auto h-8 w-8", isCollapsed && "ml-0")}
+                className={cn("ml-auto px-0 h-8 w-8", isCollapsed && "ml-0")}
                 onClick={() => setIsCollapsed(!isCollapsed)}
               >
                 <ChevronLeft className={cn("h-10 w-10 transition-transform", isCollapsed && "rotate-180")} />
