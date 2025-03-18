@@ -141,7 +141,13 @@ export default function PlaygroundPage() {
   };
 
   const currentModels = processModelsForCategory(availableModels, "chat");
-
+  if (isLoadingModels)
+    return (
+      <div className="w-full h-[80dvh] flex justify-center items-center">
+        {" "}
+        <LoadingCircle size="md" isSpinning={true} />{" "}
+      </div>
+    );
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       <BackgroundGrid />
@@ -153,18 +159,14 @@ export default function PlaygroundPage() {
               <div className="flex w-full items-center justify-between p-2">
                 {/* Model Selection */}
                 <div className="flex items-center gap-2 flex-1">
-                  {isLoadingModels ? (
-                    <div className="flex justify-center">
-                      <LoadingCircle isSpinning={true} />
-                    </div>
-                  ) : modelError ? (
+                  {modelError ? (
                     <div className="text-red-500">{modelError}</div>
                   ) : (
                     currentModels.map(model => (
                       <Button
                         key={model.model}
                         variant="ghost"
-                        className={`px-3 py-1 rounded-lg ${
+                        className={`px-1  text-xs rounded-lg ${
                           selectedModel === model.model
                             ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700"
                             : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-200"
