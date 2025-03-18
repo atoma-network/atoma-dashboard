@@ -8,12 +8,12 @@ import { BackgroundGrid } from "@/components/background-grid";
 import { ApiUsageDialog } from "@/components/api-usage-dialog";
 import Link from "next/link";
 import { getSubscriptions, getTasks } from "@/lib/api";
-import { simplifyModelName } from "@/lib/utils";
+import { modalityToFeatureName, simplifyModelName } from "@/lib/utils";
 import { ModelModality, NodeSubscription, Task } from "@/lib/atoma";
 
 interface ModelSection {
   type: ModelModality;
-  title: ModelModality;
+  title: string;
   models: {
     name: string;
     price: string;
@@ -137,17 +137,17 @@ export default function ModelsPage() {
   const modelSections: ModelSection[] = [
     {
       type: ModelModality.ChatCompletions,
-      title: ModelModality.ChatCompletions,
+      title: modalityToFeatureName(ModelModality.ChatCompletions),
       models: modelsData[ModelModality.ChatCompletions],
     },
     {
       type: ModelModality.ImagesGenerations,
-      title: ModelModality.ImagesGenerations,
+      title: modalityToFeatureName(ModelModality.ImagesGenerations),
       models: modelsData[ModelModality.ImagesGenerations],
     },
     {
       type: ModelModality.Embeddings,
-      title: ModelModality.Embeddings,
+      title: modalityToFeatureName(ModelModality.Embeddings),
       models: modelsData[ModelModality.Embeddings],
     },
   ];
@@ -177,9 +177,15 @@ export default function ModelsPage() {
                 <SelectValue placeholder="Select completion type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={ModelModality.ChatCompletions}>{ModelModality.ChatCompletions}</SelectItem>
-                <SelectItem value={ModelModality.ImagesGenerations}>{ModelModality.ImagesGenerations}</SelectItem>
-                <SelectItem value={ModelModality.Embeddings}>{ModelModality.Embeddings}</SelectItem>
+                <SelectItem value={ModelModality.ChatCompletions}>
+                  {modalityToFeatureName(ModelModality.ChatCompletions)}
+                </SelectItem>
+                <SelectItem value={ModelModality.ImagesGenerations}>
+                  {modalityToFeatureName(ModelModality.ImagesGenerations)}
+                </SelectItem>
+                <SelectItem value={ModelModality.Embeddings}>
+                  {modalityToFeatureName(ModelModality.Embeddings)}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
