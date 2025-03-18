@@ -121,7 +121,7 @@ export default function PlaygroundPage() {
       if (axios.isAxiosError(error)) {
         error.status === 401
           ? setResponse({
-              response: "there was a problem with your api key",
+              response: "There was a problem with your api key",
               error: true,
             })
           : setResponse({
