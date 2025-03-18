@@ -131,15 +131,21 @@ fetch(url, options)
           </TabsList>
 
           <TabsContent value="curl" className="relative">
-            <pre className="relative rounded-lg bg-muted p-4 overflow-x-auto font-mono text-sm">{curlCode}</pre>
+            <pre className="relative rounded-lg bg-muted p-4 overflow-x-auto font-mono text-sm h-[60vh] overflow-scroll">
+              {curlCode}
+            </pre>
           </TabsContent>
 
           <TabsContent value="python" className="relative">
-            <pre className="relative rounded-lg bg-muted p-4 overflow-x-auto font-mono text-sm">{pythonCode}</pre>
+            <pre className="relative rounded-lg bg-muted p-4 overflow-x-auto font-mono text-sm h-[60vh] overflow-scroll">
+              {pythonCode}
+            </pre>
           </TabsContent>
 
           <TabsContent value="javascript" className="relative">
-            <pre className="relative rounded-lg bg-muted p-4 overflow-x-auto font-mono text-sm">{javascriptCode}</pre>
+            <pre className="relative rounded-lg bg-muted p-4 overflow-x-auto font-mono text-sm h-[60vh] overflow-scroll">
+              {javascriptCode}
+            </pre>
           </TabsContent>
         </Tabs>
 
