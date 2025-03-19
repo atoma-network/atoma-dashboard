@@ -62,24 +62,23 @@ export default function PlaygroundPage() {
     error: boolean;
   }>({ response: "", error: false });
 
-  const [parameters, setParameters] = useState<Parameters>(() => {
-    if (typeof window !== "undefined") {
+  const [parameters, setParameters] = useState<Parameters>(defaultParameters);
+
+  useEffect(() => {
+    try {
       const savedParameters = localStorage.getItem("playground-parameters");
       if (savedParameters) {
-        try {
-          const parsed = JSON.parse(savedParameters);
-          return {
-            ...defaultParameters,
-            ...parsed,
-            apiKey: defaultParameters.apiKey,
-          };
-        } catch (error) {
-          console.error("Failed to load saved parameters:", error);
-        }
+        const parsed = JSON.parse(savedParameters);
+        setParameters(prev => ({
+          ...prev,
+          ...parsed,
+          apiKey: prev.apiKey,
+        }));
       }
+    } catch (error) {
+      console.error("Failed to load saved parameters:", error);
     }
-    return defaultParameters;
-  });
+  }, []);
 
   useEffect(() => {
     const loadModels = async () => {
