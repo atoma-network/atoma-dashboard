@@ -47,20 +47,22 @@ function PanelData({
   tickFormatter: (value: string) => string;
 }) {
   const valueFormatter = (value: number) => `${value}ms`;
-  const graphData: Record<string, Record<string, string>> = {};
+  const graphData: Record<number, Record<string, string>> = {};
   let labels: Set<string> = new Set();
   Object.keys(data["results"]).forEach(ref => {
     data["results"][ref]["frames"].forEach((frame: any) => {
       const timeId = frame.schema.fields.findIndex((field: any) => field.type === "time");
       const schema = frame.schema.fields.map((field: any) =>
-        field.type == "time" ? "time" : field?.config?.displayNameFromDS || field.name
+        field.type == "time"
+          ? "time"
+          : Object.values(field?.labels)?.[0] || field?.config?.displayNameFromDS || field.name
       );
       labels = new Set([...labels, ...schema.filter((_: any, index: number) => index !== timeId)]);
       if (frame.data.values.length === 0) {
         return;
       }
       for (let i = 0; i < frame.data.values[0].length; i++) {
-        const time = new Date(frame.data.values[timeId][i]).toLocaleString();
+        const time = new Date(frame.data.values[timeId][i]).getTime();
         if (!(time in graphData)) {
           graphData[time] = {};
         }
@@ -73,12 +75,12 @@ function PanelData({
       }
     });
   });
-  const series = Object.keys(graphData)
+  const series = Object.entries(graphData)
     .sort()
-    .map(time => {
+    .map(([time, value]) => {
       return {
-        time,
-        data: graphData[time],
+        time: new Date(Number(time)).toLocaleString(),
+        data: value,
       };
     });
   if (Object.keys(graphData).length === 0) {
