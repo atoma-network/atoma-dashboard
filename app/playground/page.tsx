@@ -102,7 +102,7 @@ export default function PlaygroundPage() {
 
       const response = await axios.post(
         `${config.ATOMA_API_URL}${endpoints.chat}`,
-        RenderRequestBodyBasedOnEndPoint("chat", selectedModel, message),
+        RenderRequestBodyBasedOnEndPoint("chat", selectedModel, message, parameters),
         {
           headers: {
             "Content-Type": "application/json",
