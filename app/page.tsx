@@ -39,14 +39,16 @@ const colors = {
 
 function PanelData({
   data,
+  unit,
   timeFilter,
   tickFormatter,
 }: {
   data: any;
+  unit?: string;
   timeFilter: (date: Date) => boolean;
   tickFormatter: (value: string) => string;
 }) {
-  const valueFormatter = (value: number) => `${value}ms`;
+  const valueFormatter = (value: number) => (unit ? `${value}${unit}` : `${value}`);
   const graphData: Record<number, Record<string, string>> = {};
   let labels: Set<string> = new Set();
   Object.keys(data["results"]).forEach(ref => {
@@ -88,6 +90,7 @@ function PanelData({
   }
   const labelsArray = Array.from(labels).sort();
   const wholeHourTicks = series.map(({ time }) => time).filter(timeStr => timeFilter(new Date(timeStr)));
+
   return (
     <ResponsiveContainer width="100%" height={250}>
       <AreaChart data={series} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
@@ -123,26 +126,29 @@ function PanelData({
             fontWeight: "bold",
             color: "var(--card-foreground)",
           }}
-          formatter={(value: number, time: string) => [
-            <div
-              key={`${time}-value`}
-              style={{
-                color:
-                  typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                    ? colors.dark[Object.keys(colors.dark)[labelsArray.indexOf(time)]]
-                    : colors.lightText[Object.keys(colors.lightText)[labelsArray.indexOf(time)]],
-              }}
-            >
-              {`${time}: ${valueFormatter(value)}`}
-            </div>,
-            null,
-          ]}
+          formatter={(value: number, time: string) => {
+            console.log(time, labelsArray.indexOf(time), Object.values(colors.lightText));
+            return [
+              <div
+                key={`${time}-value`}
+                style={{
+                  color:
+                    typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                      ? Object.values(colors.dark)[labelsArray.indexOf(time)]
+                      : Object.values(colors.lightText)[labelsArray.indexOf(time)],
+                }}
+              >
+                {`${time}: ${valueFormatter(value)}`}
+              </div>,
+              null,
+            ];
+          }}
         />
         {labelsArray.map((label, index) => {
           const color =
             typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-              ? colors.dark[Object.keys(colors.dark)[index]]
-              : colors.light[Object.keys(colors.light)[index]];
+              ? Object.values(colors.dark)[index]
+              : Object.values(colors.light)[index];
           return (
             <Area
               key={index}
@@ -163,12 +169,14 @@ function PanelData({
 function Panel({
   title,
   description,
+  unit,
   data,
   timeFilter,
   tickFormatter,
 }: {
   title: string;
-  description: string;
+  description?: string;
+  unit?: string;
   data: any;
   timeFilter: (date: Date) => boolean;
   tickFormatter: (value: string) => string;
@@ -179,21 +187,23 @@ function Panel({
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
       <CardContent className="h-full">
-        <TooltipProvider>
-          <ShadTooltip>
-            <TooltipTrigger asChild>
-              <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-500">
-                <Info className="h-4 w-4" />
-                <span className="sr-only">Information</span>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-foreground/90 dark:text-foreground/90 font-medium">{description}</p>
-            </TooltipContent>
-          </ShadTooltip>
-        </TooltipProvider>
+        {description && (
+          <TooltipProvider>
+            <ShadTooltip>
+              <TooltipTrigger asChild>
+                <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-500">
+                  <Info className="h-4 w-4" />
+                  <span className="sr-only">Information</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-foreground/90 dark:text-foreground/90 font-medium">{description}</p>
+              </TooltipContent>
+            </ShadTooltip>
+          </TooltipProvider>
+        )}
         {data ? (
-          <PanelData data={data.data} timeFilter={timeFilter} tickFormatter={tickFormatter} />
+          <PanelData data={data.data} unit={unit} timeFilter={timeFilter} tickFormatter={tickFormatter} />
         ) : (
           <div className="flex  justify-center items-center">
             <LoadingCircle isSpinning={true} />
@@ -209,20 +219,20 @@ function Dashboard({
   panels,
 }: {
   title: string;
-  panels: { title: string; description: string; data: any; query: { from: string } }[];
+  panels: { title: string; description?: string; unit?: string; data: any; query: { from: string } }[];
 }) {
   return (
     <>
-      {panels.map(({ title, description, data, query }) => {
+      {panels.map(({ title, description, unit, data, query }) => {
         const from: string = query["from"];
         const regex = /now-(\d+)([dmh])/;
         const match = from.match(regex);
         const range = match ? parseInt(match[1], 10) : null;
-        const unit = match ? match[2] : null;
+        const timeUnit = match ? match[2] : null;
         const timeFilter = (timestamp: Date) => {
-          if (!range || !unit) return true;
+          if (!range || !timeUnit) return true;
           const unixTimestamp = timestamp.getTime() / 1000;
-          switch (unit) {
+          switch (timeUnit) {
             case "d":
               return unixTimestamp % (60 * 60 * 24) === 0;
             case "h":
@@ -234,9 +244,9 @@ function Dashboard({
           }
         };
         const tickFormatter = (value: string) => {
-          if (!range || !unit) return new Date(value).toLocaleString();
+          if (!range || !timeUnit) return new Date(value).toLocaleString();
           const date = new Date(value);
-          switch (unit) {
+          switch (timeUnit) {
             case "d":
               return date.toLocaleDateString(undefined, { weekday: "short" });
             default:
@@ -248,6 +258,7 @@ function Dashboard({
             key={title}
             title={title}
             description={description}
+            unit={unit}
             data={data}
             timeFilter={timeFilter}
             tickFormatter={tickFormatter}
@@ -260,7 +271,7 @@ function Dashboard({
 
 export default function NetworkStatusPage() {
   const [graphs, setGraphs] = useState<
-    { title: string; panels: { title: string; description?: string; query: any; data: any }[] }[] | null
+    { title: string; panels: { title: string; description?: string; unit?: string; query: any; data: any }[] }[] | null
   >(null);
   useEffect(() => {
     (async () => {
@@ -272,6 +283,7 @@ export default function NetworkStatusPage() {
             title,
             description,
             query,
+            unit,
             data: null,
           })),
         }))
