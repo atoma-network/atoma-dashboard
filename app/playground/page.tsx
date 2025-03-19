@@ -144,7 +144,6 @@ export default function PlaygroundPage() {
   if (isLoadingModels)
     return (
       <div className="w-full h-[80dvh] flex justify-center items-center">
-        {" "}
         <LoadingCircle size="md" isSpinning={true} />{" "}
       </div>
     );
