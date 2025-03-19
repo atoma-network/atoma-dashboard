@@ -66,11 +66,12 @@ const addAuthInterceptor = (apiClient: any) => {
     (config: any) => {
       let userSettings = localStorage.getItem("userSettings");
       if (!userSettings) {
-        throw new Error("User settings not found in local storage");
-      }
-      const token = JSON.parse(userSettings).accessToken;
-      if (token) {
-        config.headers["Authorization"] = `Bearer ${token}`;
+        console.warn("User settings not found in local storage");
+      } else {
+        const token = JSON.parse(userSettings).accessToken;
+        if (token) {
+          config.headers["Authorization"] = `Bearer ${token}`;
+        }
       }
       return config;
     },
