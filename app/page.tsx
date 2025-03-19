@@ -54,11 +54,12 @@ function PanelData({
   Object.keys(data["results"]).forEach(ref => {
     data["results"][ref]["frames"].forEach((frame: any) => {
       const timeId = frame.schema.fields.findIndex((field: any) => field.type === "time");
-      const schema = frame.schema.fields.map((field: any) =>
-        field.type == "time"
+      const schema = frame.schema.fields.map((field: any) => {
+        console.log("field", field);
+        return field.type == "time"
           ? "time"
-          : Object.values(field?.labels)?.[0] || field?.config?.displayNameFromDS || field.name
-      );
+          : field?.config?.displayNameFromDS || Object.values(field?.labels)?.[0] || field.name;
+      });
       labels = new Set([...labels, ...schema.filter((_: any, index: number) => index !== timeId)]);
       if (frame.data.values.length === 0) {
         return;
