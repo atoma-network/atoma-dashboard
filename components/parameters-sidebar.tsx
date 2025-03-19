@@ -7,10 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
+import { toast } from "sonner";
 
-// Update Parameters interface
+//Parameters interface
 interface Parameters {
-  apiKey: string;
+  apiKey?: string;
   systemPrompt: string;
   customSystemPrompt: string;
   autoSetLength: boolean;
@@ -26,8 +28,26 @@ interface ParametersSidebarProps {
   onChange: (key: keyof Parameters, value: number | boolean | string) => void;
 }
 
-// Replace the entire content of ParametersSidebar
 export function ParametersSidebar({ parameters, onChange }: ParametersSidebarProps) {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // Creates a copy of parameters without the API key
+      const parametersToSave = { ...parameters };
+      delete parametersToSave.apiKey;
+
+      localStorage.setItem("playground-parameters", JSON.stringify(parametersToSave));
+      toast.success("Parameters saved");
+      console.log("Saved parameters (API key excluded):", parametersToSave);
+    } catch (error) {
+      toast.error("Failed to save parameters");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <TooltipProvider>
       <div className="flex flex-col h-full">
@@ -229,8 +249,8 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
 
         {/* Save Button Section */}
         <div className="p-6 border-t">
-          <Button className="w-full" variant="default">
-            Save Parameters
+          <Button className="w-full" variant="default" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? "Saving..." : "Save Parameters"}
           </Button>
         </div>
       </div>

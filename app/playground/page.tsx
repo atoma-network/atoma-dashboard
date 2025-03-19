@@ -62,7 +62,27 @@ export default function PlaygroundPage() {
     error: boolean;
   }>({ response: "", error: false });
 
-  const [parameters, setParameters] = useState<Parameters>(defaultParameters);
+  const [parameters, setParameters] = useState<Parameters>(() => {
+    // Load saved parameters from localStorage on initial state
+    if (typeof window !== "undefined") {
+      const savedParameters = localStorage.getItem("playground-parameters");
+      if (savedParameters) {
+        try {
+          // Parse saved parameters but don't overwrite API key
+          const parsed = JSON.parse(savedParameters);
+          return {
+            ...defaultParameters,
+            ...parsed,
+            // Keep API key empty - it should be entered by the user each time
+            apiKey: defaultParameters.apiKey,
+          };
+        } catch (error) {
+          console.error("Failed to load saved parameters:", error);
+        }
+      }
+    }
+    return defaultParameters;
+  });
 
   useEffect(() => {
     const loadModels = async () => {
