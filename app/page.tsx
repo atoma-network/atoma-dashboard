@@ -260,25 +260,25 @@ function Dashboard({
 
 export default function NetworkStatusPage() {
   const [graphs, setGraphs] = useState<
-    { title: string; panels: { title: string; description: string; query: any; data: any }[] }[] | null
+    { title: string; panels: { title: string; description?: string; query: any; data: any }[] }[] | null
   >(null);
   useEffect(() => {
     (async () => {
       let graphs = await getGraphs();
       setGraphs(
-        graphs.data.map(([title, dashboard]) => ({
+        graphs.data.map(({ title, panels }) => ({
           title: title,
-          panels: dashboard.map(([panelTitle, panelDescription, panelData]) => ({
-            title: panelTitle,
-            description: panelDescription,
-            query: panelData,
+          panels: panels.map(({ title, description, unit, query }) => ({
+            title,
+            description,
+            query,
             data: null,
           })),
         }))
       );
-      graphs.data.forEach(([, dashboard], dashboardIndex) => {
-        dashboard.forEach(([, , panelQuery], panelIndex) => {
-          getGraphData(panelQuery).then(panelData => {
+      graphs.data.forEach(({ panels }, dashboardIndex) => {
+        panels.forEach(({ query }, panelIndex) => {
+          getGraphData(query).then(panelData => {
             setGraphs(graphs => {
               const updatedGraphs = [...graphs!];
               updatedGraphs[dashboardIndex].panels[panelIndex].data = panelData;
