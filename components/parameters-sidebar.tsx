@@ -37,7 +37,6 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
 
       localStorage.setItem("playground-parameters", JSON.stringify(parametersToSave));
       toast.success("Parameters saved");
-      console.log("Saved parameters (API key excluded):", parametersToSave);
     } catch (error) {
       toast.error("Failed to save parameters");
     }
