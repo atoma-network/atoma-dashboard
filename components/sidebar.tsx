@@ -165,7 +165,12 @@ export function Sidebar() {
                 className={cn("ml-auto px-0 h-8 w-8", isCollapsed && "ml-0")}
                 onClick={() => setIsCollapsed(!isCollapsed)}
               >
-                <ChevronLeft className={cn("h-10 w-10 transition-transform", isCollapsed && "rotate-180")} />
+                <ChevronLeft
+                  className={cn(
+                    "h-10 w-10 transition-transform text-[#635c70] dark:text-[#8f8f98]",
+                    isCollapsed && "rotate-180"
+                  )}
+                />
                 <span className="sr-only">{isCollapsed ? "Expand" : "Collapse"} Sidebar</span>
               </Button>
             </div>
