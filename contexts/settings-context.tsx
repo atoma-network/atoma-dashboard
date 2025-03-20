@@ -18,14 +18,14 @@ export interface UserSettings {
     address?: string;
   };
   playground?: {
-    systemPrompt: string;
-    customSystemPrompt: string;
-    autoSetLength: boolean;
-    outputLength: number;
-    temperature: number;
-    topP: number;
-    topK: number;
-    repetitionPenalty: number;
+    systemPrompt?: string;
+    customSystemPrompt?: string;
+    autoSetLength?: boolean;
+    outputLength?: number;
+    temperature?: number;
+    topP?: number;
+    topK?: number;
+    repetitionPenalty?: number;
   };
 }
 
