@@ -178,7 +178,7 @@ export const getSalt = async () => {
 
 export const getGraphs = async () => {
   return await credentialsApi.get<
-    { title: string; panels: { description?: string; title: string; unit?: string; query: any }[] }[]
+    { title: string; panels: { description?: string; title: string; unit?: string; query: any; interval?: string }[] }[]
   >("/get_graphs");
 };
 

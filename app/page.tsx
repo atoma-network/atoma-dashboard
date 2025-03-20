@@ -55,7 +55,6 @@ function PanelData({
     data["results"][ref]["frames"].forEach((frame: any) => {
       const timeId = frame.schema.fields.findIndex((field: any) => field.type === "time");
       const schema = frame.schema.fields.map((field: any) => {
-        console.log("field", field);
         return field.type == "time"
           ? "time"
           : field?.config?.displayNameFromDS || Object.values(field?.labels)?.[0] || field.name;
@@ -290,7 +289,10 @@ export default function NetworkStatusPage() {
         }))
       );
       graphs.data.forEach(({ panels }, dashboardIndex) => {
-        panels.forEach(({ query }, panelIndex) => {
+        panels.forEach(({ query, interval }, panelIndex) => {
+          query.queries.forEach((q: any) => {
+            q.interval = interval;
+          });
           getGraphData(query).then(panelData => {
             setGraphs(graphs => {
               const updatedGraphs = [...graphs!];
