@@ -17,6 +17,16 @@ export interface UserSettings {
     zkp?: string;
     address?: string;
   };
+  playground?: {
+    systemPrompt: string;
+    customSystemPrompt: string;
+    autoSetLength: boolean;
+    outputLength: number;
+    temperature: number;
+    topP: number;
+    topK: number;
+    repetitionPenalty: number;
+  };
 }
 
 const defaultSettings: UserSettings = {
@@ -25,12 +35,23 @@ const defaultSettings: UserSettings = {
     isEnabled: false,
   },
   avatar: "/placeholder.svg?height=400&width=400&background=8B5CF6", // Purple
+  playground: {
+    systemPrompt: "Default",
+    customSystemPrompt: "",
+    autoSetLength: true,
+    outputLength: 2048,
+    temperature: 0.7,
+    topP: 0.7,
+    topK: 50,
+    repetitionPenalty: 1,
+  },
 };
 
 interface SettingsContextType {
   settings: UserSettings;
   updateSettings: (newSettings: Partial<UserSettings>) => void;
   updateZkLoginSettings: (newSettings: Partial<UserSettings["zkLogin"]>) => void;
+  updatePlaygroundSettings: (newSettings: Partial<UserSettings["playground"]>) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -66,12 +87,24 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const updatePlaygroundSettings = (playgroundSettings: Partial<UserSettings["playground"]>) => {
+    setSettings(prev => {
+      const updatedSettings = {
+        ...prev,
+        playground: { ...prev.playground, ...playgroundSettings },
+      };
+      localStorage.setItem("userSettings", JSON.stringify(updatedSettings));
+      return updatedSettings;
+    });
+  };
+
   return (
     <SettingsContext.Provider
       value={{
         settings,
         updateSettings,
         updateZkLoginSettings,
+        updatePlaygroundSettings,
       }}
     >
       {children}

@@ -21,6 +21,7 @@ import {
 } from "../../utils/utils";
 import config from "@/config/config";
 import LoadingCircle from "../../components/LoadingCircle";
+import { useSettings } from "../../contexts/settings-context";
 
 export type ModelCategories = "chat" | "embeddings" | "images";
 
@@ -49,6 +50,7 @@ const defaultParameters: Parameters = {
 };
 
 export default function PlaygroundPage() {
+  const { settings, updatePlaygroundSettings } = useSettings();
   const [selectedModel, setSelectedModel] = useState("");
   const [availableModels, setAvailableModels] = useState<TaskResponse>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
@@ -62,23 +64,20 @@ export default function PlaygroundPage() {
     error: boolean;
   }>({ response: "", error: false });
 
-  const [parameters, setParameters] = useState<Parameters>(defaultParameters);
+  const [parameters, setParameters] = useState<Parameters>({
+    ...defaultParameters,
+    ...(settings.playground || {}),
+  });
 
   useEffect(() => {
-    try {
-      const savedParameters = localStorage.getItem("playground-parameters");
-      if (savedParameters) {
-        const parsed = JSON.parse(savedParameters);
-        setParameters(prev => ({
-          ...prev,
-          ...parsed,
-          apiKey: prev.apiKey,
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to load saved parameters:", error);
+    if (settings.playground) {
+      setParameters(prev => ({
+        ...prev,
+        ...settings.playground,
+        apiKey: prev.apiKey,
+      }));
     }
-  }, []);
+  }, [settings.playground]);
 
   useEffect(() => {
     const loadModels = async () => {
@@ -154,6 +153,10 @@ export default function PlaygroundPage() {
 
   const handleParameterChange = (key: keyof Parameters, value: number | boolean | string) => {
     setParameters(prev => ({ ...prev, [key]: value }));
+
+    if (key !== "apiKey") {
+      updatePlaygroundSettings({ [key]: value });
+    }
   };
 
   const currentModels = processModelsForCategory(availableModels, "chat");

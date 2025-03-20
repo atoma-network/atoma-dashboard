@@ -29,10 +29,7 @@ interface ParametersSidebarProps {
 }
 
 export function ParametersSidebar({ parameters, onChange }: ParametersSidebarProps) {
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleSave = async () => {
-    setIsSaving(true);
+  const handleSave = () => {
     try {
       // Creates a copy of parameters without the API key
       const parametersToSave = { ...parameters };
@@ -43,8 +40,6 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
       console.log("Saved parameters (API key excluded):", parametersToSave);
     } catch (error) {
       toast.error("Failed to save parameters");
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -249,8 +244,8 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
 
         {/* Save Button Section */}
         <div className="p-6 border-t">
-          <Button className="w-full" variant="default" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? "Saving..." : "Save Parameters"}
+          <Button className="w-full" variant="default" onClick={handleSave}>
+            Save Parameters
           </Button>
         </div>
       </div>
