@@ -491,17 +491,16 @@ export default function NetworkStatusPage() {
           })),
         }))
       );
-      graphs.data.forEach(({ panels }, dashboardIndex) => {
-        panels.forEach(({ query, interval }, panelIndex) => {
+      graphs.data.forEach(({ title, panels }, dashboardIndex) => {
+        panels.forEach(async ({ query, interval }, panelIndex) => {
           query.queries.forEach((q: any) => {
             q.interval = interval;
           });
-          getGraphData(query).then(panelData => {
-            setGraphs(graphs => {
-              const updatedGraphs = [...graphs!];
-              updatedGraphs[dashboardIndex].panels[panelIndex].data = panelData;
-              return updatedGraphs;
-            });
+          let panelData = await getGraphData(query);
+          setGraphs(graphs => {
+            const updatedGraphs = [...graphs!];
+            updatedGraphs[dashboardIndex].panels[panelIndex].data = panelData;
+            return updatedGraphs;
           });
         });
       });
@@ -514,7 +513,7 @@ export default function NetworkStatusPage() {
       <div className="relative z-10">
         <div className="space-y-4 p-6">
           <MetricsCards />
-          {graphs ? (
+          {graphs && graphs.every(graph => graph.panels.every(panel => panel.data)) ? (
             <div className="grid md:grid-cols-2 gap-6">
               {graphs.map(({ title, panels }) => (
                 <Dashboard key={title} title={title} panels={panels} />
