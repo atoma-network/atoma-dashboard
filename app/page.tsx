@@ -10,6 +10,7 @@ import LoadingCircle from "@/components/LoadingCircle";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip as ShadTooltip } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
+import { formatNumber } from "@/lib/utils";
 
 // Colors for different chart types
 const colors = {
@@ -48,7 +49,7 @@ function PanelData({
   timeFilter: (date: Date) => boolean;
   tickFormatter: (value: string) => string;
 }) {
-  const valueFormatter = (value: number) => (unit ? `${value}${unit}` : `${value}`);
+  const valueFormatter = (value: number) => `${formatNumber(value)}${unit ? unit : ""}`;
   const graphData: Record<number, Record<string, string>> = {};
   let labels: Set<string> = new Set();
   Object.keys(data["results"]).forEach(ref => {
@@ -157,7 +158,8 @@ function PanelData({
               dataKey={data => data.data[label] || 0}
               stroke={color}
               strokeWidth={2}
-              fill="transparent"
+              fill={`${color}80`}
+              // stackId="1"
             />
           );
         })}
