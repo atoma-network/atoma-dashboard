@@ -38,12 +38,38 @@ export function processModelsForCategory(
     }));
 }
 
-export function RenderRequestBodyBasedOnEndPoint(endpoint: ModelCategories, selectedModel: string, message: string) {
+export function RenderRequestBodyBasedOnEndPoint(
+  endpoint: ModelCategories,
+  selectedModel: string,
+  message: string,
+  parameters: {
+    systemPrompt: string;
+    customSystemPrompt: string;
+    autoSetLength: boolean;
+    outputLength: number;
+    temperature: number;
+    topP: number;
+    topK: number;
+    repetitionPenalty: number;
+  }
+) {
   switch (endpoint) {
     case "chat":
       return {
-        messages: [{ role: "user", content: message }],
+        messages: [
+          {
+            role: "system",
+            content:
+              parameters.systemPrompt === "Custom" ? parameters.customSystemPrompt : "You are a helpful assistant.",
+          },
+          { role: "user", content: message },
+        ],
         model: selectedModel,
+        max_tokens: parameters.autoSetLength ? undefined : parameters.outputLength,
+        temperature: parameters.temperature,
+        top_p: parameters.topP,
+        top_k: parameters.topK,
+        repetition_penalty: parameters.repetitionPenalty,
       };
     case "embeddings":
       return {

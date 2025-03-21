@@ -82,7 +82,7 @@
 
   .grid-item:hover {
     margin: -1px -1px 0 0;
-    background-color: rgba(221,108,74,0.1);
+    background-color: rgba(221, 108, 74, 0.1);
     transition: background-color 0.3s ease-in-out;
   }
 
@@ -91,7 +91,7 @@
   }
 
   .dark .grid-item:hover {
-    background-color: rgba(221,108,74,0.05);
+    background-color: rgba(221, 108, 74, 0.05);
     transition: background-color 0.3s ease-in-out;
   }
 }

@@ -21,6 +21,7 @@ import {
 } from "../../utils/utils";
 import config from "@/config/config";
 import LoadingCircle from "../../components/LoadingCircle";
+import { useSettings } from "../../contexts/settings-context";
 
 export type ModelCategories = "chat" | "embeddings" | "images";
 
@@ -49,6 +50,7 @@ const defaultParameters: Parameters = {
 };
 
 export default function PlaygroundPage() {
+  const { settings, updatePlaygroundSettings } = useSettings();
   const [selectedModel, setSelectedModel] = useState("");
   const [availableModels, setAvailableModels] = useState<TaskResponse>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
@@ -62,7 +64,18 @@ export default function PlaygroundPage() {
     error: boolean;
   }>({ response: "", error: false });
 
-  const [parameters, setParameters] = useState<Parameters>(defaultParameters);
+  const [parameters, setParameters] = useState<Parameters>({
+    ...defaultParameters,
+    ...(settings.playground || {}),
+  });
+
+  useEffect(() => {
+    setParameters(prev => ({
+      ...prev,
+      ...settings.playground,
+      apiKey: prev.apiKey,
+    }));
+  }, [settings.playground]);
 
   useEffect(() => {
     const loadModels = async () => {
@@ -102,7 +115,7 @@ export default function PlaygroundPage() {
 
       const response = await axios.post(
         `${config.ATOMA_API_URL}${endpoints.chat}`,
-        RenderRequestBodyBasedOnEndPoint("chat", selectedModel, message),
+        RenderRequestBodyBasedOnEndPoint("chat", selectedModel, message, parameters),
         {
           headers: {
             "Content-Type": "application/json",
@@ -137,6 +150,7 @@ export default function PlaygroundPage() {
   };
 
   const handleParameterChange = (key: keyof Parameters, value: number | boolean | string) => {
+    // Only update local state, don't save to global settings yet
     setParameters(prev => ({ ...prev, [key]: value }));
   };
 
