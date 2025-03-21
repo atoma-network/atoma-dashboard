@@ -184,7 +184,7 @@ function Panel({
   tickFormatter: (value: string) => string;
 }) {
   return (
-    <Card className="col-span-2">
+    <Card className="col-span-1">
       <CardHeader>
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
@@ -207,7 +207,7 @@ function Panel({
         {data ? (
           <PanelData data={data.data} unit={unit} timeFilter={timeFilter} tickFormatter={tickFormatter} />
         ) : (
-          <div className="flex  justify-center items-center">
+          <div className="flex justify-center items-center">
             <LoadingCircle isSpinning={true} />
           </div>
         )}
