@@ -1,6 +1,17 @@
 "use client";
 
-import { ResponsiveContainer, XAxis, YAxis, Area, AreaChart, Tooltip, CartesianGrid } from "recharts";
+import {
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Area,
+  AreaChart,
+  Tooltip,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  Cell,
+} from "recharts";
 import { MetricsCards } from "@/components/analytics/metrics-cards";
 import { NetworkCharts } from "@/components/network/network-charts";
 import { BackgroundGrid } from "@/components/background-grid";
@@ -38,19 +49,242 @@ const colors = {
   },
 };
 
+function AreaPanel({
+  series,
+  tickFormatter,
+  timeFilter,
+  valueFormatter,
+  labelsArray,
+  fillOpacity,
+  stackingGroup,
+}: {
+  series: {
+    time: string;
+    data: Record<string, string>;
+  }[];
+  tickFormatter: (value: string) => string;
+  timeFilter: (date: Date) => boolean;
+  valueFormatter: (value: number) => string;
+  labelsArray: string[];
+  fillOpacity?: number;
+  stackingGroup?: string;
+}) {
+  const wholeHourTicks = series.map(({ time }) => time).filter(timeStr => timeFilter(new Date(timeStr)));
+  const percentToHex = (percent: number): string => {
+    const clampedPercent = Math.max(0, Math.min(100, percent));
+    const decimalValue = Math.round((clampedPercent / 100) * 255);
+    return decimalValue.toString(16).padStart(2, "0").toUpperCase();
+  };
+  return (
+    <ResponsiveContainer width="100%" height={250}>
+      <AreaChart data={series} margin={{ top: 0, right: 0, bottom: 0 }}>
+        <CartesianGrid
+          horizontal={true}
+          vertical={false}
+          stroke="hsl(var(--border))"
+          strokeDasharray="4 4"
+          strokeWidth={1}
+          opacity={0.6}
+        />
+        <XAxis
+          dataKey="time"
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "#888888", fontSize: 12 }}
+          tickFormatter={tickFormatter}
+          ticks={wholeHourTicks}
+        />
+        <YAxis
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "#888888", fontSize: 12 }}
+          width={80}
+          tickFormatter={valueFormatter}
+        />
+        <Tooltip
+          content={props => {
+            const { payload, label } = props;
+            const combinedPayload = payload?.map((entry, index) => ({
+              ...entry,
+              color:
+                typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                  ? Object.values(colors.dark)[index]
+                  : Object.values(colors.lightText)[index],
+            }));
+            console.log("combinedPayload", combinedPayload);
+            if (stackingGroup) {
+              combinedPayload?.reverse();
+            } else {
+              combinedPayload?.sort((a, b) => Number(b.value) - Number(a.value));
+            }
+            return (
+              <div
+                style={{
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid var(--border)",
+                  borderRadius: "6px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  fontWeight: "bold",
+                  color: "var(--card-foreground)",
+                  padding: "8px",
+                }}
+              >
+                <div>{label}</div>
+
+                {combinedPayload?.map((entry, index) => {
+                  return (
+                    <div key={index}>
+                      <span
+                        style={{ color: entry.color }}
+                      >{`${entry.name}: ${valueFormatter(Number(entry.value))}`}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }}
+        />
+        {labelsArray.map((label, index) => {
+          const color =
+            typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+              ? Object.values(colors.dark)[index]
+              : Object.values(colors.light)[index];
+          return (
+            <Area
+              key={index}
+              name={label}
+              type="monotone"
+              dataKey={data => data.data[label] || 0}
+              stroke={color}
+              strokeWidth={2}
+              fill={color}
+              fillOpacity={fillOpacity ? fillOpacity / 100 : 0}
+              stackId={stackingGroup}
+            />
+          );
+        })}
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
+function BarGaugePanel({
+  series,
+  tickFormatter,
+  timeFilter,
+  valueFormatter,
+  labelsArray,
+  fillOpacity,
+  stackingGroup,
+}: {
+  series: {
+    time: string;
+    data: Record<string, string>;
+  }[];
+  tickFormatter: (value: string) => string;
+  timeFilter: (date: Date) => boolean;
+  valueFormatter: (value: number) => string;
+  labelsArray: string[];
+  fillOpacity?: number;
+  stackingGroup?: string;
+}) {
+  const wholeHourTicks = series.map(({ time }) => time).filter(timeStr => timeFilter(new Date(timeStr)));
+  const percentToHex = (percent: number): string => {
+    const clampedPercent = Math.max(0, Math.min(100, percent));
+    const decimalValue = Math.round((clampedPercent / 100) * 255);
+    return decimalValue.toString(16).padStart(2, "0").toUpperCase();
+  };
+  const barData = labelsArray.map(label => ({
+    name: label,
+    value: Number(series[series.length - 1].data[label] || 0),
+  }));
+  console.log(series);
+  console.log("barData", barData);
+  return (
+    <ResponsiveContainer width="100%" height={250}>
+      <BarChart data={barData} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
+        <CartesianGrid
+          horizontal={true}
+          vertical={false}
+          stroke="hsl(var(--border))"
+          strokeDasharray="4 4"
+          strokeWidth={1}
+          opacity={0.6}
+        />
+        <XAxis
+          type="number"
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "#888888", fontSize: 12 }}
+          tickFormatter={valueFormatter}
+        />
+        <YAxis
+          dataKey="name"
+          type="category"
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "#888888", fontSize: 12 }}
+          tickFormatter={value => value.split("/")[1].split("-")[0]}
+        />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: "hsl(var(--card))",
+            border: "1px solid var(--border)",
+            borderRadius: "6px",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            fontWeight: "bold",
+            color: "var(--card-foreground)",
+          }}
+          formatter={(value: number, time: string) => {
+            return [
+              <div
+                key={`${time}-value`}
+                style={{
+                  color:
+                    typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                      ? Object.values(colors.dark)[labelsArray.indexOf(time)]
+                      : Object.values(colors.lightText)[labelsArray.indexOf(time)],
+                }}
+              >
+                {`${time}: ${valueFormatter(value)}`}
+              </div>,
+              null,
+            ];
+          }}
+        />
+        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
+          {labelsArray.map((entry, index) => {
+            const color =
+              typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                ? Object.values(colors.dark)[index]
+                : Object.values(colors.light)[index];
+            return <Cell key={`cell-${index}`} fill={color} fillOpacity={0.6} />;
+          })}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
 function PanelData({
   data,
-  unit,
+  fieldConfig,
   timeFilter,
   tickFormatter,
+  type,
 }: {
   data: any;
-  unit?: string;
+  fieldConfig: any;
   timeFilter: (date: Date) => boolean;
   tickFormatter: (value: string) => string;
+  type: string;
 }) {
-  const valueFormatter = (value: number) => `${formatNumber(value)}${unit ? unit : ""}`;
+  const unit = fieldConfig?.defaults?.unit;
+  const valueFormatter = (value: number) => `${formatNumber(value)}${unit ? ` ${unit}` : ""}`;
   const graphData: Record<number, Record<string, string>> = {};
+  console.log("fieldConfig", fieldConfig);
+  const stackingGroup = fieldConfig?.defaults?.custom?.stacking?.group;
+  const fillOpacity = fieldConfig?.defaults?.custom?.fillOpacity;
   let labels: Set<string> = new Set();
   Object.keys(data["results"]).forEach(ref => {
     data["results"][ref]["frames"].forEach((frame: any) => {
@@ -89,96 +323,51 @@ function PanelData({
   if (Object.keys(graphData).length === 0) {
     return <div className="flex justify-center items-center h-2/3">No data available</div>;
   }
-  const labelsArray = Array.from(labels).sort();
-  const wholeHourTicks = series.map(({ time }) => time).filter(timeStr => timeFilter(new Date(timeStr)));
 
-  return (
-    <ResponsiveContainer width="100%" height={250}>
-      <AreaChart data={series} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-        <CartesianGrid
-          horizontal={true}
-          vertical={false}
-          stroke="hsl(var(--border))"
-          strokeDasharray="4 4"
-          strokeWidth={1}
-          opacity={0.6}
-        />
-        <XAxis
-          dataKey="time"
-          axisLine={false}
-          tickLine={false}
-          tick={{ fill: "#888888", fontSize: 12 }}
+  const labelsArray = Array.from(labels).sort();
+  switch (type) {
+    case "timeseries":
+      return (
+        <AreaPanel
+          series={series}
           tickFormatter={tickFormatter}
-          ticks={wholeHourTicks}
+          timeFilter={timeFilter}
+          valueFormatter={valueFormatter}
+          labelsArray={labelsArray}
+          fillOpacity={fillOpacity}
+          stackingGroup={stackingGroup}
         />
-        <YAxis
-          axisLine={false}
-          tickLine={false}
-          tick={{ fill: "#888888", fontSize: 12 }}
-          width={60}
-          tickFormatter={valueFormatter}
+      );
+    case "bargauge":
+      return (
+        <BarGaugePanel
+          series={series}
+          tickFormatter={tickFormatter}
+          timeFilter={timeFilter}
+          valueFormatter={valueFormatter}
+          labelsArray={labelsArray}
+          fillOpacity={fillOpacity}
+          stackingGroup={stackingGroup}
         />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: "hsl(var(--card))",
-            border: "1px solid var(--border)",
-            borderRadius: "6px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            fontWeight: "bold",
-            color: "var(--card-foreground)",
-          }}
-          formatter={(value: number, time: string) => {
-            console.log(time, labelsArray.indexOf(time), Object.values(colors.lightText));
-            return [
-              <div
-                key={`${time}-value`}
-                style={{
-                  color:
-                    typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                      ? Object.values(colors.dark)[labelsArray.indexOf(time)]
-                      : Object.values(colors.lightText)[labelsArray.indexOf(time)],
-                }}
-              >
-                {`${time}: ${valueFormatter(value)}`}
-              </div>,
-              null,
-            ];
-          }}
-        />
-        {labelsArray.map((label, index) => {
-          const color =
-            typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-              ? Object.values(colors.dark)[index]
-              : Object.values(colors.light)[index];
-          return (
-            <Area
-              key={index}
-              name={label}
-              type="monotone"
-              dataKey={data => data.data[label] || 0}
-              stroke={color}
-              strokeWidth={2}
-              fill={`${color}80`}
-              // stackId="1"
-            />
-          );
-        })}
-      </AreaChart>
-    </ResponsiveContainer>
-  );
+      );
+    default:
+      return null;
+  }
 }
 
 function Panel({
   title,
   description,
-  unit,
+  fieldConfig,
+  type,
   data,
   timeFilter,
   tickFormatter,
 }: {
   title: string;
   description?: string;
-  unit?: string;
+  fieldConfig: any;
+  type: string;
   data: any;
   timeFilter: (date: Date) => boolean;
   tickFormatter: (value: string) => string;
@@ -205,7 +394,13 @@ function Panel({
           </TooltipProvider>
         )}
         {data ? (
-          <PanelData data={data.data} unit={unit} timeFilter={timeFilter} tickFormatter={tickFormatter} />
+          <PanelData
+            data={data.data}
+            type={type}
+            fieldConfig={fieldConfig}
+            timeFilter={timeFilter}
+            tickFormatter={tickFormatter}
+          />
         ) : (
           <div className="flex justify-center items-center">
             <LoadingCircle isSpinning={true} />
@@ -221,11 +416,11 @@ function Dashboard({
   panels,
 }: {
   title: string;
-  panels: { title: string; description?: string; unit?: string; data: any; query: { from: string } }[];
+  panels: { title: string; description?: string; fieldConfig: any; data: any; type: string; query: { from: string } }[];
 }) {
   return (
     <>
-      {panels.map(({ title, description, unit, data, query }) => {
+      {panels.map(({ title, description, fieldConfig, data, query, type }) => {
         const from: string = query["from"];
         const regex = /now-(\d+)([dmh])/;
         const match = from.match(regex);
@@ -260,8 +455,9 @@ function Dashboard({
             key={title}
             title={title}
             description={description}
-            unit={unit}
+            fieldConfig={fieldConfig}
             data={data}
+            type={type}
             timeFilter={timeFilter}
             tickFormatter={tickFormatter}
           />
@@ -273,7 +469,11 @@ function Dashboard({
 
 export default function NetworkStatusPage() {
   const [graphs, setGraphs] = useState<
-    { title: string; panels: { title: string; description?: string; unit?: string; query: any; data: any }[] }[] | null
+    | {
+        title: string;
+        panels: { title: string; description?: string; fieldConfig: any; query: any; data: any; type: string }[];
+      }[]
+    | null
   >(null);
   useEffect(() => {
     (async () => {
@@ -281,12 +481,13 @@ export default function NetworkStatusPage() {
       setGraphs(
         graphs.data.map(({ title, panels }) => ({
           title: title,
-          panels: panels.map(({ title, description, unit, query }) => ({
+          panels: panels.map(({ title, description, field_config, query, type }) => ({
             title,
             description,
             query,
-            unit,
+            fieldConfig: field_config,
             data: null,
+            type,
           })),
         }))
       );
