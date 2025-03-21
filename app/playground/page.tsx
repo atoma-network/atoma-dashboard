@@ -70,13 +70,11 @@ export default function PlaygroundPage() {
   });
 
   useEffect(() => {
-    if (settings.playground) {
-      setParameters(prev => ({
-        ...prev,
-        ...settings.playground,
-        apiKey: prev.apiKey,
-      }));
-    }
+    setParameters(prev => ({
+      ...prev,
+      ...settings.playground,
+      apiKey: prev.apiKey,
+    }));
   }, [settings.playground]);
 
   useEffect(() => {
