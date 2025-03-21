@@ -167,7 +167,7 @@ export function Sidebar() {
               >
                 <ChevronLeft
                   className={cn(
-                    "h-10 w-10 transition-transform text-[#635c70] dark:text-[#8f8f98]",
+                    "h-10 w-10 transition-transform rounded-md  dark:bg-darkMode text-[#635c70] dark:text-[#8f8f98] hover:text-secondary-foreground dark:hover:text-secondary-foreground dark:hover:bg-[#27272a]",
                     isCollapsed && "rotate-180"
                   )}
                 />
