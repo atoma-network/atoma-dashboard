@@ -152,11 +152,8 @@ export default function PlaygroundPage() {
   };
 
   const handleParameterChange = (key: keyof Parameters, value: number | boolean | string) => {
+    // Only update local state, don't save to global settings yet
     setParameters(prev => ({ ...prev, [key]: value }));
-
-    if (key !== "apiKey") {
-      updatePlaygroundSettings({ [key]: value });
-    }
   };
 
   const currentModels = processModelsForCategory(availableModels, "chat");

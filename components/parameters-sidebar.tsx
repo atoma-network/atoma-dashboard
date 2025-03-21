@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useSettings } from "@/contexts/settings-context";
 
 //Parameters interface
 interface Parameters {
@@ -29,13 +30,17 @@ interface ParametersSidebarProps {
 }
 
 export function ParametersSidebar({ parameters, onChange }: ParametersSidebarProps) {
+  const { updatePlaygroundSettings } = useSettings();
+
   const handleSave = () => {
     try {
       // Creates a copy of parameters without the API key
       const parametersToSave = { ...parameters };
       delete parametersToSave.apiKey;
 
-      localStorage.setItem("playground-parameters", JSON.stringify(parametersToSave));
+      // Save to global settings
+      updatePlaygroundSettings(parametersToSave);
+
       toast.success("Parameters saved");
     } catch (error) {
       toast.error("Failed to save parameters");
