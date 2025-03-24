@@ -111,7 +111,6 @@ function AreaPanel({
                   ? Object.values(colors.dark)[index]
                   : Object.values(colors.lightText)[index],
             }));
-            console.log("combinedPayload", combinedPayload);
             if (stackingGroup) {
               combinedPayload?.reverse();
             } else {
@@ -282,8 +281,8 @@ function PanelData({
   const unit = fieldConfig?.defaults?.unit;
   const valueFormatter = (value: number) => `${formatNumber(value)}${unit ? ` ${unit}` : ""}`;
   const graphData: Record<number, Record<string, string>> = {};
-  console.log("fieldConfig", fieldConfig);
-  const stackingGroup = fieldConfig?.defaults?.custom?.stacking?.group;
+  const stackingGroup =
+    fieldConfig?.defaults?.custom?.stacking?.mode != "none" && fieldConfig?.defaults?.custom?.stacking?.group;
   const fillOpacity = fieldConfig?.defaults?.custom?.fillOpacity;
   let labels: Set<string> = new Set();
   Object.keys(data["results"]).forEach(ref => {
