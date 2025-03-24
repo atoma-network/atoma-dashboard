@@ -26,7 +26,7 @@ const navigation = [
   { name: "Account Portal", href: "/account-portal", icon: LayoutDashboard },
   { name: "Models", href: "/models", icon: Box },
   { name: "Playground", href: "/playground", icon: PlayCircle },
-  { name: "Analytics", href: "/analytics", icon: TrendingUp },
+  // { name: "Analytics", href: "/analytics", icon: TrendingUp },
   { name: "Docs", href: "https://docs.atoma.network/cloud-api-reference/get-started", icon: FileText },
   { name: "Settings", href: "/settings", icon: Settings },
   {
@@ -165,7 +165,12 @@ export function Sidebar() {
                 className={cn("ml-auto px-0 h-8 w-8", isCollapsed && "ml-0")}
                 onClick={() => setIsCollapsed(!isCollapsed)}
               >
-                <ChevronLeft className={cn("h-10 w-10 transition-transform", isCollapsed && "rotate-180")} />
+                <ChevronLeft
+                  className={cn(
+                    "h-10 w-10 transition-transform rounded-md  dark:bg-darkMode text-[#635c70] dark:text-[#8f8f98] hover:text-secondary-foreground dark:hover:text-secondary-foreground dark:hover:bg-[#27272a]",
+                    isCollapsed && "rotate-180"
+                  )}
+                />
                 <span className="sr-only">{isCollapsed ? "Expand" : "Collapse"} Sidebar</span>
               </Button>
             </div>

@@ -37,7 +37,7 @@ function ModelCard({ name, price, modalities }: { name: string; price: string; m
           <div className="flex justify-between items-start mb-4">
             <div>
               <h3 className="text-base font-medium">{simplifyModelName(name)}</h3>
-              <p className="text-sm text-muted-foreground">{price} per 1M tokens</p>
+              <p className="text-sm text-muted-foreground">${price} per 1M tokens</p>
             </div>
             {modalities.map(modality => (
               <span
@@ -121,7 +121,7 @@ export default function ModelsPage() {
                 const model = cheapestSubscription.get(modelName);
                 return {
                   name: modelName,
-                  price: model!.price_per_one_million_compute_units,
+                  price: model!.price_per_one_million_compute_units / 1000000,
                   modalities,
                 };
               });

@@ -91,8 +91,8 @@ export default function AnalyticsPage() {
             </ToggleGroup>
           </div>
 
-          <AreaCharts />
-          <ModelCharts />
+          {/* <AreaCharts /> */}
+          {/* <ModelCharts /> */}
           <UsageHistory />
         </div>
       </div>
