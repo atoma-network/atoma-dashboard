@@ -3,7 +3,7 @@ name: Deploy Atoma Proxy dashboard
 on:
   push:
     branches:
-      - with-logic
+      - dash/v2
   workflow_dispatch: # Add this line to enable manual triggering
 
 permissions:
