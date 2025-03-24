@@ -20,6 +20,9 @@ export const metadata = {
   title: "AtomCloud Dashboard",
   description: "A modern, responsive financial dashboard",
   generator: "v0.dev",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
