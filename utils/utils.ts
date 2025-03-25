@@ -45,7 +45,6 @@ export function RenderRequestBodyBasedOnEndPoint(
   parameters: {
     systemPrompt: string;
     customSystemPrompt: string;
-    autoSetLength: boolean;
     outputLength: number;
     temperature: number;
     topP: number;
@@ -65,7 +64,7 @@ export function RenderRequestBodyBasedOnEndPoint(
           { role: "user", content: message },
         ],
         model: selectedModel,
-        max_tokens: parameters.autoSetLength ? undefined : parameters.outputLength,
+        max_tokens: parameters.outputLength,
         temperature: parameters.temperature,
         top_p: parameters.topP,
         top_k: parameters.topK,
