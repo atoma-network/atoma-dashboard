@@ -49,6 +49,25 @@ const colors = {
   },
 };
 
+const readableModelName = (modelName: string) => {
+  switch (modelName) {
+    case "Qwen/QwQ-32B":
+      return "QWQ 32B";
+    case "neuralmagic/DeepSeek-R1-Distill-Llama-70B-FP8-dynamic":
+      return "DeepSeek: R1 Distill Llama 70B";
+    case "neuralmagic/Qwen2-72B-Instruct-FP8":
+      return "Qwen2 72B";
+    case "meta-llama/Llama-3.1-8B-Instruct":
+      return "Llama 3.1 8B";
+    default:
+      const match = modelName.match(/\/([^\/]*\d+B)/);
+      if (match) {
+        return match[1].replace(/-/g, " ");
+      }
+      return modelName;
+  }
+};
+
 function AreaPanel({
   series,
   tickFormatter,
@@ -116,6 +135,7 @@ function AreaPanel({
             } else {
               combinedPayload?.sort((a, b) => Number(b.value) - Number(a.value));
             }
+            const formattedLabel = new Date(label).toLocaleDateString();
             return (
               <div
                 style={{
@@ -128,14 +148,14 @@ function AreaPanel({
                   padding: "8px",
                 }}
               >
-                <div>{label}</div>
+                <div>{formattedLabel}</div>
 
                 {combinedPayload?.map((entry, index) => {
                   return (
                     <div key={index}>
                       <span
                         style={{ color: entry.color }}
-                      >{`${entry.name}: ${valueFormatter(Number(entry.value))}`}</span>
+                      >{`${readableModelName(entry.name!.toString())}: ${valueFormatter(Number(entry.value))}`}</span>
                     </div>
                   );
                 })}
@@ -187,18 +207,10 @@ function BarGaugePanel({
   fillOpacity?: number;
   stackingGroup?: string;
 }) {
-  const wholeHourTicks = series.map(({ time }) => time).filter(timeStr => timeFilter(new Date(timeStr)));
-  const percentToHex = (percent: number): string => {
-    const clampedPercent = Math.max(0, Math.min(100, percent));
-    const decimalValue = Math.round((clampedPercent / 100) * 255);
-    return decimalValue.toString(16).padStart(2, "0").toUpperCase();
-  };
   const barData = labelsArray.map(label => ({
     name: label,
-    value: Number(series[series.length - 1].data[label] || 0),
+    Tokens: Number(series[series.length - 1].data[label] || 0),
   }));
-  console.log(series);
-  console.log("barData", barData);
   return (
     <ResponsiveContainer width="100%" height={250}>
       <BarChart data={barData} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
@@ -223,35 +235,40 @@ function BarGaugePanel({
           axisLine={false}
           tickLine={false}
           tick={{ fill: "#888888", fontSize: 12 }}
-          tickFormatter={value => value.split("/")[1].split("-")[0]}
+          tickFormatter={readableModelName}
         />
         <Tooltip
-          contentStyle={{
-            backgroundColor: "hsl(var(--card))",
-            border: "1px solid var(--border)",
-            borderRadius: "6px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            fontWeight: "bold",
-            color: "var(--card-foreground)",
-          }}
-          formatter={(value: number, time: string) => {
-            return [
+          content={props => {
+            const { payload, label } = props;
+            return (
               <div
-                key={`${time}-value`}
                 style={{
-                  color:
-                    typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-                      ? Object.values(colors.dark)[labelsArray.indexOf(time)]
-                      : Object.values(colors.lightText)[labelsArray.indexOf(time)],
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid var(--border)",
+                  borderRadius: "6px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  fontWeight: "bold",
+                  color: "var(--card-foreground)",
+                  padding: "8px",
                 }}
               >
-                {`${time}: ${valueFormatter(value)}`}
-              </div>,
-              null,
-            ];
+                <div>{readableModelName(label)}</div>
+                <div
+                  key={`${payload?.[0]?.name}-value`}
+                  style={{
+                    color:
+                      typeof window !== "undefined" && document.documentElement.classList.contains("dark")
+                        ? Object.values(colors.dark)[labelsArray.indexOf(label)]
+                        : Object.values(colors.lightText)[labelsArray.indexOf(label)],
+                  }}
+                >
+                  {`${payload?.[0]?.name}: ${valueFormatter(Number(payload?.[0]?.value))}`}
+                </div>
+              </div>
+            );
           }}
         />
-        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
+        <Bar dataKey="Tokens" radius={[0, 4, 4, 0]} barSize={20}>
           {labelsArray.map((entry, index) => {
             const color =
               typeof window !== "undefined" && document.documentElement.classList.contains("dark")
@@ -279,7 +296,7 @@ function PanelData({
   type: string;
 }) {
   const unit = fieldConfig?.defaults?.unit;
-  const valueFormatter = (value: number) => `${formatNumber(value)}${unit ? ` ${unit}` : ""}`;
+  const valueFormatter = (value: number) => (value ? `${formatNumber(value)}${unit ? ` ${unit}` : ""}` : "");
   const graphData: Record<number, Record<string, string>> = {};
   const stackingGroup =
     fieldConfig?.defaults?.custom?.stacking?.mode != "none" && fieldConfig?.defaults?.custom?.stacking?.group;
