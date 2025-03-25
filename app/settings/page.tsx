@@ -13,7 +13,7 @@ import { useCurrentAccount } from "@mysten/dapp-kit";
 import { getUserProfile, saveUserProfile } from "@/lib/api";
 
 export default function SettingsPage() {
-  const [userProfile, setUserProfile] = useState({ name: "", email: "" });
+  const [userProfile, setUserProfile] = useState({ email: "" });
   const { settings } = useSettings();
   const [loggedIn, setLoggedIn] = useState(false);
   const [address, setAddress] = useState<string>();
@@ -33,15 +33,10 @@ export default function SettingsPage() {
         }
       } else {
         setAddress(undefined);
-        setUserProfile({ name: "", email: "" });
+        setUserProfile({ email: "" });
       }
     })();
   }, [settings.loggedIn, account]);
-
-  const handleSaveAccount = async () => {
-    await saveUserProfile(userProfile);
-    toast.success("Account settings saved successfully");
-  };
 
   return (
     <div className="relative min-h-screen w-full">
@@ -59,15 +54,6 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="full-name">Name</Label>
-                <Input
-                  id="full-name"
-                  defaultValue={userProfile.name}
-                  disabled={!loggedIn}
-                  onChange={e => setUserProfile({ ...userProfile, name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" defaultValue={userProfile.email} readOnly className="bg-muted" />
               </div>
@@ -81,11 +67,6 @@ export default function SettingsPage() {
                 <ThemeToggle />
               </div>
             </CardContent>
-            <CardFooter>
-              <Button onClick={handleSaveAccount} disabled={!loggedIn}>
-                Save Account Settings
-              </Button>
-            </CardFooter>
           </Card>
         </div>
       </div>

@@ -164,10 +164,6 @@ export const getUserProfile = async () => {
   return await credentialsApi.get<UserProfile>("/user_profile");
 };
 
-export const saveUserProfile = async (profile: UserProfile) => {
-  return await credentialsApi.post<void>("/set_user_profile", profile);
-};
-
 export const googleOAuth = async (idToken: string) => {
   return await credentialsApi.post<AuthResponse>("/google_oauth", idToken);
 };
