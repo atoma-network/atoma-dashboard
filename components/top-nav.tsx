@@ -44,7 +44,7 @@ export function TopNav() {
       (async () => {
         try {
           let res = await getUserProfile();
-          setUsername(res.data.name);
+          setUsername(res.data.email);
         } catch (error) {
           console.log(error);
         }

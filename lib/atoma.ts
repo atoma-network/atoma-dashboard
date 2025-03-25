@@ -99,7 +99,6 @@ export interface LatencyResponse {
 
 export interface UserProfile {
   email: string;
-  name: string;
 }
 
 export const payUSDC = async (
