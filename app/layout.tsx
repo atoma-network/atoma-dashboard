@@ -17,8 +17,8 @@ import SuiWrap from "@/contexts/SuiWrap";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "AtomCloud Dashboard",
-  description: "A modern, responsive financial dashboard",
+  title: "AtomaCloud",
+  description: "Developer platform for Atoma's API access and metrics.",
   generator: "v0.dev",
   icons: {
     icon: "/favicon.svg",
