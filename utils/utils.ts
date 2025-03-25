@@ -19,7 +19,9 @@ export function processModelsForCategory(
   models: TaskResponse,
   category: ModelCategories
 ): { modelName: string; model: string }[] {
-  return models
+  const uniqueModels = new Map<string, { modelName: string; model: string }>();
+
+  models
     .filter(([model, capabilities]) => {
       switch (category) {
         case "chat":
@@ -32,10 +34,18 @@ export function processModelsForCategory(
           return false;
       }
     })
-    .map(([model]) => ({
-      modelName: model.model_name?.split("/").pop() || model.model_name || "",
-      model: model.model_name || "",
-    }));
+    .forEach(([model]) => {
+      const modelName = model.model_name || "";
+      if (modelName && !uniqueModels.has(modelName)) {
+        uniqueModels.set(modelName, {
+          modelName: modelName.split("/").pop() || modelName,
+          model: modelName,
+        });
+      }
+    });
+
+  // Convert Map  back to array
+  return Array.from(uniqueModels.values());
 }
 
 export function RenderRequestBodyBasedOnEndPoint(
