@@ -215,25 +215,6 @@ export function ApiKeyCard() {
                 with your API key can make requests on your behalf. If you do lose it, you'll need to generate a new
                 one.
               </span>
-              <br />
-              <Link href="#" className="text-primary hover:underline inline-flex items-center">
-                Learn more about API key best practices
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="ml-1"
-                >
-                  <path d="M7 7h10v10" />
-                  <path d="M7 17 17 7" />
-                </svg>
-              </Link>
             </DialogDescription>
           </DialogHeader>
           <div className="relative">
@@ -252,7 +233,7 @@ export function ApiKeyCard() {
         </DialogContent>
       </Dialog>
       <Modal isOpen={!!selectedToRevokeToken} onClose={() => setSelectedToRevokeToken(null)}>
-        <h2 className="text-lg font-semibold text-purple-600">Revoke API Key json</h2>
+        <h2 className="text-lg font-semibold text-primary">Revoke API Key json</h2>
         <p className="text-sm text-gray-500">
           Are you sure you want to revoke this <b>{selectedToRevokeToken?.name}</b> API key?
         </p>
