@@ -60,7 +60,7 @@ const readableModelName = (modelName: string) => {
     case "meta-llama/Llama-3.1-8B-Instruct":
       return "Llama 3.1 8B";
     default:
-      const match = modelName.match(/\/([^\/]*\d+B)/);
+      const match = modelName?.match(/\/([^\/]*\d+B)/);
       if (match) {
         return match[1].replace(/-/g, " ");
       }
