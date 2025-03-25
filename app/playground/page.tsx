@@ -18,6 +18,7 @@ import {
   parseOutputBasedOnEndpoint,
   fetchAvailableModels,
   TaskResponse,
+  readableModelName,
 } from "../../utils/utils";
 import config from "@/config/config";
 import LoadingCircle from "../../components/LoadingCircle";
@@ -184,7 +185,7 @@ export default function PlaygroundPage() {
                         }`}
                         onClick={() => setSelectedModel(model.model)}
                       >
-                        {model.modelName}
+                        {readableModelName(model.model)}
                       </Button>
                     ))
                   )}

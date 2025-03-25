@@ -15,11 +15,33 @@ export async function fetchAvailableModels(): Promise<TaskResponse> {
   }
 }
 
+export function readableModelName(modelName: string) {
+  switch (modelName) {
+    case "Qwen/QwQ-32B":
+      return "QWQ 32B";
+    case "neuralmagic/DeepSeek-R1-Distill-Llama-70B-FP8-dynamic":
+      return "DeepSeek: R1 Distill Llama 70B";
+    case "neuralmagic/Qwen2-72B-Instruct-FP8":
+      return "Qwen2 72B";
+    case "meta-llama/Llama-3.1-8B-Instruct":
+      return "Llama 3.1 8B";
+    default:
+      const match = modelName?.match(/\/([^\/]*\d+B)/);
+      if (match) {
+        return match[1].replace(/-/g, " ");
+      }
+      return modelName;
+  }
+}
+
 export function processModelsForCategory(
   models: TaskResponse,
   category: ModelCategories
 ): { modelName: string; model: string }[] {
-  return models
+  // Create a Map to store unique models
+  const uniqueModels = new Map<string, { modelName: string; model: string }>();
+
+  models
     .filter(([model, capabilities]) => {
       switch (category) {
         case "chat":
@@ -32,10 +54,18 @@ export function processModelsForCategory(
           return false;
       }
     })
-    .map(([model]) => ({
-      modelName: model.model_name?.split("/").pop() || model.model_name || "",
-      model: model.model_name || "",
-    }));
+    .forEach(([model]) => {
+      const modelName = model.model_name || "";
+      if (modelName && !uniqueModels.has(modelName)) {
+        uniqueModels.set(modelName, {
+          modelName: readableModelName(modelName),
+          model: modelName,
+        });
+      }
+    });
+
+  // Convert Map values to array
+  return Array.from(uniqueModels.values());
 }
 
 export function RenderRequestBodyBasedOnEndPoint(
