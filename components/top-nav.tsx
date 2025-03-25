@@ -78,10 +78,7 @@ export function TopNav() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0 hover:bg-transparent">
                   <Avatar className="h-8 w-8">
-                    <div
-                      className="h-full w-full rounded-full flex items-center justify-center text-white"
-                      style={{ backgroundColor: "#" + settings.avatar.split("background=")[1] }}
-                    >
+                    <div className="h-full w-full rounded-full flex items-center justify-center text-white bg-primary">
                       {username[0].toUpperCase()}
                     </div>
                   </Avatar>

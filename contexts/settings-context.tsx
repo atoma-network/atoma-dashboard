@@ -7,7 +7,6 @@ import { createContext, useContext, useState } from "react";
 export interface UserSettings {
   loggedIn: boolean;
   accessToken?: string;
-  avatar: string;
   zkLogin: {
     isEnabled: boolean;
     idToken?: string;
@@ -34,7 +33,6 @@ const defaultSettings: UserSettings = {
   zkLogin: {
     isEnabled: false,
   },
-  avatar: "/placeholder.svg?height=400&width=400&background=8B5CF6", // Purple
   playground: {
     systemPrompt: "Default",
     customSystemPrompt: "",
