@@ -16,7 +16,6 @@ interface Parameters {
   apiKey?: string;
   systemPrompt: string;
   customSystemPrompt: string;
-  autoSetLength: boolean;
   outputLength: number;
   temperature: number;
   topP: number;
@@ -89,20 +88,6 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
               )}
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="auto-length"
-                checked={parameters.autoSetLength}
-                onCheckedChange={checked => onChange("autoSetLength", checked)}
-              />
-              <label
-                htmlFor="auto-length"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Auto-set output length
-              </label>
-            </div>
-
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -127,7 +112,6 @@ export function ParametersSidebar({ parameters, onChange }: ParametersSidebarPro
                 min={1}
                 max={4096}
                 step={1}
-                disabled={parameters.autoSetLength}
               />
             </div>
 

@@ -20,7 +20,6 @@ export interface UserSettings {
   playground?: {
     systemPrompt?: string;
     customSystemPrompt?: string;
-    autoSetLength?: boolean;
     outputLength?: number;
     temperature?: number;
     topP?: number;
@@ -38,7 +37,6 @@ const defaultSettings: UserSettings = {
   playground: {
     systemPrompt: "Default",
     customSystemPrompt: "",
-    autoSetLength: true,
     outputLength: 2048,
     temperature: 0.7,
     topP: 0.7,

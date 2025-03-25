@@ -29,7 +29,6 @@ interface Parameters {
   apiKey: string;
   systemPrompt: string;
   customSystemPrompt: string;
-  autoSetLength: boolean;
   outputLength: number;
   temperature: number;
   topP: number;
@@ -41,7 +40,6 @@ const defaultParameters: Parameters = {
   apiKey: "",
   systemPrompt: "Default",
   customSystemPrompt: "",
-  autoSetLength: true,
   outputLength: 2048,
   temperature: 0.7,
   topP: 0.7,
