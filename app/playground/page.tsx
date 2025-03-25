@@ -177,10 +177,10 @@ export default function PlaygroundPage() {
                       <Button
                         key={model.model}
                         variant="ghost"
-                        className={`px-1  text-xs rounded-lg ${
+                        className={`px-1 text-xs rounded-lg border ${
                           selectedModel === model.model
-                            ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700"
-                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-200"
+                            ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
+                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-200 border-transparent"
                         }`}
                         onClick={() => setSelectedModel(model.model)}
                       >
