@@ -18,8 +18,8 @@ export function BillingSummaryCard() {
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
     setBillingPeriod({
-      start: startOfMonth.toLocaleDateString(undefined, { dateStyle: "long" }),
-      end: endOfMonth.toLocaleDateString(undefined, { dateStyle: "long" }),
+      start: startOfMonth.toLocaleDateString(),
+      end: endOfMonth.toLocaleDateString(),
     });
   }, []);
 
