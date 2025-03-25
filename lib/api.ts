@@ -169,7 +169,7 @@ export const googleOAuth = async (idToken: string) => {
 };
 
 export const getSalt = async () => {
-  return await credentialsApi.get<string>("/salt");
+  return await credentialsApi.get<string>("/zk_salt");
 };
 
 export const getGraphs = async () => {
