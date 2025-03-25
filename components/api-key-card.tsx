@@ -233,7 +233,7 @@ export function ApiKeyCard() {
         </DialogContent>
       </Dialog>
       <Modal isOpen={!!selectedToRevokeToken} onClose={() => setSelectedToRevokeToken(null)}>
-        <h2 className="text-lg font-semibold text-purple-600">Revoke API Key json</h2>
+        <h2 className="text-lg font-semibold text-primary">Revoke API Key json</h2>
         <p className="text-sm text-gray-500">
           Are you sure you want to revoke this <b>{selectedToRevokeToken?.name}</b> API key?
         </p>
