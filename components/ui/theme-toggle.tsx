@@ -9,7 +9,7 @@ export function ThemeToggle() {
   const [mounted, setMounted] = React.useState(false);
 
   // Initialize isToggled based on theme
-  const [isToggled, setIsToggled] = React.useState(theme === "dark");
+  const [isToggled, setIsToggled] = React.useState(false);
 
   // Update isToggled when theme changes
   React.useEffect(() => {
@@ -19,6 +19,7 @@ export function ThemeToggle() {
   // Handle mounting
   React.useEffect(() => {
     setMounted(true);
+    setIsToggled(theme === "dark");
   }, []);
 
   if (!mounted) {
