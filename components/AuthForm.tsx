@@ -11,7 +11,6 @@ interface AuthFormProps {
 }
 
 const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -26,7 +25,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
       if (loginType === "login") {
         response = await loginUser(email, password);
       } else {
-        response = await registerUser({ email, name }, password);
+        response = await registerUser({ email }, password);
       }
 
       // Save access token and refresh token to session storage
@@ -95,19 +94,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
               className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
             />
           </div>
-          {loginType === "register" && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Name</label>
-              <InputText
-                placeholder="Enter your name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required
-                className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
-              />
-            </div>
-          )}
-
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Password</label>
             <InputText
