@@ -296,7 +296,7 @@ function PanelData({
   type: string;
 }) {
   const unit = fieldConfig?.defaults?.unit;
-  const valueFormatter = (value: number) => (value ? `${formatNumber(value)}${unit ? ` ${unit}` : ""}` : "");
+  const valueFormatter = (value: number) => `${formatNumber(value)}${unit ? ` ${unit}` : ""}`;
   const graphData: Record<number, Record<string, string>> = {};
   const stackingGroup =
     fieldConfig?.defaults?.custom?.stacking?.mode != "none" && fieldConfig?.defaults?.custom?.stacking?.group;
