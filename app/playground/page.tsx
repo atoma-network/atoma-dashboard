@@ -295,7 +295,7 @@ export default function PlaygroundPage() {
                 {isLoading && !streamingResponse && (
                   <div className="flex justify-start">
                     <div className="max-w-[80%] rounded-lg p-4 bg-muted border border-border">
-                      <LoadingCircle isSpinning={true} />
+                      <LoadingCircle isSpinning={true} size="xs" />
                     </div>
                   </div>
                 )}
