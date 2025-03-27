@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SettingsProvider>
           <AppStateProvider>
             <SuiWrap>
-              <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
                 <TooltipProvider delayDuration={0}>
                   <ClientWrapper>
                     <div className="min-h-screen flex bg-background dark:bg-darkMode">
