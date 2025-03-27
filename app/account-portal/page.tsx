@@ -53,6 +53,7 @@ export default function DashboardPage() {
   const [fundsStep, setFundsStep] = useState<FundsStep>("choose");
   const [amount, setAmount] = useState<number>(10);
   const [walletConfirmed, setWalletConfirmed] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const { connectionStatus } = useCurrentWallet();
   const account = useCurrentAccount();
   const [handlingPayment, setHandlingPayment] = useState<boolean>(false);
@@ -112,36 +113,34 @@ export default function DashboardPage() {
                 })
                 .catch((error: Response) => {
                   console.error(error);
+                  setError("Failed to process payment. Please try again.");
                 });
             }, 1000);
           });
         })
         .catch(error => {
           console.error(error);
+          setError("Failed to process payment. Please try again.");
         });
       setHandlingPayment(false);
-      return;
-    }
-    if (!selectedAccount || !walletConfirmed) {
-      setHandlingPayment(false);
-      setFundsStep("wallet");
       return;
     }
 
     try {
       setFundsStep("sending");
       const suiAddress = await getSuiAddress();
-      if (suiAddress.data == null || suiAddress.data != selectedAccount.address) {
+      if (suiAddress.data == null || suiAddress.data != selectedAccount?.address) {
         throw new Error("SUI address not found or not matching");
       }
       let res = await payUSDC(amount * 1000000, suiClient, signAndExecuteTransaction, selectedAccount);
       const txDigest = (res as { digest: string }).digest;
-      res = await usdcPayment(txDigest);
-      setShowAddFunds(true);
+      await usdcPayment(txDigest);
       updateState({ refreshBalance: true });
       setFundsStep("result");
     } catch (error) {
       console.error(error);
+      setError("Failed to process payment. Please try again.");
+      setFundsStep("amount"); // Go back to amount step on error
     } finally {
       setHandlingPayment(false);
     }
@@ -151,6 +150,7 @@ export default function DashboardPage() {
     if (!selectedAccount) {
       return;
     }
+    setError(null);
     const access_token = settings.accessToken;
     let user_id;
     if (access_token) {
@@ -168,21 +168,28 @@ export default function DashboardPage() {
       user_id = token_json.user_id;
     }
 
-    signPersonalMessage({
-      account: selectedAccount,
-      message: new TextEncoder().encode(
-        `Sign this message to prove you are the owner of this wallet. User ID: ${user_id}`
-      ),
-    }).then(res => {
-      proofRequest(res.signature, selectedAccount.address)
-        .then(() => {
-          setFundsStep("amount");
-          setWalletConfirmed(true);
-        })
-        .catch((error: Response) => {
-          console.error(error);
-        });
-    });
+    try {
+      const res = await signPersonalMessage({
+        account: selectedAccount,
+        message: new TextEncoder().encode(
+          `Sign this message to prove you are the owner of this wallet. User ID: ${user_id}`
+        ),
+      });
+
+      await proofRequest(res.signature, selectedAccount.address);
+      setWalletConfirmed(true);
+      // Only proceed to amount step if not already there
+      if (fundsStep === "wallet") {
+        setFundsStep("amount");
+      }
+    } catch (error: any) {
+      console.error("Wallet error:", error);
+      if (error.message?.includes("User rejected")) {
+        setError("You rejected the wallet request. Please try again.");
+      } else {
+        setError("Failed to confirm wallet. Please try again.");
+      }
+    }
   };
 
   const renderAccountSelection = () => {
@@ -200,6 +207,20 @@ export default function DashboardPage() {
 
     return (
       <div className="space-y-4 h-full overflow-hidden">
+        {error && (
+          <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+            <div className="flex items-center space-x-2 text-red-600 dark:text-red-400">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>{error}</span>
+            </div>
+          </div>
+        )}
         <div className="space-y-2">
           <Label className="text-lg font-semibold">Select Account</Label>
           <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
@@ -212,6 +233,7 @@ export default function DashboardPage() {
                   } else {
                     setSelectedAccount(acc);
                   }
+                  setError(null);
                 }}
                 className={`p-4 rounded-lg border cursor-pointer transition-all ${
                   selectedAccount?.address === acc.address
@@ -292,11 +314,17 @@ export default function DashboardPage() {
               className="border-primary dark:border-primary"
             />
             <Button
-              onClick={() => (settings.zkLogin.isEnabled ? handleUSDCPayment(amount) : setFundsStep("wallet"))}
+              onClick={() => {
+                if (!walletConfirmed) {
+                  setFundsStep("wallet");
+                } else {
+                  handleUSDCPayment(amount);
+                }
+              }}
               className="w-full bg-primary hover:bg-primary text-white"
-              disabled={false}
+              disabled={amount <= 0}
             >
-              <ArrowRight className="h-6 w-6" />
+              {walletConfirmed ? "Pay Now" : "Continue"}
             </Button>
           </div>
         );
@@ -333,6 +361,17 @@ export default function DashboardPage() {
             <div className="flex items-center justify-center">
               <Label>Your account has been successfully funded with ${amount.toFixed(2)}</Label>
             </div>
+            <Button
+              onClick={() => {
+                setShowAddFunds(false);
+                setFundsStep("choose");
+                setWalletConfirmed(false);
+                setSelectedAccount(null);
+              }}
+              className="w-full bg-primary hover:bg-primary/90 text-white"
+            >
+              Close
+            </Button>
           </div>
         );
     }
