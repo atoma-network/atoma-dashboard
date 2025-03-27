@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2 } from "lucide-react";
+import { Send, Trash2, Square } from "lucide-react";
 import { BackgroundGrid } from "@/components/background-grid";
 import { ApiUsageDialog } from "@/components/api-usage-dialog";
 import { ParametersSidebar } from "@/components/parameters-sidebar";
@@ -23,6 +23,7 @@ import {
 import config from "@/config/config";
 import LoadingCircle from "../../components/LoadingCircle";
 import { useSettings } from "../../contexts/settings-context";
+import ReactMarkdown from "react-markdown";
 
 export type ModelCategories = "chat" | "embeddings" | "images";
 
@@ -65,6 +66,8 @@ export default function PlaygroundPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingResponse, setStreamingResponse] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const [parameters, setParameters] = useState<Parameters>({
     ...defaultParameters,
@@ -134,6 +137,8 @@ export default function PlaygroundPage() {
     const userMessage = message.trim();
     setMessage("");
     setStreamingResponse("");
+    setIsStreaming(false);
+    abortControllerRef.current = new AbortController();
 
     // Add user message to chat
     setMessages(prev => [...prev, { role: "user", content: userMessage }]);
@@ -149,13 +154,18 @@ export default function PlaygroundPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${parameters.apiKey}`,
           },
+          signal: abortControllerRef.current.signal,
         }
       );
 
       const assistantResponse = parseOutputBasedOnEndpoint("chat", response);
 
       // Simulate streaming effect
+      setIsStreaming(true);
       for (let i = 0; i < assistantResponse.length; i++) {
+        if (abortControllerRef.current?.signal.aborted) {
+          break;
+        }
         setStreamingResponse(prev => prev + assistantResponse[i]);
         await new Promise(resolve => setTimeout(resolve, 20));
       }
@@ -163,23 +173,40 @@ export default function PlaygroundPage() {
       // Add assistant message to chat
       setMessages(prev => [...prev, { role: "assistant", content: assistantResponse }]);
       setStreamingResponse("");
+      setIsStreaming(false);
     } catch (error: unknown) {
-      console.log(error);
-      const errorMessage = axios.isAxiosError(error)
-        ? error.status === 401
-          ? "There was a problem with your api key"
-          : error.response?.data?.error?.message || "Failed to query."
-        : "An unexpected error occurred.";
+      if (axios.isAxiosError(error) && error.name === "CanceledError") {
+        // Handle cancellation
+        const partialResponse = streamingResponse;
+        setMessages(prev => [...prev, { role: "assistant", content: partialResponse }]);
+        setStreamingResponse("");
+        setIsStreaming(false);
+      } else {
+        console.log(error);
+        const errorMessage = axios.isAxiosError(error)
+          ? error.status === 401
+            ? "There was a problem with your api key"
+            : error.response?.data?.error?.message || "Failed to query."
+          : "An unexpected error occurred.";
 
-      setMessages(prev => [...prev, { role: "assistant", content: errorMessage }]);
+        setMessages(prev => [...prev, { role: "assistant", content: errorMessage }]);
+      }
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
   const handleParameterChange = (key: keyof Parameters, value: number | boolean | string) => {
     // Only update local state, don't save to global settings yet
     setParameters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleStopStreaming = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setIsStreaming(false);
+    }
   };
 
   const currentModels = processModelsForCategory(availableModels, "chat");
@@ -250,14 +277,18 @@ export default function PlaygroundPage() {
                         msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted border border-border"
                       }`}
                     >
-                      <p className="whitespace-pre-wrap break-words text-sm">{msg.content}</p>
+                      <div className="prose prose-sm dark:prose-invert max-w-none [&>ul]:space-y-2 [&>ol]:space-y-2 [&>ul>li]:mt-1 [&>ol>li]:mt-1 [&>ol]:list-decimal [&>ol]:pl-6">
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
                     </div>
                   </div>
                 ))}
                 {streamingResponse && (
                   <div className="flex justify-start">
                     <div className="max-w-[80%] rounded-lg p-4 bg-muted border border-border">
-                      <p className="whitespace-pre-wrap break-words text-sm">{streamingResponse}</p>
+                      <div className="prose prose-sm dark:prose-invert max-w-none [&>ul]:space-y-2 [&>ol]:space-y-2 [&>ul>li]:mt-1 [&>ol>li]:mt-1 [&>ol]:list-decimal [&>ol]:pl-6">
+                        <ReactMarkdown>{streamingResponse}</ReactMarkdown>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -279,15 +310,28 @@ export default function PlaygroundPage() {
                     className="flex-1 px-4 py-2 rounded-lg bg-background/80 border border-primary focus:ring-2 focus:ring-primary transition"
                     disabled={isLoading}
                   />
-                  <Button
-                    type="submit"
-                    size="icon"
-                    className="bg-primary hover:bg-primary/90 transition-all duration-200 rounded-lg shadow-md"
-                    disabled={isLoading || !message.trim()}
-                  >
-                    <Send className="h-5 w-5" />
-                    <span className="sr-only">Send message</span>
-                  </Button>
+                  {isStreaming ? (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="destructive"
+                      className="hover:bg-destructive/90 transition-all duration-200 rounded-lg shadow-md"
+                      onClick={handleStopStreaming}
+                    >
+                      <Square className="h-5 w-5" />
+                      <span className="sr-only">Stop streaming</span>
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      size="icon"
+                      className="bg-primary hover:bg-primary/90 transition-all duration-200 rounded-lg shadow-md"
+                      disabled={isLoading || !message.trim()}
+                    >
+                      <Send className="h-5 w-5" />
+                      <span className="sr-only">Send message</span>
+                    </Button>
+                  )}
                 </form>
               </div>
             </div>
