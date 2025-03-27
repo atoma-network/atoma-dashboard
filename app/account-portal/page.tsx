@@ -75,9 +75,7 @@ export default function DashboardPage() {
     })();
   }, [account]);
 
-  useEffect(() => {
-    console.log("Available accounts:", accounts);
-  }, [accounts]);
+  useEffect(() => {}, [accounts]);
 
   const handleAddFunds = () => {
     setShowAddFunds(true);
