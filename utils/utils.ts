@@ -15,10 +15,33 @@ export async function fetchAvailableModels(): Promise<TaskResponse> {
   }
 }
 
+export function readableModelName(modelName: string) {
+  switch (modelName) {
+    case "Qwen/QwQ-32B":
+      return "QWQ 32B";
+    case "neuralmagic/DeepSeek-R1-Distill-Llama-70B-FP8-dynamic":
+      return "DeepSeek: R1 Distill Llama 70B";
+    case "neuralmagic/Qwen2-72B-Instruct-FP8":
+      return "Qwen2 72B";
+    case "meta-llama/Llama-3.1-8B-Instruct":
+      return "Llama3.1 8B";
+    case "Infermatic/Llama-3.3-70B-Instruct-FP8-Dynamic":
+      return "Llama3.3 70B";
+    default:
+      const match = modelName?.match(/\/([^\/]*\d+B)/);
+      if (match) {
+        return match[1].replace(/-/g, " ");
+      }
+      return modelName;
+  }
+}
+
 export function processModelsForCategory(
   models: TaskResponse,
   category: ModelCategories
 ): { modelName: string; model: string }[] {
+  // Create a Map to store unique models
+
   const uniqueModels = new Map<string, { modelName: string; model: string }>();
 
   models
@@ -38,13 +61,12 @@ export function processModelsForCategory(
       const modelName = model.model_name || "";
       if (modelName && !uniqueModels.has(modelName)) {
         uniqueModels.set(modelName, {
-          modelName: modelName.split("/").pop() || modelName,
+          modelName: readableModelName(modelName),
           model: modelName,
         });
       }
     });
 
-  // Convert Map  back to array
   return Array.from(uniqueModels.values());
 }
 
