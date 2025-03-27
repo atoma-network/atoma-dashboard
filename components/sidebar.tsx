@@ -14,6 +14,7 @@ import {
   FileText,
   LayoutDashboard,
   TrendingUp,
+  GraduationCap,
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,7 @@ const navigation = [
     href: "https://docs.google.com/forms/d/e/1FAIpQLSeE-AV0oEfo6YGtzo0Ts_vvnm8Crtf1kVhdBtANulH11c0OTA/viewform",
     icon: HelpCircle,
   },
+  { name: "Guide", href: "/guide", icon: GraduationCap },
 ];
 
 // Remove or empty the bottomNavigation array since we moved its items
