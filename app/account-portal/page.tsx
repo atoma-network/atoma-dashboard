@@ -26,8 +26,10 @@ import {
   useSignAndExecuteTransaction,
   useSignPersonalMessage,
   useSuiClient,
-  WalletProvider,
+  useAccounts,
+  ConnectButton,
 } from "@mysten/dapp-kit";
+import type { WalletAccount } from "@mysten/wallet-standard";
 import { getFullnodeUrl } from "@mysten/sui/client";
 import { ArrowRight } from "lucide-react";
 import "@mysten/dapp-kit/dist/index.css";
@@ -59,6 +61,8 @@ export default function DashboardPage() {
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
   const { settings, updateSettings, updateZkLoginSettings } = useSettings();
   const { updateState } = useAppState();
+  const accounts = useAccounts();
+  const [selectedAccount, setSelectedAccount] = useState<WalletAccount | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -69,6 +73,10 @@ export default function DashboardPage() {
       setWalletConfirmed(suiAddress.data != null && suiAddress.data == account?.address);
     })();
   }, [account]);
+
+  useEffect(() => {
+    console.log("Available accounts:", accounts);
+  }, [accounts]);
 
   const handleAddFunds = () => {
     setShowAddFunds(true);
@@ -95,7 +103,6 @@ export default function DashboardPage() {
         .payUSDC(amount * 1000000, suiClient)
         .then(res => {
           const txDigest = res.digest;
-          // const txDigest = "ASp9K5Ms1HS1sKW2H4oa4Q9q6Zz3kBqKUn3x9JbZcGsw";
           zkLogin.signMessage(txDigest).then(proofSignature => {
             setTimeout(() => {
               usdcPayment(txDigest, proofSignature)
@@ -104,7 +111,6 @@ export default function DashboardPage() {
                   setFundsStep("result");
                 })
                 .catch((error: Response) => {
-                  // setError(`${error.status} : ${error.statusText}`);
                   console.error(error);
                 });
             }, 1000);
@@ -112,24 +118,23 @@ export default function DashboardPage() {
         })
         .catch(error => {
           console.error(error);
-          // setError(`${error}`);
         });
       setHandlingPayment(false);
       return;
     }
-    if (account == null) {
+    if (!selectedAccount || !walletConfirmed) {
       setHandlingPayment(false);
+      setFundsStep("wallet");
       return;
     }
 
     try {
       setFundsStep("sending");
       const suiAddress = await getSuiAddress();
-      if (suiAddress.data == null || suiAddress.data != account?.address) {
-        // We haven't proven the SUI address yet
+      if (suiAddress.data == null || suiAddress.data != selectedAccount.address) {
         throw new Error("SUI address not found or not matching");
       }
-      let res = await payUSDC(amount * 1000000, suiClient, signAndExecuteTransaction, account);
+      let res = await payUSDC(amount * 1000000, suiClient, signAndExecuteTransaction, selectedAccount);
       const txDigest = (res as { digest: string }).digest;
       res = await usdcPayment(txDigest);
       setShowAddFunds(true);
@@ -137,14 +142,13 @@ export default function DashboardPage() {
       setFundsStep("result");
     } catch (error) {
       console.error(error);
-      // handleConfirmWallet();
     } finally {
       setHandlingPayment(false);
     }
   };
 
   const handleConfirmWallet = async () => {
-    if (account == null) {
+    if (!selectedAccount) {
       return;
     }
     const access_token = settings.accessToken;
@@ -165,12 +169,12 @@ export default function DashboardPage() {
     }
 
     signPersonalMessage({
-      account,
+      account: selectedAccount,
       message: new TextEncoder().encode(
         `Sign this message to prove you are the owner of this wallet. User ID: ${user_id}`
       ),
     }).then(res => {
-      proofRequest(res.signature, account.address)
+      proofRequest(res.signature, selectedAccount.address)
         .then(() => {
           setFundsStep("amount");
           setWalletConfirmed(true);
@@ -179,6 +183,84 @@ export default function DashboardPage() {
           console.error(error);
         });
     });
+  };
+
+  const renderAccountSelection = () => {
+    console.log("Rendering accounts:", accounts);
+    if (!accounts || accounts.length === 0) {
+      return (
+        <div className="text-center py-4">
+          <div className="text-gray-500 dark:text-gray-400">No accounts detected</div>
+          <div className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+            Please make sure your wallet is connected and has accounts
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4 h-full overflow-hidden">
+        <div className="space-y-2">
+          <Label className="text-lg font-semibold">Select Account</Label>
+          <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+            {accounts.map(acc => (
+              <div
+                key={acc.address}
+                onClick={() => {
+                  if (selectedAccount?.address === acc.address) {
+                    setSelectedAccount(null);
+                  } else {
+                    setSelectedAccount(acc);
+                  }
+                }}
+                className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                  selectedAccount?.address === acc.address
+                    ? "border-primary bg-primary/5 dark:bg-primary/10"
+                    : "border-gray-200 dark:border-gray-700 hover:border-primary/50 dark:hover:border-primary/50"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-primary font-medium">{acc.address.slice(0, 1).toUpperCase()}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                        Account {acc.address.slice(0, 6)}...{acc.address.slice(-4)}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 truncate">{acc.address}</div>
+                    </div>
+                  </div>
+                  {selectedAccount?.address === acc.address && (
+                    <div className="text-primary flex-shrink-0 ml-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <Button
+          onClick={handleConfirmWallet}
+          className="w-full bg-primary hover:bg-primary/90 text-white"
+          disabled={!selectedAccount}
+        >
+          Confirm Account
+        </Button>
+      </div>
+    );
   };
 
   const body = () => {
@@ -210,11 +292,7 @@ export default function DashboardPage() {
               className="border-primary dark:border-primary"
             />
             <Button
-              onClick={() =>
-                (connectionStatus == "connected" && walletConfirmed) || settings.zkLogin.isEnabled
-                  ? handleUSDCPayment(amount)
-                  : setFundsStep("wallet")
-              }
+              onClick={() => (settings.zkLogin.isEnabled ? handleUSDCPayment(amount) : setFundsStep("wallet"))}
               className="w-full bg-primary hover:bg-primary text-white"
               disabled={false}
             >
@@ -223,25 +301,22 @@ export default function DashboardPage() {
           </div>
         );
       case "wallet":
-        if (connectionStatus == "connected") {
-          return (
-            <Button
-              onClick={() => (walletConfirmed ? handleUSDCPayment(amount) : handleConfirmWallet())}
-              className="w-full justify-start bg-white dark:bg-darkMode text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
-              disabled={false}
-            >
-              {walletConfirmed ? "Pay with USDC" : "Confirm Account"}
-            </Button>
-          );
+        if (connectionStatus === "connected") {
+          return renderAccountSelection();
         } else {
           return (
-            <ConnectModal
-              trigger={
-                <Button className="w-full justify-start bg-white dark:bg-darkMode text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
-                  Connect sui wallet
-                </Button>
-              }
-            />
+            <div className="space-y-4">
+              <ConnectModal
+                trigger={
+                  <Button className="w-full justify-start bg-white dark:bg-darkMode text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
+                    Connect sui wallet
+                  </Button>
+                }
+              />
+              <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                Make sure your wallet is connected to testnet
+              </div>
+            </div>
           );
         }
       case "sending":
@@ -289,13 +364,13 @@ export default function DashboardPage() {
           setFundsStep("choose");
         }}
       >
-        <DialogContent>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Add Funds</DialogTitle>
             <DialogDescription>{description()}</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">{body()}</div>
+          <div className="grid gap-4 py-4 overflow-hidden">
+            <div className="space-y-2 overflow-hidden">{body()}</div>
           </div>
           <DialogFooter></DialogFooter>
         </DialogContent>
