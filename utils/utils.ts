@@ -24,9 +24,9 @@ export function readableModelName(modelName: string) {
     case "neuralmagic/Qwen2-72B-Instruct-FP8":
       return "Qwen2 72B";
     case "meta-llama/Llama-3.1-8B-Instruct":
-      return "Llama 3.1 8B";
+      return "Llama3.1 8B";
     case "Infermatic/Llama-3.3-70B-Instruct-FP8-Dynamic":
-      return "Llama 3.3 70B";
+      return "Llama3.3 70B";
     default:
       const match = modelName?.match(/\/([^\/]*\d+B)/);
       if (match) {
