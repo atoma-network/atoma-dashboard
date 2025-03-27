@@ -66,7 +66,7 @@ export default class ZkLogin {
           zkp: undefined,
           address: undefined,
         });
-        updateSettings({ loggedIn: false });
+        updateSettings({ accessToken: undefined, loggedIn: false });
       });
   };
 
@@ -136,41 +136,42 @@ export default class ZkLogin {
       document.cookie = `refresh_token=${refresh_token}; path=/; secure; HttpOnly; SameSite=Strict`;
       accessToken = access_token;
     }
-    const salt = await getSalt();
-    this.salt = BigInt(`0x${Buffer.from(salt.data, "base64").toString("hex")}`);
-    this.zkLoginUserAddress = jwtToAddress(idToken, this.salt);
-    updateZkLoginSettings({ address: this.zkLoginUserAddress });
-    this.ephemeralKeyPair = Ed25519Keypair.fromSecretKey(local_storage_secret_key);
-    const partialZkLogin = zkLoginSettings.zkp;
-    if (!partialZkLogin) {
-      const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(this.ephemeralKeyPair.getPublicKey());
+    // Leave this here for now, we can uncomment this when we decide to use the actual zkLogin
+    // const salt = await getSalt();
+    // this.salt = BigInt(`0x${Buffer.from(salt.data, "base64").toString("hex")}`);
+    // this.zkLoginUserAddress = jwtToAddress(idToken, this.salt);
+    // updateZkLoginSettings({ address: this.zkLoginUserAddress });
+    // this.ephemeralKeyPair = Ed25519Keypair.fromSecretKey(local_storage_secret_key);
+    // const partialZkLogin = zkLoginSettings.zkp;
+    // if (!partialZkLogin) {
+    //   const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(this.ephemeralKeyPair.getPublicKey());
 
-      const response = await fetch(`${this.proverUrl}/v1`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          jwt: idToken,
-          extendedEphemeralPublicKey: extendedEphemeralPublicKey,
-          maxEpoch: this.maxEpoch,
-          jwtRandomness: randomness,
-          salt: this.salt.toString(),
-          keyClaimName: "sub",
-        }),
-      });
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
+    //   const response = await fetch(`${this.proverUrl}/v1`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       jwt: idToken,
+    //       extendedEphemeralPublicKey: extendedEphemeralPublicKey,
+    //       maxEpoch: this.maxEpoch,
+    //       jwtRandomness: randomness,
+    //       salt: this.salt.toString(),
+    //       keyClaimName: "sub",
+    //     }),
+    //   });
+    //   if (!response.ok) {
+    //     throw new Error(`Error: ${response.statusText}`);
+    //   }
 
-      const zkProofResult = await response.json();
+    //   const zkProofResult = await response.json();
 
-      this.partialZkLoginSignature = zkProofResult as PartialZkLoginSignature;
-      updateZkLoginSettings({ zkp: JSON.stringify(this.partialZkLoginSignature), isEnabled: true });
-    } else {
-      this.partialZkLoginSignature = JSON.parse(partialZkLogin);
-    }
-    updateSettings({ loggedIn: true });
+    //   this.partialZkLoginSignature = zkProofResult as PartialZkLoginSignature;
+    //   updateZkLoginSettings({ zkp: JSON.stringify(this.partialZkLoginSignature), isEnabled: true });
+    // } else {
+    //   this.partialZkLoginSignature = JSON.parse(partialZkLogin);
+    // }
+    // updateSettings({ loggedIn: true });
   };
 
   private prepare = async (
