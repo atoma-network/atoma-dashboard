@@ -41,6 +41,7 @@ export function processModelsForCategory(
   category: ModelCategories
 ): { modelName: string; model: string }[] {
   // Create a Map to store unique models
+
   const uniqueModels = new Map<string, { modelName: string; model: string }>();
 
   models
@@ -66,7 +67,6 @@ export function processModelsForCategory(
       }
     });
 
-  // Convert Map values to array
   return Array.from(uniqueModels.values());
 }
 
