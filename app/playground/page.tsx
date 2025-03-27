@@ -2,11 +2,11 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Send } from "lucide-react";
+import { Send, Trash2 } from "lucide-react";
 import { BackgroundGrid } from "@/components/background-grid";
 import { ApiUsageDialog } from "@/components/api-usage-dialog";
 import { ParametersSidebar } from "@/components/parameters-sidebar";
@@ -48,20 +48,23 @@ const defaultParameters: Parameters = {
   repetitionPenalty: 1,
 };
 
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export default function PlaygroundPage() {
   const { settings, updatePlaygroundSettings } = useSettings();
   const [selectedModel, setSelectedModel] = useState("");
   const [availableModels, setAvailableModels] = useState<TaskResponse>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
   const [modelError, setModelError] = useState<string | null>(null);
-
+  const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
   const [isApiDialogOpen, setIsApiDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [response, setResponse] = useState<{
-    response: string;
-    error: boolean;
-  }>({ response: "", error: false });
+  const [streamingResponse, setStreamingResponse] = useState("");
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   const [parameters, setParameters] = useState<Parameters>({
     ...defaultParameters,
@@ -100,6 +103,24 @@ export default function PlaygroundPage() {
     loadModels();
   }, []);
 
+  // Load messages from localStorage on component mount
+  useEffect(() => {
+    const savedMessages = localStorage.getItem("playgroundMessages");
+    if (savedMessages) {
+      setMessages(JSON.parse(savedMessages));
+    }
+  }, []);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("playgroundMessages", JSON.stringify(messages));
+  }, [messages]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, streamingResponse]);
+
   const endpoints = {
     chat: "chat/completions",
     embeddings: "embeddings",
@@ -108,13 +129,21 @@ export default function PlaygroundPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!message.trim()) return;
+
+    const userMessage = message.trim();
     setMessage("");
+    setStreamingResponse("");
+
+    // Add user message to chat
+    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
+
     try {
       setIsLoading(true);
 
       const response = await axios.post(
         `${config.ATOMA_API_URL}${endpoints.chat}`,
-        RenderRequestBodyBasedOnEndPoint("chat", selectedModel, message, parameters),
+        RenderRequestBodyBasedOnEndPoint("chat", selectedModel, userMessage, parameters),
         {
           headers: {
             "Content-Type": "application/json",
@@ -122,27 +151,27 @@ export default function PlaygroundPage() {
           },
         }
       );
-      console.log(response);
 
-      setResponse({
-        response: parseOutputBasedOnEndpoint("chat", response),
-        error: false,
-      });
+      const assistantResponse = parseOutputBasedOnEndpoint("chat", response);
+
+      // Simulate streaming effect
+      for (let i = 0; i < assistantResponse.length; i++) {
+        setStreamingResponse(prev => prev + assistantResponse[i]);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
+
+      // Add assistant message to chat
+      setMessages(prev => [...prev, { role: "assistant", content: assistantResponse }]);
+      setStreamingResponse("");
     } catch (error: unknown) {
       console.log(error);
-      if (axios.isAxiosError(error)) {
-        error.status === 401
-          ? setResponse({
-              response: "There was a problem with your api key",
-              error: true,
-            })
-          : setResponse({
-              response: error.response?.data?.error?.message ? error.response.data.error.message : "failed to query.",
-              error: true,
-            });
-      } else {
-        setResponse({ response: "An unexpected error occurred.", error: true });
-      }
+      const errorMessage = axios.isAxiosError(error)
+        ? error.status === 401
+          ? "There was a problem with your api key"
+          : error.response?.data?.error?.message || "Failed to query."
+        : "An unexpected error occurred.";
+
+      setMessages(prev => [...prev, { role: "assistant", content: errorMessage }]);
     } finally {
       setIsLoading(false);
     }
@@ -160,6 +189,12 @@ export default function PlaygroundPage() {
         <LoadingCircle size="md" isSpinning={true} />{" "}
       </div>
     );
+
+  const clearChat = () => {
+    setMessages([]);
+    localStorage.removeItem("playgroundMessages");
+  };
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       <BackgroundGrid />
@@ -178,9 +213,9 @@ export default function PlaygroundPage() {
                       <Button
                         key={model.model}
                         variant="ghost"
-                        className={`px-1 text-xs rounded-lg border ${
+                        className={`px-2 py-1 text-xs rounded-lg border ${
                           selectedModel === model.model
-                            ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
+                            ? "bg-primary text-primary-foreground border-primary"
                             : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-200 border-transparent"
                         }`}
                         onClick={() => setSelectedModel(model.model)}
@@ -201,20 +236,39 @@ export default function PlaygroundPage() {
             </div>
 
             {/* Chat Section */}
-            <div className="flex-1 flex flex-col overflow-auto">
-              <div className="flex-1 p-4">
-                {(!response.response && !isLoading) || isLoading ? (
-                  <div className="h-full flex items-center justify-center">
-                    <LoadingCircle isSpinning={isLoading} />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.length === 0 && !isLoading && (
+                  <div className="h-full flex items-center justify-center text-muted-foreground">
+                    <p>Start a conversation by sending a message</p>
                   </div>
-                ) : response.error ? (
-                  <div className="w-full max-w-md p-4 border border-red-200 bg-red-50 text-red-400 rounded-md">
-                    <p className="font-semibold uppercase">Error</p>
-                    <p>{response.response}</p>
-                  </div>
-                ) : (
-                  <p className="break-words w-[90%]">{response.response}</p>
                 )}
+                {messages.map((msg, index) => (
+                  <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-[80%] rounded-lg p-4 ${
+                        msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted border border-border"
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap break-words text-sm">{msg.content}</p>
+                    </div>
+                  </div>
+                ))}
+                {streamingResponse && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] rounded-lg p-4 bg-muted border border-border">
+                      <p className="whitespace-pre-wrap break-words text-sm">{streamingResponse}</p>
+                    </div>
+                  </div>
+                )}
+                {isLoading && !streamingResponse && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] rounded-lg p-4 bg-muted border border-border">
+                      <LoadingCircle isSpinning={true} />
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
               </div>
               <div className="border-t p-4 bg-background/50 backdrop-blur-md shadow-md rounded-b-lg">
                 <form onSubmit={handleSubmit} className="flex gap-3">
@@ -223,11 +277,13 @@ export default function PlaygroundPage() {
                     onChange={e => setMessage(e.target.value)}
                     placeholder="Type your message..."
                     className="flex-1 px-4 py-2 rounded-lg bg-background/80 border border-primary focus:ring-2 focus:ring-primary transition"
+                    disabled={isLoading}
                   />
                   <Button
                     type="submit"
                     size="icon"
-                    className="bg-primary hover:bg-primary transition-all duration-200 rounded-lg shadow-md"
+                    className="bg-primary hover:bg-primary/90 transition-all duration-200 rounded-lg shadow-md"
+                    disabled={isLoading || !message.trim()}
                   >
                     <Send className="h-5 w-5" />
                     <span className="sr-only">Send message</span>
