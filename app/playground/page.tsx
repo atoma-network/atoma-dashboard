@@ -160,7 +160,7 @@ export default function PlaygroundPage() {
 
       const assistantResponse = parseOutputBasedOnEndpoint("chat", response);
 
-      // Simulate streaming effect
+      // Streaming effect
       setIsStreaming(true);
       for (let i = 0; i < assistantResponse.length; i++) {
         if (abortControllerRef.current?.signal.aborted) {
