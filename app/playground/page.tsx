@@ -127,56 +127,94 @@ export default function PlaygroundPage() {
     setIsStreaming(false);
     abortControllerRef.current = new AbortController();
 
-    // Add user message to chat
     setMessages(prev => [...prev, { role: "user", content: userMessage }]);
 
     try {
       setIsLoading(true);
-
-      const response = await axios.post(
-        `${config.ATOMA_API_URL}${endpoints.chat}`,
-        RenderRequestBodyBasedOnEndPoint("chat", selectedModel, userMessage, parameters, messages),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${parameters.apiKey}`,
-          },
-          signal: abortControllerRef.current.signal,
-        }
-      );
-
-      const assistantResponse = parseOutputBasedOnEndpoint("chat", response);
-
-      // Streaming effect
       setIsStreaming(true);
-      for (let i = 0; i < assistantResponse.length; i++) {
-        if (abortControllerRef.current?.signal.aborted) {
-          break;
-        }
-        setStreamingResponse(prev => prev + assistantResponse[i]);
-        await new Promise(resolve => setTimeout(resolve, 20));
+
+      const response = await fetch(`${config.ATOMA_API_URL}${endpoints.chat}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${parameters.apiKey}`,
+        },
+        body: JSON.stringify({
+          ...RenderRequestBodyBasedOnEndPoint("chat", selectedModel, userMessage, parameters, messages),
+          stream: true,
+        }),
+        signal: abortControllerRef.current.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Add assistant message to chat
-      setMessages(prev => [...prev, { role: "assistant", content: assistantResponse }]);
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No reader available");
+
+      const decoder = new TextDecoder();
+      let fullResponse = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n").filter((line: string) => line.trim() !== "");
+
+        for (const line of lines) {
+          if (abortControllerRef.current?.signal.aborted) {
+            break;
+          }
+
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6);
+            if (data === "[DONE]") {
+              break;
+            }
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.choices[0].delta.content) {
+                const content = parsed.choices[0].delta.content;
+                fullResponse += content;
+                setStreamingResponse(fullResponse);
+              }
+            } catch (e) {
+              console.error("Error parsing chunk:", e);
+            }
+          }
+        }
+      }
+
+      setMessages(prev => [...prev, { role: "assistant", content: fullResponse }]);
       setStreamingResponse("");
       setIsStreaming(false);
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.name === "CanceledError") {
-        // Handle cancellation
-        const partialResponse = streamingResponse;
-        setMessages(prev => [...prev, { role: "assistant", content: partialResponse }]);
-        setStreamingResponse("");
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        // Handle cancellation - preserve the partial response
+        const currentResponse = streamingResponse;
+        if (currentResponse) {
+          setMessages(prev => [...prev, { role: "assistant", content: currentResponse }]);
+        }
         setIsStreaming(false);
+        setStreamingResponse("");
       } else {
         console.log(error);
-        const errorMessage = axios.isAxiosError(error)
-          ? error.status === 401
-            ? "There was a problem with your api key"
-            : error.response?.data?.error?.message || "Failed to query."
-          : "An unexpected error occurred.";
+        const currentResponse = streamingResponse;
+        if (currentResponse) {
+          setMessages(prev => [...prev, { role: "assistant", content: currentResponse }]);
+        }
+
+        const errorMessage =
+          error instanceof Error
+            ? error.message.includes("401")
+              ? "There was a problem with your api key"
+              : error.message
+            : "An unexpected error occurred.";
 
         setMessages(prev => [...prev, { role: "assistant", content: errorMessage }]);
+        setStreamingResponse("");
       }
     } finally {
       setIsLoading(false);
@@ -185,14 +223,18 @@ export default function PlaygroundPage() {
   };
 
   const handleParameterChange = (key: keyof Parameters, value: number | boolean | string) => {
-    // Only update local state, don't save to global settings yet
     setParameters(prev => ({ ...prev, [key]: value }));
   };
 
   const handleStopStreaming = () => {
     if (abortControllerRef.current) {
+      const currentResponse = streamingResponse;
       abortControllerRef.current.abort();
+      if (currentResponse) {
+        setMessages(prev => [...prev, { role: "assistant", content: currentResponse }]);
+      }
       setIsStreaming(false);
+      setStreamingResponse("");
     }
   };
 
