@@ -395,24 +395,12 @@ text,
   opacity: 0.3 !important;
 }
 
-/* Dropdown menu positioning and animation */
+/* Dropdown menu positioning and animation - FIXED VERSION */
 [data-radix-popper-content-wrapper] {
   position: absolute !important;
-  transform-origin: var(--radix-popper-transform-origin) !important;
-  transform: var(--radix-popper-transform) !important;
-  z-index: 1000 !important; /* Ensure high z-index */
 }
 
-/* Specific styling for Select content */
-[data-radix-select-content] {
-  position: relative !important;
-  z-index: 999 !important;
-}
-
-[role="menu"] {
-  transform-origin: var(--radix-dropdown-menu-content-transform-origin) !important;
-}
-
+/* Keep only animation styles for the menus */
 [data-state="open"][role="menu"] {
   animation: dropdownIn 0.1s ease-out !important;
 }
@@ -446,7 +434,6 @@ text,
 /* Tooltip and Combobox specific fixes */
 [role="tooltip"],
 [role="combobox"] {
-  position: relative !important;
   z-index: 500 !important;
 }
 
