@@ -24,7 +24,8 @@
     --input: 262 10% 90%;
     --ring: 262 83.3% 57.8%;
     --radius: 0.5rem;
-    --grid-color: rgb(243 244 246);
+    --grid-color: rgba(64, 67, 83, 0.6);
+    --bg-overlay: transparent; /* No overlay in light mode */
   }
 
   .dark {
@@ -47,7 +48,8 @@
     --border: 215 28% 17%;
     --input: 215 28% 17%;
     --ring: 263 85% 65%;
-    --grid-color: rgba(31, 41, 55, 0.2);
+    --grid-color: rgba(180, 180, 180, 0.15);
+    --bg-overlay: rgba(0, 0, 0, 0.95); /* Darker overlay in dark mode */
   }
 }
 
@@ -55,43 +57,398 @@
   * {
     @apply border-border;
   }
+  
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
-    font-feature-settings:
-      "rlig" 1,
-      "calt" 1;
+    @apply text-foreground transition-colors duration-300;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100vh;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    background-color: white !important; /* White background in light mode */
+    position: relative;
+  }
+  
+  html {
+    min-height: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    background-color: white !important; /* White background in light mode */
+  }
+  
+  /* Only apply dark overlay in dark mode */
+  .dark body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-overlay);
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  /* Light mode should have white background */
+  body::before {
+    display: none; 
+  }
+  
+  .dark body, .dark html {
+    background-color: #121212 !important; /* Dark background in dark mode */
+  }
+  
+  #__next, main {
+    min-height: 100vh;
+    background-color: transparent !important;
+  }
+
+  /* Remove the bottom fade gradient completely */
+  html::after, body::after {
+    display: none;
   }
 }
 
-@layer utilities {
-  .bg-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 50px);
-    grid-template-rows: repeat(auto-fill, 50px);
-    transform: translate(-1px, -1px);
-  }
+/* Base card styling */
+.card, 
+[class*="card"],
+[role="region"],
+div[style*="border-radius"],
+div[style*="background-color"] {
+  background-color: white !important;
+  backdrop-filter: blur(4px);
+  position: relative;
+  z-index: 5;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  filter: none !important;
+  border: 1px solid rgba(200, 200, 200, 0.3) !important;
+}
 
-  .grid-item {
-    width: 51px;
-    height: 51px;
-    margin: -1px -1px 0 0;
-    border-right: 1px solid var(--grid-color);
-    border-bottom: 1px solid var(--grid-color);
-    transition: background-color 2s ease-in-out;
-  }
+/* Dark mode card styling */
+.dark .card, 
+.dark [class*="card"],
+.dark [role="region"],
+.dark div[style*="border-radius"],
+.dark div[style*="background-color"] {
+  background-color: rgba(31, 41, 55, 0.9) !important;
+  border: 1px solid rgba(64, 67, 83, 0.6) !important;
+}
 
-  .grid-item:hover {
-    margin: -1px -1px 0 0;
-    background-color: rgba(221, 108, 74, 0.1);
-    transition: background-color 0.3s ease-in-out;
-  }
+/* Grid styling */
+.bg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 50px);
+  grid-template-rows: repeat(auto-fill, 50px);
+  transform: translate(-1px, -1px);
+  min-height: 1000vh;
+  position: fixed;
+  inset: 0;
+  overflow: visible !important;
+  z-index: 1 !important;
+  pointer-events: none;
+  background-color: transparent !important;
+}
 
-  .grid-item:not(:hover) {
-    transition-delay: 0.7s;
-  }
+/* Light mode grid lines - slightly more visible */
+.grid-item {
+  width: 51px;
+  height: 51px;
+  margin: -1px -1px 0 0;
+  border-right: 1px solid rgba(180, 180, 180, 0.141) !important;
+  border-bottom: 1px solid rgba(180, 180, 180, 0.141) !important;
+  transition: background-color 0.3s ease-in-out;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
 
-  .dark .grid-item:hover {
-    background-color: rgba(221, 108, 74, 0.05);
-    transition: background-color 0.3s ease-in-out;
+/* Dark mode grid lines - slightly more visible */
+.dark .grid-item {
+  border-right: 1px solid rgba(41, 41, 42, 0.304) !important;
+  border-bottom: 1px solid rgba(41, 41, 42, 0.304) !important;
+}
+
+/* Active grid items */
+.grid-item[data-active="true"],
+.grid-item.active {
+  margin: -1px -1px 0 0;
+  background-color: rgba(178, 63, 34, 0.277) !important;
+  opacity: 0.9 !important;
+  transition: all 0.2s ease-in-out;
+  transform: scale(1.05);
+  z-index: 2;
+  box-shadow: none !important;
+}
+
+.grid-item:not([data-active="true"]) {
+  transition: all 0.5s ease-in-out;
+}
+
+.dark .grid-item[data-active="true"],
+.dark .grid-item.active {
+  background-color: rgba(180, 66, 46, 0.35) !important;
+  transition: all 0.2s ease-in-out;
+  box-shadow: none !important;
+}
+
+/* Layout and positioning */
+main, body, html, #__next, [class*="container"] {
+  background-color: transparent !important;
+}
+
+/* Sidebar styling */
+[class*="fixed inset-y-0 z-20 flex flex-col"] {
+  background-color: white !important;
+  border-right-color: #e5e7eb !important;
+  min-height: 100vh !important;
+  height: 100% !important;
+  padding-bottom: 0 !important;
+  bottom: 0 !important;
+}
+
+.dark [class*="fixed inset-y-0 z-20 flex flex-col"] {
+  background-color: #09090b !important;
+  border-right-color: #27272a !important;
+}
+
+/* Remove any borders from sidebar bottom */
+[class*="fixed inset-y-0"] div[class*="border-t"] {
+  border-top: none !important;
+}
+
+/* Z-index management */
+[role="menu"],
+[role="dialog"],
+[role="tooltip"] {
+  z-index: 50 !important;
+}
+
+.content-layer {
+  position: relative;
+  z-index: 10;
+}
+
+main, header, footer, nav, aside, section, article, .main-content, [class*="content"] {
+  position: relative;
+  z-index: 5 !important;
+}
+
+.fixed.inset-0.flex.items-center.justify-center[class*="z-"] {
+  z-index: 9999 !important;
+}
+
+.fixed.inset-0.bg-black.bg-opacity-60 {
+  z-index: 9998 !important;
+}
+
+/* Modal styling */
+[role="dialog"], 
+.fixed.inset-0.flex.items-center.justify-center {
+  z-index: 100000 !important;
+  position: fixed !important;
+}
+
+.auth-modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  z-index: 999999 !important;
+  isolation: isolate !important;
+}
+
+.auth-modal-content {
+  position: relative !important;
+  z-index: 1000000 !important;
+  isolation: isolate !important;
+  max-width: 28rem !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  border-radius: 0.5rem !important;
+}
+
+body:has(.auth-modal-overlay),
+html:has(.auth-modal-overlay) {
+  overflow: hidden !important;
+}
+
+/* Chart styling - unified */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-layer,
+.recharts-tooltip-wrapper,
+.recharts-default-tooltip,
+[class*="recharts-"],
+svg,
+g,
+rect,
+path,
+line,
+circle,
+foreignObject,
+[data-testid*="recharts"],
+[class*="area"],
+[class*="graph"],
+[class*="chart"] {
+  filter: none !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  border-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Chart text colors */
+.recharts-text,
+.recharts-cartesian-axis-tick-value,
+text,
+.recharts-label,
+.recharts-text-label,
+.recharts-cartesian-axis-tick text {
+  fill: #000000 !important;
+  color: #000000 !important;
+}
+
+.dark .recharts-text,
+.dark .recharts-cartesian-axis-tick-value,
+.dark text,
+.dark .recharts-label,
+.dark .recharts-text-label,
+.dark .recharts-cartesian-axis-tick text {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* Chart fill colors */
+.recharts-area-area,
+.recharts-area path,
+.recharts-area polygon,
+.recharts-layer path,
+.recharts-surface path:not(.recharts-curve),
+.recharts-area-chart path {
+  fill: #4d80e4 !important;
+  fill-opacity: 1 !important;
+  stroke: none !important;
+  stroke-opacity: 0 !important;
+}
+
+.dark .recharts-area-area,
+.dark .recharts-area path,
+.dark .recharts-area polygon,
+.dark .recharts-layer path,
+.dark .recharts-surface path:not(.recharts-curve),
+.dark .recharts-area-chart path {
+  fill: #1a237e !important;
+  fill-opacity: 1 !important;
+  stroke: none !important;
+  stroke-opacity: 0 !important;
+}
+
+/* Grid and axis lines - more visible */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line,
+.recharts-reference-line line,
+.recharts-cartesian-axis line,
+.recharts-xAxis line,
+.recharts-yAxis line {
+  stroke: rgba(0, 0, 0, 0.4) !important;
+  stroke-width: 1 !important;
+  stroke-dasharray: 3 !important;
+}
+
+.dark .recharts-cartesian-grid-horizontal line,
+.dark .recharts-cartesian-grid-vertical line,
+.dark .recharts-reference-line line,
+.dark .recharts-cartesian-axis line,
+.dark .recharts-xAxis line,
+.dark .recharts-yAxis line {
+  stroke: rgba(255, 255, 255, 0.6) !important;
+  stroke-width: 1 !important;
+  stroke-dasharray: 3 !important;
+}
+
+/* Tooltip styling */
+.recharts-tooltip-wrapper {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.recharts-default-tooltip {
+  background-color: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: var(--radius) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.recharts-tooltip-cursor {
+  fill: rgba(100, 100, 110, 0.2) !important;
+  stroke: rgba(100, 100, 110, 0.3) !important;
+  opacity: 0.3 !important;
+}
+
+/* Dropdown menu positioning and animation */
+[data-radix-popper-content-wrapper] {
+  position: absolute !important;
+  transform-origin: var(--radix-popper-transform-origin) !important;
+  transform: var(--radix-popper-transform) !important;
+  z-index: 1000 !important; /* Ensure high z-index */
+}
+
+/* Specific styling for Select content */
+[data-radix-select-content] {
+  position: relative !important;
+  z-index: 999 !important;
+}
+
+[role="menu"] {
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin) !important;
+}
+
+[data-state="open"][role="menu"] {
+  animation: dropdownIn 0.1s ease-out !important;
+}
+
+[data-state="closed"][role="menu"] {
+  animation: dropdownOut 0.1s ease-out !important;
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
+
+@keyframes dropdownOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Tooltip and Combobox specific fixes */
+[role="tooltip"],
+[role="combobox"] {
+  position: relative !important;
+  z-index: 500 !important;
+}
+
+
+

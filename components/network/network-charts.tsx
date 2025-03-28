@@ -43,6 +43,11 @@ const colors = {
     red: "#7f1d1d",
     purple: "#581c87",
   },
+  cursor: {
+    // Add cursor colors
+    light: "#d97706", // Darker pale orange
+    dark: "#d97706",  // Same darker pale orange for dark mode
+  }
 };
 
 // Generate consistent data for each model
@@ -183,10 +188,10 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   backgroundColor: "hsl(var(--card))",
                   border: "1px solid var(--border)",
                   borderRadius: "6px",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
+                cursor={{ stroke: typeof window !== "undefined" && document.documentElement.classList.contains("dark") ? colors.cursor.dark : colors.cursor.light, strokeWidth: 1 }}
                 formatter={(value: number, name: string) => [
                   <div
                     key={`${name}-value`}
@@ -254,9 +259,9 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                 horizontal={true}
                 vertical={false}
                 stroke="hsl(var(--border))"
-                strokeDasharray="4 4"
-                strokeWidth={1}
-                opacity={0.6}
+                strokeDasharray="2 2"
+                strokeWidth={0.5}
+                opacity={0.2}
               />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
               <YAxis
@@ -276,6 +281,7 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
+                cursor={{ stroke: typeof window !== "undefined" && document.documentElement.classList.contains("dark") ? colors.cursor.dark : colors.cursor.light, strokeWidth: 1 }}
                 formatter={(value: number, name: string) => [
                   <div
                     key={`${name}-value`}
@@ -297,7 +303,7 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                     ? colors.dark[Object.keys(colors.dark)[index]]
                     : colors.light[Object.keys(colors.light)[index]];
                 return (
-                  <Area key={model} type="monotone" dataKey={model} stroke={color} strokeWidth={2} fill="transparent" />
+                  <Area key={model} type="monotone" dataKey={model} stroke={color} strokeWidth={2} fill="none" />
                 );
               })}
             </AreaChart>
@@ -348,6 +354,7 @@ function NetworkChartCard({ config }: { config: (typeof chartConfigs)[0] }) {
                   fontWeight: "bold",
                   color: "var(--card-foreground)",
                 }}
+                cursor={{ fill: "rgba(0, 0, 0, 0.1)" }}
                 formatter={(value: number, name: string, props: any) => {
                   const model = tokensPerModel.find(m => m.name === props.payload.name);
                   const colorIndex = tokensPerModel.indexOf(model as any);
