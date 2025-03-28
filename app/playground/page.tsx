@@ -106,19 +106,6 @@ export default function PlaygroundPage() {
     loadModels();
   }, []);
 
-  // Load messages from localStorage on component mount
-  useEffect(() => {
-    const savedMessages = localStorage.getItem("playgroundMessages");
-    if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
-    }
-  }, []);
-
-  // Save messages to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem("playgroundMessages", JSON.stringify(messages));
-  }, [messages]);
-
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -148,7 +135,7 @@ export default function PlaygroundPage() {
 
       const response = await axios.post(
         `${config.ATOMA_API_URL}${endpoints.chat}`,
-        RenderRequestBodyBasedOnEndPoint("chat", selectedModel, userMessage, parameters),
+        RenderRequestBodyBasedOnEndPoint("chat", selectedModel, userMessage, parameters, messages),
         {
           headers: {
             "Content-Type": "application/json",
@@ -219,7 +206,6 @@ export default function PlaygroundPage() {
 
   const clearChat = () => {
     setMessages([]);
-    localStorage.removeItem("playgroundMessages");
   };
 
   return (
