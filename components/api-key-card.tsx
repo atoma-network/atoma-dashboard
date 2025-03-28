@@ -59,7 +59,7 @@ export function ApiKeyCard() {
           key: `sk-...${token.token_last_4}`,
           created: new Date(token.created_at).toLocaleDateString(),
           projectAccess: "all",
-          createdBy: userProfile.data.name,
+          createdBy: userProfile.data.email,
           permissions: "all",
           lastUsed: token.last_used_timestamp ? new Date(token.last_used_timestamp).toLocaleString() : "Never",
           id: token.id,
@@ -144,9 +144,6 @@ export function ApiKeyCard() {
                         <TableCell>{key.permissions}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon">
-                              <Pencil className="h-4 w-4" />
-                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"
