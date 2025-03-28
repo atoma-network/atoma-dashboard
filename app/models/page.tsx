@@ -96,7 +96,6 @@ export default function ModelsPage() {
           modality: modality,
         }));
         for (const { task, modality } of tasks) {
-          modelModalities.set(task.model_name!, modality);
           const subs_for_this_task = subscriptionsRes?.data.filter(
             (subscription: NodeSubscription) => subscription.task_small_id === task.task_small_id && subscription.valid
           );
@@ -104,6 +103,7 @@ export default function ModelsPage() {
             // No valid subscriptions for this task
             continue;
           }
+          modelModalities.set(task.model_name!, modality);
           cheapestSubscription.set(
             task.model_name!,
             subs_for_this_task.reduce(
