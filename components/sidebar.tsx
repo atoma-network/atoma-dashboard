@@ -90,7 +90,7 @@ export function Sidebar() {
         )}
       </TooltipTrigger>
       {isCollapsed && mounted && (
-        <TooltipContent side="right" className="flex items-center gap-4">
+        <TooltipContent side="right" className="flex items-center gap-4 !z-[200]">
           {item.name}
         </TooltipContent>
       )}
@@ -102,9 +102,8 @@ export function Sidebar() {
     return (
       <div
         className={cn(
-          "fixed inset-y-0 z-20 flex flex-col bg-background border-r border-border transition-all duration-300 ease-in-out lg:static",
-          "w-60",
-          "-translate-x-full lg:translate-x-0"
+          "fixed inset-y-0 z-20 flex flex-col bg-background dark:bg-darkMode border-r border-border transition-all duration-300 ease-in-out lg:static",
+          "-left-full lg:left-0"
         )}
       >
         {/* Minimal content for server rendering */}
@@ -115,6 +114,8 @@ export function Sidebar() {
             </div>
           </div>
         </div>
+        <div className="flex-1 overflow-auto dark:bg-darkMode"></div>
+        <div className="p-2 dark:bg-darkMode"></div>
       </div>
     );
   }
@@ -123,7 +124,7 @@ export function Sidebar() {
     <TooltipProvider>
       <>
         <button
-          className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-background rounded-md shadow-md"
+          className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-background dark:bg-darkMode rounded-md"
           onClick={() => setIsMobileOpen(!isMobileOpen)}
           aria-label="Toggle sidebar"
         >
@@ -131,10 +132,11 @@ export function Sidebar() {
         </button>
         <div
           className={cn(
-            "fixed inset-y-0 z-20 flex flex-col bg-background border-r border-border transition-all duration-300 ease-in-out lg:static",
+            "fixed inset-y-0 z-10 flex flex-col bg-background dark:bg-darkMode border-r border-border transition-all duration-300 ease-in-out lg:relative",
             isCollapsed ? "w-[56px]" : "w-60",
-            isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            isMobileOpen ? "left-0" : "-left-full lg:left-0"
           )}
+          style={{ height: '100vh', minHeight: '100vh' }}
         >
           <div className="border-b border-border dark:bg-darkMode">
             <div
@@ -169,7 +171,7 @@ export function Sidebar() {
               >
                 <ChevronLeft
                   className={cn(
-                    "h-10 w-10 transition-transform rounded-md  dark:bg-darkMode text-[#635c70] dark:text-[#8f8f98] hover:text-secondary-foreground dark:hover:text-secondary-foreground dark:hover:bg-[#27272a]",
+                    "h-10 w-10 transition-transform rounded-md dark:bg-darkMode text-[#635c70] dark:text-[#8f8f98] hover:text-secondary-foreground dark:hover:text-secondary-foreground dark:hover:bg-[#27272a]",
                     isCollapsed && "rotate-180"
                   )}
                 />
@@ -184,7 +186,7 @@ export function Sidebar() {
               ))}
             </nav>
           </div>
-          <div className="border-t border-border p-2">
+          <div className="p-2 dark:bg-darkMode">
             <nav className="space-y-1">
               {bottomNavigation.map((item: any) => (
                 <NavItem key={item.name} item={item} isBottom />

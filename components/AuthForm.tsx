@@ -75,34 +75,34 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
   };
 
   return (
-    <div className="p-8 w-96 mx-auto dark:bg-darkMode">
+    <div className="w-full mx-auto rounded-lg p-6" style={{ backgroundColor: "#000000" }}>
       <Toast ref={toastRef} />
 
-      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-50">
+      <h2 className="text-2xl font-bold mb-6 text-center text-white">
         {loginType === "login" ? "Enter your credentials." : "Create Account"}
       </h2>
 
       <div className="flex flex-col space-y-6">
         <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Email</label>
+            <label className="text-sm font-medium text-gray-400">Email</label>
             <InputText
               placeholder="Enter your email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              className="p-inputtext-lg w-full border  border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
+              className="p-inputtext-lg w-full border border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-black text-white"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Password</label>
+            <label className="text-sm font-medium text-gray-400">Password</label>
             <InputText
               type="password"
               placeholder="Enter your password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              className="p-inputtext-lg w-full border border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-inherit"
+              className="p-inputtext-lg w-full border border-gray-600 p-3 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent bg-black text-white"
             />
           </div>
 
@@ -122,7 +122,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
         </form>
         {process.env.NEXT_PUBLIC_ENABLE_ZK_LOGIN_GOOGLE === "true" && (
           <Button
-            className="justify-center p-button p-4 font-medium rounded-md transition-colors duration-200 bg-white dark:bg-black hover:bg-gray-200 dark:hover:bg-gray-800 text-black dark:text-white border border-gray-400 dark:border-gray-600"
+            className="justify-center p-button p-4 font-medium rounded-md transition-colors duration-200 bg-white hover:bg-gray-200 text-black border border-gray-400"
             onClick={handleGoogleOauth}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="size-6 mr-3">
@@ -149,7 +149,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onClose }) => {
         )}
       </div>
 
-      <div className="text-center text-sm text-gray-600 mt-4">
+      <div className="text-center text-sm text-gray-400 mt-4">
         {loginType === "login" ? (
           <p>
             Don't have an account?{" "}
