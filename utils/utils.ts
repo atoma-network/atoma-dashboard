@@ -82,7 +82,8 @@ export function RenderRequestBodyBasedOnEndPoint(
     topP: number;
     topK: number;
     repetitionPenalty: number;
-  }
+  },
+  messages: { role: "user" | "assistant"; content: string }[] = []
 ) {
   switch (endpoint) {
     case "chat":
@@ -93,6 +94,7 @@ export function RenderRequestBodyBasedOnEndPoint(
             content:
               parameters.systemPrompt === "Custom" ? parameters.customSystemPrompt : "You are a helpful assistant.",
           },
+          ...messages,
           { role: "user", content: message },
         ],
         model: selectedModel,
