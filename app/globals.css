@@ -49,7 +49,7 @@
     --input: 215 28% 17%;
     --ring: 263 85% 65%;
     --grid-color: rgba(180, 180, 180, 0.15);
-    --bg-overlay: rgba(0, 0, 0, 0.95); /* Darker overlay in dark mode (increased from 0.75 to 0.95) */
+    --bg-overlay: rgba(0, 0, 0, 0.95); /* Darker overlay in dark mode */
   }
 }
 
@@ -57,11 +57,10 @@
   * {
     @apply border-border;
   }
+  
   body {
     @apply text-foreground transition-colors duration-300;
-    font-feature-settings:
-      "rlig" 1,
-      "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1;
     min-height: 100vh;
     overflow-x: hidden;
     margin: 0;
@@ -69,6 +68,7 @@
     background-color: white !important; /* White background in light mode */
     position: relative;
   }
+  
   html {
     min-height: 100%;
     overflow-x: hidden;
@@ -104,688 +104,154 @@
     background-color: transparent !important;
   }
 
-  /* Card styling for light mode */
-  .card, 
-  [class*="card"],
-  [role="region"],
-  div[style*="border-radius"],
-  div[style*="background-color"] {
-    background-color: white !important;
-    backdrop-filter: blur(4px);
-    position: relative;
-    z-index: 5;
-    box-shadow: none !important;
-    -webkit-box-shadow: none !important;
-    filter: drop-shadow(0 0 0 transparent) !important;
-  }
-  
-  /* Dark mode card styling */
-  .dark .card, 
-  .dark [class*="card"],
-  .dark [role="region"],
-  .dark div[style*="border-radius"],
-  .dark div[style*="background-color"] {
-    background-color: rgba(31, 41, 55, 0.9) !important;
-  }
-  
-  /* Fix for dark mode bottom border */
-  .dark body::after {
-    display: none !important;
-  }
-  
-  /* Fix for light mode bottom border */
-  body::after {
-    display: none !important;
-  }
-
-  /* Target chart border elements directly and remove them */
-  .recharts-wrapper,
-  .recharts-surface,
-  .recharts-legend-wrapper,
-  .recharts-tooltip-wrapper,
-  .recharts-default-tooltip {
-    border: none !important;
-    box-shadow: none !important;
-    filter: none !important;
-  }
-  
-  /* Apply custom transparent border to replace chart borders */
-  [class*="requests"], 
-  [class*="tokens"], 
-  [class*="processed"],
-  [class*="latency"],
-  div[style*="border-radius"] {
-    border: 1px solid rgba(39, 39, 42, 0.2) !important;
-    background-color: rgba(31, 41, 55, 0.9) !important;
-    box-shadow: none !important;
-    position: relative;
-    z-index: 1;
-  }
-  
-  /* Fix border for dark mode charts */
-  .dark [role="region"],
-  .dark div[style*="border-radius"] {
-    border: 1px solid rgba(39, 39, 42, 0.2) !important;
-    background-color: rgba(31, 41, 55, 0.9) !important;
-  }
-  
-  /* Ensure chart containers have clean backgrounds */
-  div[style*="border-radius"],
-  [role="region"] {
-    overflow: hidden !important;
-  }
-  
-  /* Remove any lingering shadows from SVG elements */
-  svg * {
-    fill-opacity: 1 !important;
-    stroke-opacity: 1 !important;
-    filter: none !important;
-    box-shadow: none !important;
-  }
-  
-  /* Remove any borders from elements with common recharts classes */
-  .recharts-cartesian-grid-horizontal line,
-  .recharts-cartesian-grid-vertical line,
-  .recharts-reference-line line {
-    stroke: rgba(255, 255, 255, 0.1) !important;
-    stroke-dasharray: none !important;
+  /* Remove the bottom fade gradient completely */
+  html::after, body::after {
+    display: none;
   }
 }
 
-/* Remove the bottom fade gradient completely */
-html::after,
-body::after {
-  display: none;
-}
-
-@layer utilities {
-  /* Fix grid styling for both light and dark modes */
-  .bg-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 50px);
-    grid-template-rows: repeat(auto-fill, 50px);
-    transform: translate(-1px, -1px);
-    min-height: 1000vh;
-    position: relative;
-    overflow: visible !important;
-    z-index: 1 !important;
-    pointer-events: none;
-    background-color: transparent !important;
-  }
-  
-  /* Light mode grid lines */
-  .grid-item {
-    width: 51px;
-    height: 51px;
-    margin: -1px -1px 0 0;
-    border-right: 1px solid rgba(180, 180, 180, 0.3) !important;
-    border-bottom: 1px solid rgba(180, 180, 180, 0.3) !important;
-    transition: background-color 0.3s ease-in-out;
-    opacity: 1 !important;
-    box-shadow: none !important;
-    position: relative;
-    z-index: 1;
-    pointer-events: none;
-  }
-  
-  /* Dark mode grid lines */
-  .dark .grid-item {
-    border-right: 1px solid rgba(40, 42, 54, 0.7) !important;
-    border-bottom: 1px solid rgba(40, 42, 54, 0.7) !important;
-  }
-  
-  /* Ensure light mode has transparent background */
-  body:not(.dark), html:not(.dark) {
-    background-color: transparent !important;
-  }
-  
-  /* Make cards semi-transparent in light mode */
-  .card, 
-  [class*="card"],
-  [role="region"],
-  div[style*="border-radius"],
-  div[style*="background-color"] {
-    background-color: rgba(255, 255, 255, 0.85) !important;
-    backdrop-filter: blur(2px);
-    border: 1px solid rgba(200, 200, 200, 0.3) !important;
-  }
-  
-  /* Dark mode cards */
-  .dark .card, 
-  .dark [class*="card"],
-  .dark [role="region"],
-  .dark div[style*="border-radius"],
-  .dark div[style*="background-color"] {
-    background-color: rgba(31, 41, 55, 0.9) !important;
-    backdrop-filter: blur(2px);
-    border: 1px solid rgba(64, 67, 83, 0.6) !important;
-  }
-  
-  /* Ensure grid container is properly positioned */
-  .grid-container {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-  }
-  
-  /* Remove any white background elements */
-  main, body, html, #__next, [class*="container"] {
-    background-color: transparent !important;
-  }
-  
-  /* Dark mode grid only */
-  .dark .bg-grid {
-    background-color: #050505 !important; /* Even darker grid background in dark mode */
-  }
-
-  /* Ensure light mode body/html are always white */
-  html:not(.dark), 
-  body:not(.dark) {
-    background-color: transparent !important;
-  }
-  
-  /* Override transparent background styles with more specific selectors */
-  body:not(.dark),
-  html:not(.dark),
-  body:not(.dark) div.min-h-screen,
-  html:not(.dark) div.min-h-screen {
-    background-color: transparent !important;
-  }
-
-  .grid-item[data-active="true"],
-  .grid-item.active {
-    margin: -1px -1px 0 0;
-    background-color: rgba(192, 86, 59, 0.4) !important;
-    opacity: 0.9 !important;
-    transition: all 0.2s ease-in-out;
-    transform: scale(1.05);
-    z-index: 2;
-    box-shadow: none !important;
-  }
-
-  .grid-item:not([data-active="true"]) {
-    transition: all 0.5s ease-in-out;
-  }
-
-  .dark .grid-item[data-active="true"],
-  .dark .grid-item.active {
-    background-color: rgba(180, 66, 46, 0.35) !important;
-    transition: all 0.2s ease-in-out;
-    box-shadow: none !important;
-  }
-  
-  /* Ensure dark background extends to page bottom even when scrolling */
-  .dark .min-h-screen {
-    background-color: transparent !important;
-  }
-  
-  .dark #root, 
-  .dark [data-rk],
-  .dark [data-overlay-container] {
-    background-color: transparent !important;
-  }
-  
-  /* Fix for sidebar in dark mode */
-  .dark [class*="fixed inset-y-0 z-20 flex flex-col"] {
-    background-color: #09090b !important;
-    border-right-color: #27272a !important;
-    min-height: 100vh !important;
-    height: 100% !important;
-    padding-bottom: 0 !important;
-    bottom: 0 !important;
-  }
-  
-  /* Fix for sidebar in light mode */
-  [class*="fixed inset-y-0 z-20 flex flex-col"] {
-    background-color: white !important;
-    border-right-color: #e5e7eb !important;
-    min-height: 100vh !important;
-    height: 100% !important;
-    padding-bottom: 0 !important;
-    bottom: 0 !important;
-  }
-  
-  /* Remove any border from sidebar bottom */
-  .dark [class*="fixed inset-y-0"] div[class*="border-t"],
-  [class*="fixed inset-y-0"] div[class*="border-t"] {
-    border-top: none !important;
-  }
-  
-  /* Additional styling to remove shadows from all chart components */
-  [class*="recharts"],
-  svg,
-  g,
-  rect,
-  path,
-  line,
-  circle,
-  foreignObject,
-  [data-testid*="recharts"],
-  [class*="area"],
-  [class*="graph"],
-  [class*="chart"] {
-    filter: drop-shadow(0 0 0 transparent) !important;
-    box-shadow: none !important;
-    -webkit-box-shadow: none !important;
-    border-shadow: none !important;
-    text-shadow: none !important;
-  }
-  
-  /* Specifically target any potential borders in charts */
-  [role="region"],
-  [role="region"] > *,
-  [role="region"] > * > *,
-  [role="grid"],
-  [class*="recharts"] * {
-    border: none !important;
-    outline: none !important;
-    stroke-opacity: 1 !important;
-    filter: drop-shadow(0 0 0 transparent) !important;
-  }
-  
-  /* Target chart containers */
-  div[style*="border-radius"] {
-    border: none !important;
-    box-shadow: none !important;
-    -webkit-box-shadow: none !important;
-    filter: none !important;
-  }
-  
-  /* Apply !important to background colors for charts */
-  [class*="recharts"],
-  [role="region"],
-  div[style*="border-radius"],
-  div[style*="background-color"] {
-    background-color: hsl(var(--card)/90%) !important;
-  }
-  
-  /* Target all section containers */
-  section,
-  article,
-  div[class*="card"],
-  div[class*="panel"],
-  div[class*="container"],
-  div[class*="wrapper"] {
-    box-shadow: none !important;
-    border: none !important;
-    filter: none !important;
-  }
-  
-  /* Force all chart components to have same background */
-  [role="region"] {
-    background-color: hsl(var(--card)/90%) !important;
-    backdrop-filter: blur(4px);
-  }
-}
-
-/* Add very specific styling for Recharts components */
-.recharts-wrapper .recharts-surface {
-  filter: none !important;
-}
-
-.recharts-tooltip-wrapper {
-  filter: none !important;
-  box-shadow: none !important;
-}
-
-/* Fix for chart container display */
-.recharts-responsive-container {
-  filter: none !important;
-}
-
-/* Fix for AreaChart */
-.recharts-area {
-  filter: none !important;
-}
-
-/* Fix for specific card elements with shadow issues */
-[class*="card"] {
-  border: 1px solid rgba(39, 39, 42, 0.2) !important;
-  filter: none !important;
-  box-shadow: none !important;
-}
-
-/* Fix for the chart borders */
-.recharts-cartesian-grid {
-  filter: none !important;
-}
-
-.recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line {
-  filter: none !important;
-  box-shadow: none !important;
-}
-
-/* Fix for the tooltips */
-.recharts-tooltip-cursor {
-  fill: rgba(21, 27, 84, 0.4) !important;
-  stroke: rgba(21, 27, 84, 0.6) !important;
-}
-
-.recharts-tooltip-wrapper,
-.recharts-default-tooltip {
-  background-color: rgba(50, 50, 60, 0.85) !important;
-  border-color: rgba(80, 80, 90, 0.3) !important;
-  color: rgba(200, 200, 210, 0.9) !important;
-}
-
-.recharts-tooltip-item {
-  color: rgba(200, 200, 210, 0.9) !important;
-}
-
-/* Fix for the legend */
-.recharts-legend-wrapper {
-  filter: none !important;
-}
-
-/* Card content override */
-.dark .card-content {
-  background-color: rgba(31, 41, 55, 0.9) !important;
-}
-
-/* Force clean rendering for all SVG elements */
-svg {
-  filter: none !important;
-  isolation: isolate !important;
-}
-
-/* Fix for specific chart data shadows */
-.recharts-area-area,
-.recharts-area-curve,
-.recharts-area-dot {
-  filter: none !important;
-  fill: #1a237e !important; /* Solid navy blue with no transparency */
-  fill-opacity: 1 !important; /* Full opacity for solid color */
-  stroke-opacity: 1 !important;
-}
-
-/* Force colors without gradients */
-.recharts-area path,
-.recharts-area polygon {
-  fill: #1a237e !important; /* Solid navy blue with no transparency */
-  fill-opacity: 1 !important; /* Full opacity for solid color */
-  stroke-opacity: 0 !important; /* No stroke */
-}
-
-/* Additional styles to ensure consistent navy blue for all chart components */
-.recharts-layer,
-.recharts-curve,
-.recharts-area-chart,
-.recharts-filled[class*="area"],
-.recharts-area-filled,
-.recharts-line-curve,
-.recharts-line-chart,
-.recharts-active-dot,
-.recharts-default-dot {
-  fill: #1a237e !important; /* Solid navy blue with no transparency */
-  color: #1a237e !important;
-  filter: none !important;
-}
-
-/* Ensure any gradient or transparent components use the same color */
-.recharts-gradient-light,
-.recharts-gradient-dark,
-.recharts-area-gradient {
-  stop-color: #1a237e !important;
-}
-
-/* Make grid lines visible but subtle - consistent in both modes */
-.recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line,
-.recharts-reference-line line {
-  stroke-dasharray: 2 !important;
-  stroke-width: 0.5 !important;
-}
-
-/* Dark mode grid lines */
-.dark .recharts-cartesian-grid-horizontal line,
-.dark .recharts-cartesian-grid-vertical line,
-.dark .recharts-reference-line line {
-  stroke: rgba(255, 255, 255, 0.05) !important;
-}
-
-/* Light mode grid lines */
-.recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line,
-.recharts-reference-line line {
-  stroke: rgba(0, 0, 0, 0.05) !important;
-}
-
-/* Fix chart backgrounds */
-.dark div[style*="border-radius"],
-.dark [role="region"] {
-  background-color: #0a0a0f !important; /* Very dark background for the card */
-  border: 1px solid rgba(40, 42, 54, 0.7) !important;
-}
-
-/* Override any transition effects that might cause shadows */
-* {
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter !important;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-  transition-duration: 150ms !important;
-}
-
-/* Remove any text shadows */
-text {
-  text-shadow: none !important;
-}
-
-/* Ensure chart region doesn't have shadows */
-[role="region"] > * {
-  filter: none !important;
-  box-shadow: none !important;
-}
-
-/* Change specific chart appearance */
-.card {
-  border: 1px solid rgba(39, 39, 42, 0.2) !important;
-  background-color: rgba(31, 41, 55, 0.9) !important;
-}
-
-/* Target the area chart specifically to prevent shadow effects */
-.recharts-area-area,
-.recharts-area path {
-  filter: none !important;
-  box-shadow: none !important;
-  -webkit-box-shadow: none !important;
-  stroke-width: 0 !important; /* Remove stroke that might cause shadow effect */
-}
-
-/* Remove any blur effects */
-.recharts-area,
-.recharts-area-curve,
-.recharts-curve,
-.recharts-area-chart {
-  filter: none !important;
-  box-shadow: none !important;
-  -webkit-box-shadow: none !important;
-}
-
-/* Remove borders between charts */
-.card + .card {
-  margin-top: 1rem;
-  border: 1px solid rgba(39, 39, 42, 0.2) !important;
-  box-shadow: none !important;
-}
-
-/* Ensure clean borders between cards */
-.col-span-2 {
-  border: 1px solid rgba(39, 39, 42, 0.2) !important;
-  margin: 0.5rem 0;
-  box-shadow: none !important;
-}
-
-/* Remove default styling from grid lines */
-.recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line,
-.recharts-reference-line line {
-  stroke: rgba(75, 85, 99, 0.2) !important;
-  stroke-dasharray: none !important;
-}
-
-/* Force consistent card backgrounds */
+/* Base card styling */
 .card, 
-.col-span-2 {
-  background-color: white !important; /* White in light mode */
-}
-
-/* Remove shadows from all chart components */
-.recharts-wrapper,
-.recharts-surface,
-.recharts-layer,
-.recharts-tooltip-wrapper,
-.recharts-default-tooltip {
+[class*="card"],
+[role="region"],
+div[style*="border-radius"],
+div[style*="background-color"] {
+  background-color: white !important;
+  backdrop-filter: blur(4px);
+  position: relative;
+  z-index: 5;
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
   filter: none !important;
+  border: 1px solid rgba(200, 200, 200, 0.3) !important;
 }
 
-/* Remove shadows from cards */
-.card,
-.card-header,
-.card-content {
+/* Dark mode card styling */
+.dark .card, 
+.dark [class*="card"],
+.dark [role="region"],
+.dark div[style*="border-radius"],
+.dark div[style*="background-color"] {
+  background-color: rgba(31, 41, 55, 0.9) !important;
+  border: 1px solid rgba(64, 67, 83, 0.6) !important;
+}
+
+/* Grid styling */
+.bg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 50px);
+  grid-template-rows: repeat(auto-fill, 50px);
+  transform: translate(-1px, -1px);
+  min-height: 1000vh;
+  position: fixed;
+  inset: 0;
+  overflow: visible !important;
+  z-index: 1 !important;
+  pointer-events: none;
+  background-color: transparent !important;
+}
+
+/* Light mode grid lines - slightly more visible */
+.grid-item {
+  width: 51px;
+  height: 51px;
+  margin: -1px -1px 0 0;
+  border-right: 1px solid rgba(180, 180, 180, 0.141) !important;
+  border-bottom: 1px solid rgba(180, 180, 180, 0.141) !important;
+  transition: background-color 0.3s ease-in-out;
+  opacity: 1 !important;
   box-shadow: none !important;
-  -webkit-box-shadow: none !important;
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
 }
 
-/* Remove tooltip shadows */
-[role="tooltip"],
-.tooltip-content {
+/* Dark mode grid lines - slightly more visible */
+.dark .grid-item {
+  border-right: 1px solid rgba(41, 41, 42, 0.304) !important;
+  border-bottom: 1px solid rgba(41, 41, 42, 0.304) !important;
+}
+
+/* Active grid items */
+.grid-item[data-active="true"],
+.grid-item.active {
+  margin: -1px -1px 0 0;
+  background-color: rgba(178, 63, 34, 0.277) !important;
+  opacity: 0.9 !important;
+  transition: all 0.2s ease-in-out;
+  transform: scale(1.05);
+  z-index: 2;
   box-shadow: none !important;
-  -webkit-box-shadow: none !important;
 }
 
-/* Ensure dropdowns and other UI elements stay on top */
+.grid-item:not([data-active="true"]) {
+  transition: all 0.5s ease-in-out;
+}
+
+.dark .grid-item[data-active="true"],
+.dark .grid-item.active {
+  background-color: rgba(180, 66, 46, 0.35) !important;
+  transition: all 0.2s ease-in-out;
+  box-shadow: none !important;
+}
+
+/* Layout and positioning */
+main, body, html, #__next, [class*="container"] {
+  background-color: transparent !important;
+}
+
+/* Sidebar styling */
+[class*="fixed inset-y-0 z-20 flex flex-col"] {
+  background-color: white !important;
+  border-right-color: #e5e7eb !important;
+  min-height: 100vh !important;
+  height: 100% !important;
+  padding-bottom: 0 !important;
+  bottom: 0 !important;
+}
+
+.dark [class*="fixed inset-y-0 z-20 flex flex-col"] {
+  background-color: #09090b !important;
+  border-right-color: #27272a !important;
+}
+
+/* Remove any borders from sidebar bottom */
+[class*="fixed inset-y-0"] div[class*="border-t"] {
+  border-top: none !important;
+}
+
+/* Z-index management */
 [role="menu"],
 [role="dialog"],
 [role="tooltip"] {
   z-index: 50 !important;
 }
 
-/* Keep the background grid properly layered */
-.bg-grid {
-  isolation: isolate;
-  z-index: 1 !important;
-}
-
-/* Ensure content stays above grid but below dropdowns */
 .content-layer {
   position: relative;
   z-index: 10;
 }
 
-/* Dropdown menu specific z-index */
-[data-state="open"][role="menu"] {
-  z-index: 100 !important;
-}
-
-[data-state="closed"][role="menu"] {
-  z-index: -1 !important;
-  pointer-events: none !important;
-}
-
-/* Other UI elements */
-[role="dialog"],
-[role="tooltip"] {
-  z-index: 50 !important;
-}
-
-/* Content layer */
-.content-layer {
-  position: relative;
-  z-index: 10;
-}
-
-/* Ensure the grid container is properly positioned */
-.grid-container {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-}
-
-/* Base layer for main content */
-.card, 
-[class*="card"],
-[role="region"],
-div[style*="border-radius"],
-div[style*="background-color"] {
-  position: relative;
-  z-index: 10 !important;
-}
-
-/* Navigation and main content */
-nav,
-main,
-header,
-.content-wrapper {
-  position: relative;
-  z-index: 10 !important;
-}
-
-/* Ensure content stays above grid and overlay but below dropdowns */
 main, header, footer, nav, aside, section, article, .main-content, [class*="content"] {
   position: relative;
   z-index: 5 !important;
 }
 
-/* Chart active/highlight elements */
-.recharts-active-dot,
-.recharts-dot.active,
-.recharts-area-dot.active,
-.recharts-rectangle.active,
-.recharts-active-fill,
-[class*="active"],
-[class*="highlight"],
-.recharts-tooltip-cursor {
-  fill: rgba(21, 27, 84, 0.7) !important;
-  stroke: rgba(21, 27, 84, 0.8) !important;
-}
-
-/* Soften chart highlight colors */
-.recharts-tooltip-cursor,
-.recharts-reference-line line,
-.recharts-reference-line rect {
-  stroke: rgba(170, 170, 180, 0.4) !important;
-  fill: rgba(170, 170, 180, 0.15) !important;
-}
-
-/* Remove any blur effects */
-.recharts-area,
-.recharts-area-curve,
-.recharts-curve,
-.recharts-area-chart {
-  filter: none !important;
-  box-shadow: none !important;
-  -webkit-box-shadow: none !important;
-}
-
-/* Ensure modals are always on top of everything */
 .fixed.inset-0.flex.items-center.justify-center[class*="z-"] {
-  z-index: 9999 !important; /* Extremely high z-index to ensure it's on top */
+  z-index: 9999 !important;
 }
 
-/* Ensure modal backdrops are visible */
 .fixed.inset-0.bg-black.bg-opacity-60 {
   z-index: 9998 !important;
 }
 
-/* Force dashboard cards to stay below modals */
-.card, 
-[class*="card"],
-[role="region"],
-div[style*="border-radius"],
-div[style*="background-color"] {
-  z-index: 5 !important;
-}
-
-/* Ensure auth modals are always visible on top */
+/* Modal styling */
 [role="dialog"], 
 .fixed.inset-0.flex.items-center.justify-center {
   z-index: 100000 !important;
   position: fixed !important;
 }
 
-/* Super-specific auth modal styles to guarantee they appear on top */
 .auth-modal-overlay {
   position: fixed !important;
   top: 0 !important;
@@ -810,213 +276,179 @@ div[style*="background-color"] {
   border-radius: 0.5rem !important;
 }
 
-/* Fix stacking contexts that might be interfering */
-body, html, #__next, main, div, section, header, nav {
-  isolation: auto !important;
-}
-
-/* Aggressively reset stacking context for the entire page when a modal is open */
 body:has(.auth-modal-overlay),
 html:has(.auth-modal-overlay) {
   overflow: hidden !important;
 }
 
-/* Override the rule that's making all cards dark regardless of theme */
-.card, 
-.col-span-2 {
-  background-color: white !important; /* White in light mode */
-}
-
-/* Only make cards dark in dark mode */
-.dark .card, 
-.dark .col-span-2 {
-  background-color: rgba(31, 41, 55, 0.95) !important; /* Darker in dark mode (increased from 0.9 to 0.95) */
-}
-
-/* Fix chart containers for light mode */
-div[style*="border-radius"],
-[role="region"] {
-  background-color: white !important; /* White in light mode */
-  border: 1px solid rgba(200, 200, 200, 0.3) !important; /* Light border in light mode */
-}
-
-/* Dark mode specific chart styling */
-.dark div[style*="border-radius"],
-.dark [role="region"] {
-  background-color: rgba(31, 41, 55, 0.95) !important; /* Darker in dark mode (increased from 0.9 to 0.95) */
-  border: 1px solid rgba(64, 67, 83, 0.6) !important; /* More visible border */
-}
-
-/* Additional styles to ensure consistent navy blue for all chart components */
+/* Chart styling - unified */
+.recharts-wrapper,
+.recharts-surface,
 .recharts-layer,
-.recharts-curve,
-.recharts-area-chart,
-.recharts-filled[class*="area"],
-.recharts-area-filled,
-.recharts-line-curve,
-.recharts-line-chart,
-.recharts-active-dot,
-.recharts-default-dot {
-  fill: rgba(21, 27, 84, 0.9) !important; /* Darker navy blue fill */
-  color: rgba(21, 27, 84, 0.9) !important;
-  filter: none !important;
-}
-
-/* Ensure any gradient or transparent components use the same color */
-.recharts-gradient-light,
-.recharts-gradient-dark,
-.recharts-area-gradient {
-  stop-color: rgba(21, 27, 84, 0.9) !important;
-}
-
-/* Chart styling: Two color approach - background and graph */
-/* Dark mode: Navy blue graph on dark background */
-.dark .recharts-area-area,
-.dark .recharts-area-curve,
-.dark .recharts-area-dot,
-.dark .recharts-area path,
-.dark .recharts-area polygon,
-.dark .recharts-layer,
-.dark .recharts-curve,
-.dark .recharts-area-chart,
-.dark .recharts-filled[class*="area"],
-.dark .recharts-area-filled,
-.dark .recharts-line-curve,
-.dark .recharts-line-chart,
-.dark .recharts-active-dot,
-.dark .recharts-default-dot {
-  fill: #1a237e !important; /* Solid navy blue */
-  color: #1a237e !important;
-  fill-opacity: 1 !important;
-  stroke-opacity: 0 !important;
-  filter: none !important;
-}
-
-/* Light mode: Brighter blue graph on white background */
-.recharts-area-area,
-.recharts-area-curve,
-.recharts-area-dot,
-.recharts-area path,
-.recharts-area polygon,
-.recharts-layer,
-.recharts-curve,
-.recharts-area-chart,
-.recharts-filled[class*="area"],
-.recharts-area-filled,
-.recharts-line-curve,
-.recharts-line-chart,
-.recharts-active-dot,
-.recharts-default-dot {
-  fill: #4d80e4 !important; /* Brighter soft blue */
-  color: #4d80e4 !important;
-  fill-opacity: 1 !important;
-  stroke-opacity: 0 !important;
-  filter: none !important;
-}
-
-/* Chart backgrounds - just two colors */
-/* Dark mode: Very dark background */
-.dark div[style*="border-radius"],
-.dark [role="region"] {
-  background-color: #0a0a0f !important; /* Very dark background for dark mode */
-  border: 1px solid rgba(40, 42, 54, 0.7) !important;
-}
-
-/* Light mode: Clean white background */
-div[style*="border-radius"],
-[role="region"] {
-  background-color: #ffffff !important; /* Pure white background for light mode */
-  border: 1px solid rgba(200, 200, 200, 0.3) !important;
-}
-
-/* Remove all previous chart styling */
-/* ====== SIMPLIFIED CHART STYLING WITH ONLY TWO COLORS ====== */
-
-/* Reset all chart elements to remove any styling */
-.recharts-wrapper *,
-.recharts-surface *,
-[class*="recharts-"] {
+.recharts-tooltip-wrapper,
+.recharts-default-tooltip,
+[class*="recharts-"],
+svg,
+g,
+rect,
+path,
+line,
+circle,
+foreignObject,
+[data-testid*="recharts"],
+[class*="area"],
+[class*="graph"],
+[class*="chart"] {
   filter: none !important;
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
-  stroke-width: inherit !important;
+  border-shadow: none !important;
+  text-shadow: none !important;
 }
 
-/* STEP 1: DARK MODE - Two colors only */
-/* Dark mode card backgrounds - very dark, almost black */
-.dark [role="region"],
-.dark div[style*="border-radius"] {
-  background-color: #0a0a0f !important; /* Very dark background */
-  border: 1px solid rgba(40, 42, 54, 0.7) !important;
+/* Chart text colors */
+.recharts-text,
+.recharts-cartesian-axis-tick-value,
+text,
+.recharts-label,
+.recharts-text-label,
+.recharts-cartesian-axis-tick text {
+  fill: #000000 !important;
+  color: #000000 !important;
 }
 
-/* Dark mode graph areas - solid navy blue */
-.dark .recharts-area-area,
-.dark .recharts-area path,
-.dark .recharts-area polygon,
-.dark .recharts-layer path,
-.dark .recharts-surface path:not(.recharts-curve),
-.dark .recharts-area-chart path {
-  fill: #1a237e !important; /* Single solid navy blue */
-  fill-opacity: 1 !important;
-  stroke: none !important;
-  stroke-opacity: 0 !important;
+.dark .recharts-text,
+.dark .recharts-cartesian-axis-tick-value,
+.dark text,
+.dark .recharts-label,
+.dark .recharts-text-label,
+.dark .recharts-cartesian-axis-tick text {
+  fill: #ffffff !important;
+  color: #ffffff !important;
 }
 
-/* STEP 2: LIGHT MODE - Two colors only */
-/* Light mode card backgrounds - pure white */
-[role="region"],
-div[style*="border-radius"] {
-  background-color: #ffffff !important; /* Pure white background */
-  border: 1px solid rgba(200, 200, 200, 0.3) !important;
-}
-
-/* Light mode graph areas - bright blue */
+/* Chart fill colors */
 .recharts-area-area,
 .recharts-area path,
 .recharts-area polygon,
 .recharts-layer path,
 .recharts-surface path:not(.recharts-curve),
 .recharts-area-chart path {
-  fill: #4d80e4 !important; /* Bright blue */
+  fill: #4d80e4 !important;
   fill-opacity: 1 !important;
   stroke: none !important;
   stroke-opacity: 0 !important;
 }
 
-/* STEP 3: GRID LINES - keep dotted lines in both modes */
-/* Base grid line styling */
+.dark .recharts-area-area,
+.dark .recharts-area path,
+.dark .recharts-area polygon,
+.dark .recharts-layer path,
+.dark .recharts-surface path:not(.recharts-curve),
+.dark .recharts-area-chart path {
+  fill: #1a237e !important;
+  fill-opacity: 1 !important;
+  stroke: none !important;
+  stroke-opacity: 0 !important;
+}
+
+/* Grid and axis lines - more visible */
 .recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line {
-  stroke-dasharray: 3 !important;
+.recharts-cartesian-grid-vertical line,
+.recharts-reference-line line,
+.recharts-cartesian-axis line,
+.recharts-xAxis line,
+.recharts-yAxis line {
+  stroke: rgba(0, 0, 0, 0.4) !important;
   stroke-width: 1 !important;
+  stroke-dasharray: 3 !important;
 }
 
-/* Dark mode grid lines */
 .dark .recharts-cartesian-grid-horizontal line,
-.dark .recharts-cartesian-grid-vertical line {
-  stroke: rgba(255, 255, 255, 0.1) !important;
+.dark .recharts-cartesian-grid-vertical line,
+.dark .recharts-reference-line line,
+.dark .recharts-cartesian-axis line,
+.dark .recharts-xAxis line,
+.dark .recharts-yAxis line {
+  stroke: rgba(255, 255, 255, 0.6) !important;
+  stroke-width: 1 !important;
+  stroke-dasharray: 3 !important;
 }
 
-/* Light mode grid lines */
-.recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line {
-  stroke: rgba(0, 0, 0, 0.1) !important;
+/* Tooltip styling */
+.recharts-tooltip-wrapper {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-/* Ensure tooltips and highlights don't add extra colors */
-.recharts-tooltip-cursor,
-.recharts-active-dot,
-.recharts-dot.active {
+.recharts-default-tooltip {
+  background-color: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: var(--radius) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.recharts-tooltip-cursor {
+  fill: rgba(100, 100, 110, 0.2) !important;
+  stroke: rgba(100, 100, 110, 0.3) !important;
   opacity: 0.3 !important;
 }
 
-/* Hide any other potential color elements */
-.recharts-reference-area,
-.recharts-gradient-light,
-.recharts-gradient-dark,
-.recharts-area-gradient {
-  display: none !important;
+/* Dropdown menu positioning and animation */
+[data-radix-popper-content-wrapper] {
+  position: absolute !important;
+  transform-origin: var(--radix-popper-transform-origin) !important;
+  transform: var(--radix-popper-transform) !important;
+  z-index: 1000 !important; /* Ensure high z-index */
 }
+
+/* Specific styling for Select content */
+[data-radix-select-content] {
+  position: relative !important;
+  z-index: 999 !important;
+}
+
+[role="menu"] {
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin) !important;
+}
+
+[data-state="open"][role="menu"] {
+  animation: dropdownIn 0.1s ease-out !important;
+}
+
+[data-state="closed"][role="menu"] {
+  animation: dropdownOut 0.1s ease-out !important;
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dropdownOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Tooltip and Combobox specific fixes */
+[role="tooltip"],
+[role="combobox"] {
+  position: relative !important;
+  z-index: 500 !important;
+}
+
 
 
